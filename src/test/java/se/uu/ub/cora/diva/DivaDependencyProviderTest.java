@@ -51,7 +51,7 @@ import se.uu.ub.cora.spider.search.RecordIndexer;
 
 public class DivaDependencyProviderTest {
 	private DivaDependencyProvider dependencyProvider;
-	private String basePath = "/tmp/recordStorageOnDiskTemp/";
+	private String basePath = "/tmp/divaRecordStorageOnDiskTemp/";
 	private Map<String, String> initInfo;
 
 	@BeforeMethod
