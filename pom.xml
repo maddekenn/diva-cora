@@ -45,9 +45,9 @@
 	</properties>
 
 	<scm>
-		<connection>scm:git:https://github.com/lsu-ub-uu/alvin.git</connection>
-		<developerConnection>scm:git:https://github.com/lsu-ub-uu/alvin.git</developerConnection>
-		<url>https://github.com/lsu-ub-uu/alvin.git</url>
+		<connection>scm:git:https://github.com/lsu-ub-uu/diva-cora.git</connection>
+		<developerConnection>scm:git:https://github.com/lsu-ub-uu/diva-cora.git</developerConnection>
+		<url>https://github.com/lsu-ub-uu/diva-cora.git</url>
 	</scm>
 
 	<repositories>
@@ -96,7 +96,6 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>userpicker</artifactId>
 			<version>${userpicker.version}</version>
-			<!-- <scope>provided</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
