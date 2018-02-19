@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2016, 2017 Uppsala University Library
+ * Copyright 2015, 2016, 2017, 2018 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -31,6 +31,8 @@ import se.uu.ub.cora.bookkeeper.termcollector.DataGroupTermCollector;
 import se.uu.ub.cora.bookkeeper.termcollector.DataGroupTermCollectorImp;
 import se.uu.ub.cora.bookkeeper.validator.DataValidator;
 import se.uu.ub.cora.bookkeeper.validator.DataValidatorImp;
+import se.uu.ub.cora.diva.tocorastorage.DivaToCoraConverterFactory;
+import se.uu.ub.cora.diva.tocorastorage.DivaToCoraConverterFactoryImp;
 import se.uu.ub.cora.gatekeeperclient.authentication.AuthenticatorImp;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
@@ -69,6 +71,9 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 	private SearchStorage searchStorage;
 	private String basePath;
 	private String storageOnDiskClassName;
+	private String mixedStorageClassName;
+	private String fedoraURL;
+	private String divaToCoraStorageClassName;
 
 	public DivaDependencyProvider(Map<String, String> initInfo) {
 		super(initInfo);
@@ -81,10 +86,24 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 	}
 
 	private void readInitInfo() {
-		tryToSetGatekeeperUrl();
-		basePath = tryToGetStorageOnDiskBasePath();
+		mixedStorageClassName = tryToGetInitParameter("mixedStorageClassName");
+		fedoraURL = tryToGetInitParameter("fedoraURL");
+		divaToCoraStorageClassName = tryToGetInitParameter("divaToCoraStorageClassName");
+		gatekeeperUrl = tryToGetInitParameter("gatekeeperURL");
+		basePath = tryToGetInitParameter("storageOnDiskBasePath");
 		storageOnDiskClassName = tryToGetStorageOnDiskClassName();
-		tryToSetSolrUrl();
+		solrUrl = tryToGetInitParameter("solrURL");
+	}
+
+	private String tryToGetInitParameter(String parameterName) {
+		throwErrorIfKeyIsMissingFromInitInfo(parameterName);
+		return initInfo.get(parameterName);
+	}
+
+	private void throwErrorIfKeyIsMissingFromInitInfo(String key) {
+		if (!initInfo.containsKey(key)) {
+			throw new RuntimeException("InitInfo must contain " + key);
+		}
 	}
 
 	private String tryToGetStorageOnDiskClassName() {
@@ -100,18 +119,20 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 
 	private void tryToInitialize() throws NoSuchMethodException, ClassNotFoundException,
 			IllegalAccessException, InvocationTargetException {
-		recordStorage = tryToCreateRecordStorage(basePath);
+		RecordStorage basicStorage = tryToCreateRecordStorage();
+		RecordStorage divaToCoraStorage = tryToCreateDivaToCoraStorage();
+		recordStorage = tryToCreateMixedRecordStorage(basicStorage, divaToCoraStorage);
 
-		metadataStorage = (MetadataStorage) recordStorage;
+		metadataStorage = (MetadataStorage) basicStorage;
 		idGenerator = new TimeStampIdGenerator();
 		streamStorage = StreamStorageOnDisk.usingBasePath(basePath + "streams/");
 		solrClientProvider = SolrClientProviderImp.usingBaseUrl(solrUrl);
 		solrRecordIndexer = SolrRecordIndexer
 				.createSolrRecordIndexerUsingSolrClientProvider(solrClientProvider);
-		searchStorage = (SearchStorage) recordStorage;
+		searchStorage = (SearchStorage) basicStorage;
 	}
 
-	private RecordStorage tryToCreateRecordStorage(String basePath) throws NoSuchMethodException,
+	private RecordStorage tryToCreateRecordStorage() throws NoSuchMethodException,
 			ClassNotFoundException, IllegalAccessException, InvocationTargetException {
 		Class<?>[] cArg = new Class[1];
 		cArg[0] = String.class;
@@ -120,19 +141,27 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 		return (RecordStorage) constructor.invoke(null, basePath);
 	}
 
-	private void tryToSetGatekeeperUrl() {
-		throwErrorIfMissingKeyIsMissingFromInitInfo("gatekeeperURL");
-		gatekeeperUrl = initInfo.get("gatekeeperURL");
+	private RecordStorage tryToCreateDivaToCoraStorage() throws NoSuchMethodException,
+			ClassNotFoundException, IllegalAccessException, InvocationTargetException {
+		Class<?>[] cArg = new Class[3];
+		cArg[0] = HttpHandlerFactory.class;
+		cArg[1] = DivaToCoraConverterFactory.class;
+		cArg[2] = String.class;
+		Method constructor = Class.forName(divaToCoraStorageClassName)
+				.getMethod("usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL", cArg);
+		return (RecordStorage) constructor.invoke(null, new HttpHandlerFactoryImp(),
+				new DivaToCoraConverterFactoryImp(), fedoraURL);
 	}
 
-	private String tryToGetStorageOnDiskBasePath() {
-		throwErrorIfMissingKeyIsMissingFromInitInfo("storageOnDiskBasePath");
-		return initInfo.get("storageOnDiskBasePath");
-	}
-
-	private void tryToSetSolrUrl() {
-		throwErrorIfMissingKeyIsMissingFromInitInfo("solrURL");
-		solrUrl = initInfo.get("solrURL");
+	private RecordStorage tryToCreateMixedRecordStorage(RecordStorage basicStorage,
+			RecordStorage divaToCoraStorage) throws NoSuchMethodException, ClassNotFoundException,
+			IllegalAccessException, InvocationTargetException {
+		Class<?>[] cArg = new Class[2];
+		cArg[0] = RecordStorage.class;
+		cArg[1] = RecordStorage.class;
+		Method constructor = Class.forName(mixedStorageClassName)
+				.getMethod("usingBasicAndDivaToCoraStorage", cArg);
+		return (RecordStorage) constructor.invoke(null, basicStorage, divaToCoraStorage);
 	}
 
 	@Override

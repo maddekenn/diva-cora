@@ -42,6 +42,8 @@
 		<gatekeeperclient.version>0.4-SNAPSHOT</gatekeeperclient.version>
 		<metacreator.version>0.1-SNAPSHOT</metacreator.version>
 		<solrsearch.version>0.1-SNAPSHOT</solrsearch.version>
+		<divatocorastorage.version>0.1-SNAPSHOT</divatocorastorage.version>
+		<divamixedstorage.version>0.1-SNAPSHOT</divamixedstorage.version>
 	</properties>
 
 	<scm>
@@ -111,6 +113,16 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>solrsearch</artifactId>
 			<version>${solrsearch.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>divatocorastorage</artifactId>
+			<version>${divatocorastorage.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>divamixedstorage</artifactId>
+			<version>${divamixedstorage.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>

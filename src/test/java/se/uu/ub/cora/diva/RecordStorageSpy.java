@@ -4,12 +4,19 @@ import java.util.Collection;
 
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.bookkeeper.storage.MetadataStorage;
+import se.uu.ub.cora.diva.tocorastorage.DivaToCoraConverterFactory;
+import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.searchstorage.SearchStorage;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
 
 public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchStorage {
 
 	private String basePath;
+	public RecordStorageSpy basicStorage;
+	public RecordStorageSpy divaToCoraStorage;
+	public HttpHandlerFactory httpHandlerFactory;
+	public DivaToCoraConverterFactory converterFactory;
+	public String baseURL;
 
 	public static RecordStorageSpy createRecordStorageOnDiskWithBasePath(String basePath) {
 		return new RecordStorageSpy(basePath);
@@ -17,6 +24,29 @@ public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchS
 
 	private RecordStorageSpy(String basePath) {
 		this.basePath = basePath;
+	}
+
+	public RecordStorageSpy(RecordStorage basicStorage, RecordStorage divaToCoraStorage) {
+		this.basicStorage = (RecordStorageSpy) basicStorage;
+		this.divaToCoraStorage = (RecordStorageSpy) divaToCoraStorage;
+	}
+
+	public static RecordStorage usingBasicAndDivaToCoraStorage(RecordStorage basicStorage,
+			RecordStorage divaToCoraStorage) {
+		return new RecordStorageSpy(basicStorage, divaToCoraStorage);
+	}
+
+	private RecordStorageSpy(HttpHandlerFactory httpHandlerFactory,
+			DivaToCoraConverterFactory converterFactory, String baseURL) {
+		this.httpHandlerFactory = httpHandlerFactory;
+		this.converterFactory = converterFactory;
+		this.baseURL = baseURL;
+	}
+
+	public static RecordStorageSpy usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL(
+			HttpHandlerFactory httpHandlerFactory, DivaToCoraConverterFactory converterFactory,
+			String baseURL) {
+		return new RecordStorageSpy(httpHandlerFactory, converterFactory, baseURL);
 	}
 
 	@Override
@@ -82,7 +112,8 @@ public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchS
 	}
 
 	@Override
-	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type, String id) {
+	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
+			String id) {
 		// TODO Auto-generated method stub
 		return false;
 	}
