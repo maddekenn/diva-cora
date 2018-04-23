@@ -220,7 +220,7 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 	}
 
 	@Override
-	public DataGroupTermCollector getDataGroupSearchTermCollector() {
+	public DataGroupTermCollector getDataGroupTermCollector() {
 		return new DataGroupTermCollectorImp(metadataStorage);
 	}
 
