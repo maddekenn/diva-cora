@@ -77,15 +77,10 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 
 	public DivaDependencyProvider(Map<String, String> initInfo) {
 		super(initInfo);
-		readInitInfo();
-		try {
-			tryToInitialize();
-		} catch (Exception e) {
-			throw new RuntimeException("Error starting The Rest: " + e.getMessage());
-		}
 	}
 
-	private void readInitInfo() {
+	@Override
+	protected void readInitInfo() {
 		mixedStorageClassName = tryToGetInitParameter("mixedStorageClassName");
 		fedoraURL = tryToGetInitParameter("fedoraURL");
 		divaToCoraStorageClassName = tryToGetInitParameter("divaToCoraStorageClassName");
@@ -117,7 +112,8 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 		}
 	}
 
-	private void tryToInitialize() throws NoSuchMethodException, ClassNotFoundException,
+	@Override
+	protected void tryToInitialize() throws NoSuchMethodException, ClassNotFoundException,
 			IllegalAccessException, InvocationTargetException {
 		RecordStorage basicStorage = tryToCreateRecordStorage();
 		RecordStorage divaToCoraStorage = tryToCreateDivaToCoraStorage();
