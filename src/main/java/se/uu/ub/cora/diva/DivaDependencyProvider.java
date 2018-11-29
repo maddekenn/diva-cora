@@ -23,6 +23,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import se.uu.ub.cora.beefeater.AuthorizatorImp;
 import se.uu.ub.cora.bookkeeper.linkcollector.DataRecordLinkCollector;
 import se.uu.ub.cora.bookkeeper.linkcollector.DataRecordLinkCollectorImp;
@@ -31,6 +34,10 @@ import se.uu.ub.cora.bookkeeper.termcollector.DataGroupTermCollector;
 import se.uu.ub.cora.bookkeeper.termcollector.DataGroupTermCollectorImp;
 import se.uu.ub.cora.bookkeeper.validator.DataValidator;
 import se.uu.ub.cora.bookkeeper.validator.DataValidatorImp;
+import se.uu.ub.cora.connection.ContextConnectionProviderImp;
+import se.uu.ub.cora.connection.SqlConnectionProvider;
+import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactory;
+import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.tocorastorage.fedora.DivaToCoraConverterFactory;
 import se.uu.ub.cora.diva.tocorastorage.fedora.DivaToCoraConverterFactoryImp;
 import se.uu.ub.cora.gatekeeperclient.authentication.AuthenticatorImp;
@@ -56,6 +63,8 @@ import se.uu.ub.cora.spider.role.RulesProvider;
 import se.uu.ub.cora.spider.role.RulesProviderImp;
 import se.uu.ub.cora.spider.search.RecordIndexer;
 import se.uu.ub.cora.spider.stream.storage.StreamStorage;
+import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.RecordReaderFactoryImp;
 import se.uu.ub.cora.storage.StreamStorageOnDisk;
 
 public class DivaDependencyProvider extends SpiderDependencyProvider {
@@ -73,7 +82,9 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 	private String storageOnDiskClassName;
 	private String mixedStorageClassName;
 	private String fedoraURL;
-	private String divaToCoraStorageClassName;
+	private String divaFedoraToCoraStorageClassName;
+	private String divaDbToCoraStorageClassName;
+	private String databaseLookupName;
 
 	public DivaDependencyProvider(Map<String, String> initInfo) {
 		super(initInfo);
@@ -83,11 +94,14 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 	protected void readInitInfo() {
 		mixedStorageClassName = tryToGetInitParameter("mixedStorageClassName");
 		fedoraURL = tryToGetInitParameter("fedoraURL");
-		divaToCoraStorageClassName = tryToGetInitParameter("divaToCoraStorageClassName");
+		divaFedoraToCoraStorageClassName = tryToGetInitParameter(
+				"divaFedoraToCoraStorageClassName");
+		divaDbToCoraStorageClassName = tryToGetInitParameter("divaDbToCoraStorageClassName");
 		gatekeeperUrl = tryToGetInitParameter("gatekeeperURL");
 		basePath = tryToGetInitParameter("storageOnDiskBasePath");
 		storageOnDiskClassName = tryToGetStorageOnDiskClassName();
 		solrUrl = tryToGetInitParameter("solrURL");
+		databaseLookupName = tryToGetInitParameter("databaseLookupName");
 	}
 
 	private String tryToGetInitParameter(String parameterName) {
@@ -114,10 +128,12 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 
 	@Override
 	protected void tryToInitialize() throws NoSuchMethodException, ClassNotFoundException,
-			IllegalAccessException, InvocationTargetException {
+			IllegalAccessException, InvocationTargetException, NamingException {
 		RecordStorage basicStorage = tryToCreateRecordStorage();
-		RecordStorage divaToCoraStorage = tryToCreateDivaToCoraStorage();
-		recordStorage = tryToCreateMixedRecordStorage(basicStorage, divaToCoraStorage);
+		RecordStorage divaFedoraToCoraStorage = tryToCreateDivaFedoraToCoraStorage();
+		RecordStorage divaDbToCoraStorage = tryToCreateDivaDbToCoraStorage();
+		recordStorage = tryToCreateMixedRecordStorage(basicStorage, divaFedoraToCoraStorage,
+				divaDbToCoraStorage);
 
 		metadataStorage = (MetadataStorage) basicStorage;
 		idGenerator = new TimeStampIdGenerator();
@@ -137,27 +153,49 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 		return (RecordStorage) constructor.invoke(null, basePath);
 	}
 
-	private RecordStorage tryToCreateDivaToCoraStorage() throws NoSuchMethodException,
+	private RecordStorage tryToCreateDivaFedoraToCoraStorage() throws NoSuchMethodException,
 			ClassNotFoundException, IllegalAccessException, InvocationTargetException {
 		Class<?>[] cArg = new Class[3];
 		cArg[0] = HttpHandlerFactory.class;
 		cArg[1] = DivaToCoraConverterFactory.class;
 		cArg[2] = String.class;
-		Method constructor = Class.forName(divaToCoraStorageClassName)
+		Method constructor = Class.forName(divaFedoraToCoraStorageClassName)
 				.getMethod("usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL", cArg);
 		return (RecordStorage) constructor.invoke(null, new HttpHandlerFactoryImp(),
 				new DivaToCoraConverterFactoryImp(), fedoraURL);
 	}
 
-	private RecordStorage tryToCreateMixedRecordStorage(RecordStorage basicStorage,
-			RecordStorage divaToCoraStorage) throws NoSuchMethodException, ClassNotFoundException,
-			IllegalAccessException, InvocationTargetException {
+	private RecordStorage tryToCreateDivaDbToCoraStorage()
+			throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException,
+			InvocationTargetException, NamingException {
 		Class<?>[] cArg = new Class[2];
+		cArg[0] = RecordReaderFactory.class;
+		cArg[1] = DivaDbToCoraConverterFactory.class;
+		SqlConnectionProvider connectionProvider = createConnectionProvider();
+		Method constructor = Class.forName(divaDbToCoraStorageClassName)
+				.getMethod("usingRecordReaderFactoryAndConverterFactory", cArg);
+		return (RecordStorage) constructor.invoke(null,
+				new RecordReaderFactoryImp(connectionProvider),
+				new DivaDbToCoraConverterFactoryImp());
+	}
+
+	private SqlConnectionProvider createConnectionProvider() throws NamingException {
+		InitialContext context = new InitialContext();
+		return ContextConnectionProviderImp.usingInitialContextAndName(context, databaseLookupName);
+	}
+
+	private RecordStorage tryToCreateMixedRecordStorage(RecordStorage basicStorage,
+			RecordStorage divaFedoraToCoraStorage, RecordStorage divaDbToCoraStorage)
+			throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException,
+			InvocationTargetException {
+		Class<?>[] cArg = new Class[3];
 		cArg[0] = RecordStorage.class;
 		cArg[1] = RecordStorage.class;
+		cArg[2] = RecordStorage.class;
 		Method constructor = Class.forName(mixedStorageClassName)
 				.getMethod("usingBasicAndDivaToCoraStorage", cArg);
-		return (RecordStorage) constructor.invoke(null, basicStorage, divaToCoraStorage);
+		return (RecordStorage) constructor.invoke(null, basicStorage, divaFedoraToCoraStorage,
+				divaDbToCoraStorage);
 	}
 
 	@Override
