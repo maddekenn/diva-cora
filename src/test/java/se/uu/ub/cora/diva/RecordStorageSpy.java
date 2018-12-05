@@ -4,20 +4,25 @@ import java.util.Collection;
 
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.bookkeeper.storage.MetadataStorage;
-import se.uu.ub.cora.diva.tocorastorage.DivaToCoraConverterFactory;
+import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactory;
+import se.uu.ub.cora.diva.tocorastorage.fedora.DivaToCoraConverterFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.searchstorage.SearchStorage;
 import se.uu.ub.cora.spider.data.SpiderReadResult;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
+import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
 public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchStorage {
 
 	private String basePath;
 	public RecordStorageSpy basicStorage;
-	public RecordStorageSpy divaToCoraStorage;
+	public RecordStorageSpy divaFedoraToCoraStorage;
+	public RecordStorageSpy divaDbToCoraStorage;
 	public HttpHandlerFactory httpHandlerFactory;
 	public DivaToCoraConverterFactory converterFactory;
 	public String baseURL;
+	public DivaDbToCoraConverterFactory dbConverterFactory;
+	public RecordReaderFactory readerFactory;
 
 	public static RecordStorageSpy createRecordStorageOnDiskWithBasePath(String basePath) {
 		return new RecordStorageSpy(basePath);
@@ -29,12 +34,25 @@ public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchS
 
 	public RecordStorageSpy(RecordStorage basicStorage, RecordStorage divaToCoraStorage) {
 		this.basicStorage = (RecordStorageSpy) basicStorage;
-		this.divaToCoraStorage = (RecordStorageSpy) divaToCoraStorage;
+		this.divaFedoraToCoraStorage = (RecordStorageSpy) divaToCoraStorage;
+	}
+
+	public RecordStorageSpy(RecordStorage basicStorage, RecordStorage divaToCoraStorage,
+			RecordStorage divaDbToCoraStorage) {
+		this.basicStorage = (RecordStorageSpy) basicStorage;
+		this.divaFedoraToCoraStorage = (RecordStorageSpy) divaToCoraStorage;
+		this.divaDbToCoraStorage = (RecordStorageSpy) divaDbToCoraStorage;
 	}
 
 	public static RecordStorage usingBasicAndDivaToCoraStorage(RecordStorage basicStorage,
-			RecordStorage divaToCoraStorage) {
-		return new RecordStorageSpy(basicStorage, divaToCoraStorage);
+			RecordStorage divaToCoraStorage, RecordStorage divaDbToCoraStorage) {
+		return new RecordStorageSpy(basicStorage, divaToCoraStorage, divaDbToCoraStorage);
+	}
+
+	public static RecordStorage usingRecordReaderFactoryAndConverterFactory(
+			RecordReaderFactory readerFactory, DivaDbToCoraConverterFactory converterFactory) {
+		return new RecordStorageSpy(readerFactory, converterFactory);
+
 	}
 
 	private RecordStorageSpy(HttpHandlerFactory httpHandlerFactory,
@@ -42,6 +60,12 @@ public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchS
 		this.httpHandlerFactory = httpHandlerFactory;
 		this.converterFactory = converterFactory;
 		this.baseURL = baseURL;
+	}
+
+	public RecordStorageSpy(RecordReaderFactory readerFactory,
+			DivaDbToCoraConverterFactory converterFactory) {
+		this.readerFactory = readerFactory;
+		dbConverterFactory = converterFactory;
 	}
 
 	public static RecordStorageSpy usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL(

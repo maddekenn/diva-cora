@@ -35,10 +35,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import javax.naming.InitialContext;
+
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.connection.ContextConnectionProviderImp;
+import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactory;
+import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.gatekeeperclient.authentication.AuthenticatorImp;
 import se.uu.ub.cora.metacreator.extended.MetacreatorExtendedFunctionalityProvider;
 import se.uu.ub.cora.solr.SolrClientProviderImp;
@@ -48,6 +53,7 @@ import se.uu.ub.cora.spider.authentication.Authenticator;
 import se.uu.ub.cora.spider.authorization.PermissionRuleCalculator;
 import se.uu.ub.cora.spider.record.RecordSearch;
 import se.uu.ub.cora.spider.search.RecordIndexer;
+import se.uu.ub.cora.sqldatabase.RecordReaderFactoryImp;
 
 public class DivaDependencyProviderTest {
 	private DivaDependencyProvider dependencyProvider;
@@ -60,12 +66,14 @@ public class DivaDependencyProviderTest {
 			makeSureBasePathExistsAndIsEmpty();
 			initInfo = new HashMap<>();
 			initInfo.put("mixedStorageClassName", "se.uu.ub.cora.diva.RecordStorageSpy");
-			initInfo.put("divaToCoraStorageClassName", "se.uu.ub.cora.diva.RecordStorageSpy");
+			initInfo.put("divaFedoraToCoraStorageClassName", "se.uu.ub.cora.diva.RecordStorageSpy");
+			initInfo.put("divaDbToCoraStorageClassName", "se.uu.ub.cora.diva.RecordStorageSpy");
 			initInfo.put("fedoraURL", "http://diva-cora-fedora:8088/fedora/");
 			initInfo.put("storageOnDiskClassName", "se.uu.ub.cora.diva.RecordStorageSpy");
 			initInfo.put("gatekeeperURL", "http://localhost:8080/gatekeeper/");
 			initInfo.put("storageOnDiskBasePath", basePath);
 			initInfo.put("solrURL", "http://localhost:8983/solr/stuff");
+			initInfo.put("databaseLookupName", "java:/comp/env/jdbc/postgres");
 			dependencyProvider = new DivaDependencyProvider(initInfo);
 
 		} catch (Exception e) {
@@ -128,7 +136,24 @@ public class DivaDependencyProviderTest {
 		RecordStorageSpy recordStorage = (RecordStorageSpy) dependencyProvider.getRecordStorage();
 		assertTrue(recordStorage instanceof RecordStorageSpy);
 		assertTrue(recordStorage.basicStorage instanceof RecordStorageSpy);
-		assertTrue(recordStorage.divaToCoraStorage instanceof RecordStorageSpy);
+		assertTrue(recordStorage.divaFedoraToCoraStorage instanceof RecordStorageSpy);
+		assertTrue(recordStorage.divaDbToCoraStorage instanceof RecordStorageSpy);
+	}
+
+	@Test
+	public void testDivaDbToRecordStorage() {
+		RecordStorageSpy recordStorage = (RecordStorageSpy) dependencyProvider.getRecordStorage();
+		DivaDbToCoraConverterFactory dbConverterFactory = recordStorage.divaDbToCoraStorage.dbConverterFactory;
+		assertTrue(dbConverterFactory instanceof DivaDbToCoraConverterFactoryImp);
+
+		RecordReaderFactoryImp readerFactory = (RecordReaderFactoryImp) recordStorage.divaDbToCoraStorage.readerFactory;
+
+		ContextConnectionProviderImp connectionProvider = (ContextConnectionProviderImp) readerFactory
+				.getConnectionProvider();
+		assertTrue(connectionProvider instanceof ContextConnectionProviderImp);
+
+		assertEquals(connectionProvider.getName(), initInfo.get("databaseLookupName"));
+		assertTrue(connectionProvider.getContext() instanceof InitialContext);
 	}
 
 	@Test
@@ -142,14 +167,14 @@ public class DivaDependencyProviderTest {
 	}
 
 	@Test
-	public void testMissingDivaToCoraStorageClassNameInInitInfo() {
-		initInfo.remove("divaToCoraStorageClassName");
+	public void testMissingDivaFedoraToCoraStorageClassNameInInitInfo() {
+		initInfo.remove("divaFedoraToCoraStorageClassName");
 
 		Exception thrownException = callSystemOneDependencyProviderAndReturnResultingError();
 
 		assertTrue(thrownException instanceof RuntimeException);
 		assertEquals(thrownException.getMessage(),
-				"InitInfo must contain divaToCoraStorageClassName");
+				"InitInfo must contain divaFedoraToCoraStorageClassName");
 	}
 
 	@Test
@@ -197,7 +222,7 @@ public class DivaDependencyProviderTest {
 			+ "Error starting DivaDependencyProvider: "
 			+ "Invocation exception from RecordStorageErrorOnStartupSpy")
 	public void testHandlingAndGettingCorrectErrorMessageFromErrorsThrowsOnStartup() {
-		initInfo.put("divaToCoraStorageClassName",
+		initInfo.put("divaFedoraToCoraStorageClassName",
 				"se.uu.ub.cora.diva.RecordStorageInvocationErrorOnStartupSpy");
 		dependencyProvider = new DivaDependencyProvider(initInfo);
 	}

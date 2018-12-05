@@ -20,7 +20,7 @@ package se.uu.ub.cora.diva;
 
 import java.lang.reflect.InvocationTargetException;
 
-import se.uu.ub.cora.diva.tocorastorage.DivaToCoraConverterFactory;
+import se.uu.ub.cora.diva.tocorastorage.fedora.DivaToCoraConverterFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 
 public class RecordStorageInvocationErrorOnStartupSpy {
