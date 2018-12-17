@@ -33,16 +33,16 @@
 
 	<properties>
 		<httphandler.version>0.5.1</httphandler.version>
-		<bookkeeper.version>0.13.0</bookkeeper.version>
+		<bookkeeper.version>0.14.0</bookkeeper.version>
 		<beefeater.version>0.8.0</beefeater.version>
-		<spider.version>0.16.0</spider.version>
-		<basicstorage.version>0.9.0</basicstorage.version>
-		<userpicker.version>0.5.0</userpicker.version>
+		<spider.version>0.17.0</spider.version>
+		<basicstorage.version>0.10.1</basicstorage.version>
+		<userpicker.version>0.6.0</userpicker.version>
 		<gatekeeperclient.version>0.6.0</gatekeeperclient.version>
-		<metacreator.version>0.3.0</metacreator.version>
-		<solrsearch.version>0.3.0</solrsearch.version>
-		<divatocorastorage.version>0.3.0</divatocorastorage.version>
-		<divamixedstorage.version>0.3.0</divamixedstorage.version>
+		<metacreator.version>0.4.0</metacreator.version>
+		<solrsearch.version>0.4.0</solrsearch.version>
+		<divatocorastorage.version>0.4.0</divatocorastorage.version>
+		<divamixedstorage.version>0.4.0</divamixedstorage.version>
 	</properties>
 
 	<scm>
