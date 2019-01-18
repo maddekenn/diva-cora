@@ -41,7 +41,7 @@
 		<gatekeeperclient.version>0.6.0</gatekeeperclient.version>
 		<metacreator.version>0.4.0</metacreator.version>
 		<solrsearch.version>0.4.0</solrsearch.version>
-		<divatocorastorage.version>0.4.0</divatocorastorage.version>
+		<divatocorastorage.version>0.5-SNAPSHOT</divatocorastorage.version>
 		<divamixedstorage.version>0.4.0</divamixedstorage.version>
 	</properties>
 
