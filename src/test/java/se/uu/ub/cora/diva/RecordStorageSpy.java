@@ -5,6 +5,7 @@ import java.util.Collection;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.bookkeeper.storage.MetadataStorage;
 import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactory;
+import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactory;
 import se.uu.ub.cora.diva.tocorastorage.fedora.DivaToCoraConverterFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.searchstorage.SearchStorage;
@@ -23,6 +24,7 @@ public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchS
 	public String baseURL;
 	public DivaDbToCoraConverterFactory dbConverterFactory;
 	public RecordReaderFactory readerFactory;
+	public DivaDbToCoraFactory divaDbToCoraFactory;
 
 	public static RecordStorageSpy createRecordStorageOnDiskWithBasePath(String basePath) {
 		return new RecordStorageSpy(basePath);
@@ -49,9 +51,10 @@ public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchS
 		return new RecordStorageSpy(basicStorage, divaToCoraStorage, divaDbToCoraStorage);
 	}
 
-	public static RecordStorage usingRecordReaderFactoryAndConverterFactory(
-			RecordReaderFactory readerFactory, DivaDbToCoraConverterFactory converterFactory) {
-		return new RecordStorageSpy(readerFactory, converterFactory);
+	public static RecordStorage usingRecordReaderFactoryConverterFactoryAndDbToCoraFactory(
+			RecordReaderFactory readerFactory, DivaDbToCoraConverterFactory converterFactory,
+			DivaDbToCoraFactory divaDbToCoraFactory) {
+		return new RecordStorageSpy(readerFactory, converterFactory, divaDbToCoraFactory);
 
 	}
 
@@ -63,9 +66,12 @@ public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchS
 	}
 
 	public RecordStorageSpy(RecordReaderFactory readerFactory,
-			DivaDbToCoraConverterFactory converterFactory) {
+			DivaDbToCoraConverterFactory converterFactory,
+			DivaDbToCoraFactory divaDbToCoraFactory) {
 		this.readerFactory = readerFactory;
 		dbConverterFactory = converterFactory;
+		this.divaDbToCoraFactory = divaDbToCoraFactory;
+
 	}
 
 	public static RecordStorageSpy usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL(

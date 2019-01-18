@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2017, 2018 Uppsala University Library
+ * Copyright 2015, 2017, 2018, 2019 Uppsala University Library
  * Copyright 2017 Olov McKie
  *
  * This file is part of Cora.
@@ -44,6 +44,8 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactory;
 import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactoryImp;
+import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactory;
+import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactoryImp;
 import se.uu.ub.cora.gatekeeperclient.authentication.AuthenticatorImp;
 import se.uu.ub.cora.metacreator.extended.MetacreatorExtendedFunctionalityProvider;
 import se.uu.ub.cora.solr.SolrClientProviderImp;
@@ -147,6 +149,13 @@ public class DivaDependencyProviderTest {
 		assertTrue(dbConverterFactory instanceof DivaDbToCoraConverterFactoryImp);
 
 		RecordReaderFactoryImp readerFactory = (RecordReaderFactoryImp) recordStorage.divaDbToCoraStorage.readerFactory;
+
+		DivaDbToCoraFactory divaDbToCoraFactory = recordStorage.divaDbToCoraStorage.divaDbToCoraFactory;
+		assertTrue(divaDbToCoraFactory instanceof DivaDbToCoraFactoryImp);
+
+		DivaDbToCoraFactoryImp divaDbToCoraFactoryImp = (DivaDbToCoraFactoryImp) divaDbToCoraFactory;
+		assertEquals(divaDbToCoraFactoryImp.getReaderFactory(), readerFactory);
+		assertEquals(divaDbToCoraFactoryImp.getConverterFactory(), dbConverterFactory);
 
 		ContextConnectionProviderImp connectionProvider = (ContextConnectionProviderImp) readerFactory
 				.getConnectionProvider();

@@ -38,6 +38,8 @@ import se.uu.ub.cora.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.connection.SqlConnectionProvider;
 import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactory;
 import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactoryImp;
+import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactory;
+import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactoryImp;
 import se.uu.ub.cora.diva.tocorastorage.fedora.DivaToCoraConverterFactory;
 import se.uu.ub.cora.diva.tocorastorage.fedora.DivaToCoraConverterFactoryImp;
 import se.uu.ub.cora.gatekeeperclient.authentication.AuthenticatorImp;
@@ -168,15 +170,21 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 	private RecordStorage tryToCreateDivaDbToCoraStorage()
 			throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException,
 			InvocationTargetException, NamingException {
-		Class<?>[] cArg = new Class[2];
+		Class<?>[] cArg = new Class[3];
 		cArg[0] = RecordReaderFactory.class;
 		cArg[1] = DivaDbToCoraConverterFactory.class;
+		cArg[2] = DivaDbToCoraFactory.class;
 		SqlConnectionProvider connectionProvider = createConnectionProvider();
+
 		Method constructor = Class.forName(divaDbToCoraStorageClassName)
-				.getMethod("usingRecordReaderFactoryAndConverterFactory", cArg);
-		return (RecordStorage) constructor.invoke(null,
-				new RecordReaderFactoryImp(connectionProvider),
-				new DivaDbToCoraConverterFactoryImp());
+				.getMethod("usingRecordReaderFactoryConverterFactoryAndDbToCoraFactory", cArg);
+		RecordReaderFactoryImp recordReaderFactoryImp = new RecordReaderFactoryImp(
+				connectionProvider);
+		DivaDbToCoraConverterFactoryImp divaDbToCoraConverterFactoryImp = new DivaDbToCoraConverterFactoryImp();
+
+		return (RecordStorage) constructor.invoke(null, recordReaderFactoryImp,
+				divaDbToCoraConverterFactoryImp, new DivaDbToCoraFactoryImp(recordReaderFactoryImp,
+						divaDbToCoraConverterFactoryImp));
 	}
 
 	private SqlConnectionProvider createConnectionProvider() throws NamingException {
