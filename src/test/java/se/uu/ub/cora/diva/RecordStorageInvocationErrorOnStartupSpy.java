@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2018, 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -20,14 +20,14 @@ package se.uu.ub.cora.diva;
 
 import java.lang.reflect.InvocationTargetException;
 
-import se.uu.ub.cora.diva.tocorastorage.fedora.DivaToCoraConverterFactory;
+import se.uu.ub.cora.diva.tocorastorage.fedora.DivaFedoraConverterFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 
 public class RecordStorageInvocationErrorOnStartupSpy {
 
-	public static RecordStorageSpy usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL(
-			HttpHandlerFactory httpHandlerFactory, DivaToCoraConverterFactory converterFactory,
-			String baseURL) throws InvocationTargetException {
+	public static RecordStorageSpy usingHttpHandlerFactoryAndConverterFactoryAndBaseURLAndUsernameAndPassword(
+			HttpHandlerFactory httpHandlerFactory, DivaFedoraConverterFactory converterFactory,
+			String baseURL, String username, String password) throws InvocationTargetException {
 		throw new InvocationTargetException(new Throwable(),
 				"Invocation exception from RecordStorageErrorOnStartupSpy");
 	}

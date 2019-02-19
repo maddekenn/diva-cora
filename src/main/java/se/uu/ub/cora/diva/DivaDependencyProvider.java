@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2016, 2017, 2018 Uppsala University Library
+ * Copyright 2015, 2016, 2017, 2018, 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -40,8 +40,8 @@ import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactory;
 import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactory;
 import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactoryImp;
-import se.uu.ub.cora.diva.tocorastorage.fedora.DivaToCoraConverterFactory;
-import se.uu.ub.cora.diva.tocorastorage.fedora.DivaToCoraConverterFactoryImp;
+import se.uu.ub.cora.diva.tocorastorage.fedora.DivaFedoraConverterFactory;
+import se.uu.ub.cora.diva.tocorastorage.fedora.DivaFedoraConverterFactoryImp;
 import se.uu.ub.cora.gatekeeperclient.authentication.AuthenticatorImp;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
@@ -84,6 +84,8 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 	private String storageOnDiskClassName;
 	private String mixedStorageClassName;
 	private String fedoraURL;
+	private String fedoraUsername;
+	private String fedoraPassword;
 	private String divaFedoraToCoraStorageClassName;
 	private String divaDbToCoraStorageClassName;
 	private String databaseLookupName;
@@ -96,6 +98,8 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 	protected void readInitInfo() {
 		mixedStorageClassName = tryToGetInitParameter("mixedStorageClassName");
 		fedoraURL = tryToGetInitParameter("fedoraURL");
+		fedoraUsername = tryToGetInitParameter("fedoraUsername");
+		fedoraPassword = tryToGetInitParameter("fedoraPassword");
 		divaFedoraToCoraStorageClassName = tryToGetInitParameter(
 				"divaFedoraToCoraStorageClassName");
 		divaDbToCoraStorageClassName = tryToGetInitParameter("divaDbToCoraStorageClassName");
@@ -157,14 +161,17 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 
 	private RecordStorage tryToCreateDivaFedoraToCoraStorage() throws NoSuchMethodException,
 			ClassNotFoundException, IllegalAccessException, InvocationTargetException {
-		Class<?>[] cArg = new Class[3];
+		Class<?>[] cArg = new Class[5];
 		cArg[0] = HttpHandlerFactory.class;
-		cArg[1] = DivaToCoraConverterFactory.class;
+		cArg[1] = DivaFedoraConverterFactory.class;
 		cArg[2] = String.class;
-		Method constructor = Class.forName(divaFedoraToCoraStorageClassName)
-				.getMethod("usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL", cArg);
+		cArg[3] = String.class;
+		cArg[4] = String.class;
+		Method constructor = Class.forName(divaFedoraToCoraStorageClassName).getMethod(
+				"usingHttpHandlerFactoryAndConverterFactoryAndBaseURLAndUsernameAndPassword", cArg);
 		return (RecordStorage) constructor.invoke(null, new HttpHandlerFactoryImp(),
-				new DivaToCoraConverterFactoryImp(), fedoraURL);
+				DivaFedoraConverterFactoryImp.usingFedoraURL(fedoraURL), fedoraURL, fedoraUsername,
+				fedoraPassword);
 	}
 
 	private RecordStorage tryToCreateDivaDbToCoraStorage()
@@ -201,7 +208,7 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 		cArg[1] = RecordStorage.class;
 		cArg[2] = RecordStorage.class;
 		Method constructor = Class.forName(mixedStorageClassName)
-				.getMethod("usingBasicAndDivaToCoraStorage", cArg);
+				.getMethod("usingBasicAndFedoraAndDbStorage", cArg);
 		return (RecordStorage) constructor.invoke(null, basicStorage, divaFedoraToCoraStorage,
 				divaDbToCoraStorage);
 	}

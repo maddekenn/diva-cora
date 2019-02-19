@@ -46,7 +46,9 @@ import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactory;
 import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactory;
 import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactoryImp;
+import se.uu.ub.cora.diva.tocorastorage.fedora.DivaFedoraConverterFactoryImp;
 import se.uu.ub.cora.gatekeeperclient.authentication.AuthenticatorImp;
+import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.metacreator.extended.MetacreatorExtendedFunctionalityProvider;
 import se.uu.ub.cora.solr.SolrClientProviderImp;
 import se.uu.ub.cora.solrindex.SolrRecordIndexer;
@@ -71,6 +73,8 @@ public class DivaDependencyProviderTest {
 			initInfo.put("divaFedoraToCoraStorageClassName", "se.uu.ub.cora.diva.RecordStorageSpy");
 			initInfo.put("divaDbToCoraStorageClassName", "se.uu.ub.cora.diva.RecordStorageSpy");
 			initInfo.put("fedoraURL", "http://diva-cora-fedora:8088/fedora/");
+			initInfo.put("fedoraUsername", "fedoraUser");
+			initInfo.put("fedoraPassword", "fedoraPass");
 			initInfo.put("storageOnDiskClassName", "se.uu.ub.cora.diva.RecordStorageSpy");
 			initInfo.put("gatekeeperURL", "http://localhost:8080/gatekeeper/");
 			initInfo.put("storageOnDiskBasePath", basePath);
@@ -143,6 +147,19 @@ public class DivaDependencyProviderTest {
 	}
 
 	@Test
+	public void testCorrectInitParametersUsedInFedoraToCoraStorage() throws Exception {
+		RecordStorageSpy fedoraToCoraStorage = ((RecordStorageSpy) dependencyProvider
+				.getRecordStorage()).divaFedoraToCoraStorage;
+		assertTrue(fedoraToCoraStorage.httpHandlerFactory instanceof HttpHandlerFactoryImp);
+		DivaFedoraConverterFactoryImp converterFactory = (DivaFedoraConverterFactoryImp) fedoraToCoraStorage.converterFactory;
+		assertTrue(converterFactory instanceof DivaFedoraConverterFactoryImp);
+		assertEquals(converterFactory.getFedoraURL(), initInfo.get("fedoraURL"));
+		assertEquals(fedoraToCoraStorage.baseURL, initInfo.get("fedoraURL"));
+		assertEquals(fedoraToCoraStorage.fedoraUsername, initInfo.get("fedoraUsername"));
+		assertEquals(fedoraToCoraStorage.fedoraPassword, initInfo.get("fedoraPassword"));
+	}
+
+	@Test
 	public void testDivaDbToRecordStorage() {
 		RecordStorageSpy recordStorage = (RecordStorageSpy) dependencyProvider.getRecordStorage();
 		DivaDbToCoraConverterFactory dbConverterFactory = recordStorage.divaDbToCoraStorage.dbConverterFactory;
@@ -194,6 +211,26 @@ public class DivaDependencyProviderTest {
 
 		assertTrue(thrownException instanceof RuntimeException);
 		assertEquals(thrownException.getMessage(), "InitInfo must contain fedoraURL");
+	}
+
+	@Test
+	public void testMissingFedoraUsernameInInitInfo() {
+		initInfo.remove("fedoraUsername");
+
+		Exception thrownException = callSystemOneDependencyProviderAndReturnResultingError();
+
+		assertTrue(thrownException instanceof RuntimeException);
+		assertEquals(thrownException.getMessage(), "InitInfo must contain fedoraUsername");
+	}
+
+	@Test
+	public void testMissingFedoraPasswordInInitInfo() {
+		initInfo.remove("fedoraPassword");
+
+		Exception thrownException = callSystemOneDependencyProviderAndReturnResultingError();
+
+		assertTrue(thrownException instanceof RuntimeException);
+		assertEquals(thrownException.getMessage(), "InitInfo must contain fedoraPassword");
 	}
 
 	@Test
