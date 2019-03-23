@@ -42,11 +42,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.connection.ContextConnectionProviderImp;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactory;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactoryImp;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactory;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactoryImp;
-import se.uu.ub.cora.diva.tocorastorage.fedora.DivaFedoraConverterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.CoraToDbConverterFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.CoraToDbConverterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactoryImp;
 import se.uu.ub.cora.gatekeeperclient.authentication.AuthenticatorImp;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.metacreator.extended.MetacreatorExtendedFunctionalityProvider;
@@ -58,6 +60,8 @@ import se.uu.ub.cora.spider.authorization.PermissionRuleCalculator;
 import se.uu.ub.cora.spider.record.RecordSearch;
 import se.uu.ub.cora.spider.search.RecordIndexer;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactoryImp;
+import se.uu.ub.cora.sqldatabase.RecordUpdaterFactory;
+import se.uu.ub.cora.sqldatabase.RecordUpdaterFactoryImp;
 
 public class DivaDependencyProviderTest {
 	private DivaDependencyProvider dependencyProvider;
@@ -167,6 +171,9 @@ public class DivaDependencyProviderTest {
 
 		RecordReaderFactoryImp readerFactory = (RecordReaderFactoryImp) recordStorage.divaDbToCoraStorage.readerFactory;
 
+		RecordUpdaterFactory updaterFactory = recordStorage.divaDbToCoraStorage.updaterFactory;
+		assertTrue(updaterFactory instanceof RecordUpdaterFactoryImp);
+
 		DivaDbToCoraFactory divaDbToCoraFactory = recordStorage.divaDbToCoraStorage.divaDbToCoraFactory;
 		assertTrue(divaDbToCoraFactory instanceof DivaDbToCoraFactoryImp);
 
@@ -180,6 +187,9 @@ public class DivaDependencyProviderTest {
 
 		assertEquals(connectionProvider.getName(), initInfo.get("databaseLookupName"));
 		assertTrue(connectionProvider.getContext() instanceof InitialContext);
+
+		CoraToDbConverterFactory coraToDbConverterFactory = recordStorage.divaDbToCoraStorage.coraToDbConverterFactory;
+		assertTrue(coraToDbConverterFactory instanceof CoraToDbConverterFactoryImp);
 	}
 
 	@Test

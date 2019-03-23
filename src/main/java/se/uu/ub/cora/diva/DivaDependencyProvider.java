@@ -36,12 +36,14 @@ import se.uu.ub.cora.bookkeeper.validator.DataValidator;
 import se.uu.ub.cora.bookkeeper.validator.DataValidatorImp;
 import se.uu.ub.cora.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.connection.SqlConnectionProvider;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactory;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactoryImp;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactory;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactoryImp;
-import se.uu.ub.cora.diva.tocorastorage.fedora.DivaFedoraConverterFactory;
-import se.uu.ub.cora.diva.tocorastorage.fedora.DivaFedoraConverterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.CoraToDbConverterFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.CoraToDbConverterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactory;
+import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactoryImp;
 import se.uu.ub.cora.gatekeeperclient.authentication.AuthenticatorImp;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
@@ -67,6 +69,8 @@ import se.uu.ub.cora.spider.search.RecordIndexer;
 import se.uu.ub.cora.spider.stream.storage.StreamStorage;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactoryImp;
+import se.uu.ub.cora.sqldatabase.RecordUpdaterFactory;
+import se.uu.ub.cora.sqldatabase.RecordUpdaterFactoryImp;
 import se.uu.ub.cora.storage.StreamStorageOnDisk;
 
 public class DivaDependencyProvider extends SpiderDependencyProvider {
@@ -177,21 +181,29 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 	private RecordStorage tryToCreateDivaDbToCoraStorage()
 			throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException,
 			InvocationTargetException, NamingException {
-		Class<?>[] cArg = new Class[3];
+		Class<?>[] cArg = new Class[5];
 		cArg[0] = RecordReaderFactory.class;
-		cArg[1] = DivaDbToCoraConverterFactory.class;
-		cArg[2] = DivaDbToCoraFactory.class;
+		cArg[1] = RecordUpdaterFactory.class;
+		cArg[2] = DivaDbToCoraConverterFactory.class;
+		cArg[3] = DivaDbToCoraFactory.class;
+		cArg[4] = CoraToDbConverterFactory.class;
 		SqlConnectionProvider connectionProvider = createConnectionProvider();
 
-		Method constructor = Class.forName(divaDbToCoraStorageClassName)
-				.getMethod("usingRecordReaderFactoryConverterFactoryAndDbToCoraFactory", cArg);
+		Method constructor = Class.forName(divaDbToCoraStorageClassName).getMethod("usingFactories",
+				cArg);
 		RecordReaderFactoryImp recordReaderFactoryImp = new RecordReaderFactoryImp(
+				connectionProvider);
+		RecordUpdaterFactoryImp recordUpdaterFactoryImp = new RecordUpdaterFactoryImp(
 				connectionProvider);
 		DivaDbToCoraConverterFactoryImp divaDbToCoraConverterFactoryImp = new DivaDbToCoraConverterFactoryImp();
 
+		CoraToDbConverterFactory coraToDbConverterFactoryImp = new CoraToDbConverterFactoryImp();
+
 		return (RecordStorage) constructor.invoke(null, recordReaderFactoryImp,
-				divaDbToCoraConverterFactoryImp, new DivaDbToCoraFactoryImp(recordReaderFactoryImp,
-						divaDbToCoraConverterFactoryImp));
+				recordUpdaterFactoryImp, divaDbToCoraConverterFactoryImp,
+				new DivaDbToCoraFactoryImp(recordReaderFactoryImp, divaDbToCoraConverterFactoryImp),
+				coraToDbConverterFactoryImp);
+
 	}
 
 	private SqlConnectionProvider createConnectionProvider() throws NamingException {

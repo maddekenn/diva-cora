@@ -4,14 +4,16 @@ import java.util.Collection;
 
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.bookkeeper.storage.MetadataStorage;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactory;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactory;
-import se.uu.ub.cora.diva.tocorastorage.fedora.DivaFedoraConverterFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.CoraToDbConverterFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraFactory;
+import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.searchstorage.SearchStorage;
 import se.uu.ub.cora.spider.data.SpiderReadResult;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.RecordUpdaterFactory;
 
 public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchStorage {
 
@@ -27,6 +29,8 @@ public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchS
 	public DivaDbToCoraFactory divaDbToCoraFactory;
 	public String fedoraUsername;
 	public String fedoraPassword;
+	public RecordUpdaterFactory updaterFactory;
+	public CoraToDbConverterFactory coraToDbConverterFactory;
 
 	public static RecordStorageSpy createRecordStorageOnDiskWithBasePath(String basePath) {
 		return new RecordStorageSpy(basePath);
@@ -53,10 +57,12 @@ public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchS
 		return new RecordStorageSpy(basicStorage, divaFedoraToCoraStorage, divaDbToCoraStorage);
 	}
 
-	public static RecordStorage usingRecordReaderFactoryConverterFactoryAndDbToCoraFactory(
-			RecordReaderFactory readerFactory, DivaDbToCoraConverterFactory converterFactory,
-			DivaDbToCoraFactory divaDbToCoraFactory) {
-		return new RecordStorageSpy(readerFactory, converterFactory, divaDbToCoraFactory);
+	public static RecordStorage usingFactories(RecordReaderFactory readerFactory,
+			RecordUpdaterFactory updaterFactory, DivaDbToCoraConverterFactory converterFactory,
+			DivaDbToCoraFactory divaDbToCoraFactory,
+			CoraToDbConverterFactory coraToDbConverterFactory) {
+		return new RecordStorageSpy(readerFactory, updaterFactory, converterFactory,
+				divaDbToCoraFactory, coraToDbConverterFactory);
 
 	}
 
@@ -70,12 +76,14 @@ public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchS
 		fedoraPassword = password;
 	}
 
-	public RecordStorageSpy(RecordReaderFactory readerFactory,
-			DivaDbToCoraConverterFactory converterFactory,
-			DivaDbToCoraFactory divaDbToCoraFactory) {
+	public RecordStorageSpy(RecordReaderFactory readerFactory, RecordUpdaterFactory updaterFactory,
+			DivaDbToCoraConverterFactory converterFactory, DivaDbToCoraFactory divaDbToCoraFactory,
+			CoraToDbConverterFactory coraToDbConverterFactory) {
 		this.readerFactory = readerFactory;
+		this.updaterFactory = updaterFactory;
 		dbConverterFactory = converterFactory;
 		this.divaDbToCoraFactory = divaDbToCoraFactory;
+		this.coraToDbConverterFactory = coraToDbConverterFactory;
 
 	}
 
