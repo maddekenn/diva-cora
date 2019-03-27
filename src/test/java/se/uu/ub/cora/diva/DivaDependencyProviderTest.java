@@ -42,11 +42,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.connection.ContextConnectionProviderImp;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactory;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraConverterFactoryImp;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactory;
-import se.uu.ub.cora.diva.tocorastorage.db.DivaDbToCoraFactoryImp;
-import se.uu.ub.cora.diva.tocorastorage.fedora.DivaFedoraConverterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactoryImp;
 import se.uu.ub.cora.gatekeeperclient.authentication.AuthenticatorImp;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.metacreator.extended.MetacreatorExtendedFunctionalityProvider;
