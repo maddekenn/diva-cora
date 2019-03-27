@@ -26,7 +26,7 @@
 	</parent>
 
 	<artifactId>diva</artifactId>
-	<version>0.12.0</version>
+	<version>0.12.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>DiVA Cora</name>
@@ -48,7 +48,7 @@
 		<connection>scm:git:https://github.com/lsu-ub-uu/diva-cora.git</connection>
 		<developerConnection>scm:git:https://github.com/lsu-ub-uu/diva-cora.git</developerConnection>
 		<url>https://github.com/lsu-ub-uu/diva-cora.git</url>
-	  <tag>diva-0.12.0</tag>
+	  <tag>release/0.12</tag>
   </scm>
 
 	<repositories>
