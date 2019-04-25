@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 Uppsala University Library
+  ~ Copyright 2018, 2019 Uppsala University Library
   ~
   ~ This file is part of Cora.
   ~
@@ -22,26 +22,24 @@
 	<parent>
 		<groupId>se.uu.ub.cora</groupId>
 		<artifactId>cora-parent</artifactId>
-		<version>0.8.6</version>
+		<version>0.9.0</version>
 	</parent>
 
 	<artifactId>diva</artifactId>
-	<version>0.13-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>DiVA Cora</name>
 
 	<properties>
-		<httphandler.version>0.5.1</httphandler.version>
-		<bookkeeper.version>0.14.0</bookkeeper.version>
-		<beefeater.version>0.8.0</beefeater.version>
-		<spider.version>0.20.0</spider.version>
-		<basicstorage.version>0.13.0</basicstorage.version>
-		<userpicker.version>0.6.0</userpicker.version>
-		<gatekeeperclient.version>0.8.0</gatekeeperclient.version>
-		<metacreator.version>0.8.0</metacreator.version>
-		<solrsearch.version>0.6.0</solrsearch.version>
-		<divamixedstorage.version>0.7.0</divamixedstorage.version>
+		<httphandler.version>1.0.0</httphandler.version>
+		<spider.version>1.0.0</spider.version>
+		<basicstorage.version>1.1.0</basicstorage.version>
+		<userpicker.version>1.0.0</userpicker.version>
+		<gatekeeperclient.version>1.1.0</gatekeeperclient.version>
+		<metacreator.version>1.0.0</metacreator.version>
+		<solrsearch.version>1.1.0</solrsearch.version>
+		<divamixedstorage.version>1.0.0</divamixedstorage.version>
 	</properties>
 
 	<scm>
@@ -72,16 +70,6 @@
 			<artifactId>httphandler</artifactId>
 			<version>${httphandler.version}</version>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>se.uu.ub.cora</groupId>
-			<artifactId>bookkeeper</artifactId>
-			<version>${bookkeeper.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>se.uu.ub.cora</groupId>
-			<artifactId>beefeater</artifactId>
-			<version>${beefeater.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
