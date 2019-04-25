@@ -39,7 +39,7 @@
 		<gatekeeperclient.version>1.1.0</gatekeeperclient.version>
 		<metacreator.version>1.0.0</metacreator.version>
 		<solrsearch.version>1.1.0</solrsearch.version>
-		<divamixedstorage.version>1.0.0</divamixedstorage.version>
+		<divamixedstorage.version>1.1.0</divamixedstorage.version>
 	</properties>
 
 	<scm>
