@@ -27,7 +27,6 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,7 +52,6 @@ import se.uu.ub.cora.metacreator.extended.MetacreatorExtendedFunctionalityProvid
 import se.uu.ub.cora.solr.SolrClientProviderImp;
 import se.uu.ub.cora.solrindex.SolrRecordIndexer;
 import se.uu.ub.cora.solrsearch.SolrRecordSearch;
-import se.uu.ub.cora.spider.authentication.Authenticator;
 import se.uu.ub.cora.spider.authorization.PermissionRuleCalculator;
 import se.uu.ub.cora.spider.record.RecordSearch;
 import se.uu.ub.cora.spider.search.RecordIndexer;
@@ -319,19 +317,9 @@ public class DivaDependencyProviderTest {
 
 	@Test
 	public void testtestGetAuthenticatorUsesGatekeeperUrl() {
-		Authenticator authenticator = dependencyProvider.getAuthenticator();
+		AuthenticatorImp authenticator = (AuthenticatorImp) dependencyProvider.getAuthenticator();
 		assertNotNull(authenticator);
-		try {
-			Field f2;
-			f2 = authenticator.getClass().getDeclaredField("baseUrl");
-			f2.setAccessible(true);
-			String baseUrl = (String) f2.get(authenticator);
-
-			assertEquals(baseUrl, "http://localhost:8080/gatekeeper/");
-		} catch (Exception e) {
-			// if exception fail test
-			assertTrue(false);
-		}
+		assertEquals(authenticator.getBaseURL(), initInfo.get("gatekeeperURL"));
 	}
 
 	@Test
@@ -366,48 +354,18 @@ public class DivaDependencyProviderTest {
 
 	@Test
 	public void testGetRecordIndexerUsesSolrUrlWhenCreatingSolrClientProvider() {
-		RecordIndexer recordIndexer = dependencyProvider.getRecordIndexer();
-		assertNotNull(recordIndexer);
-		try {
-			Field f;
-			f = recordIndexer.getClass().getDeclaredField("solrClientProvider");
-			f.setAccessible(true);
-			SolrClientProviderImp solrClientProviderImp = (SolrClientProviderImp) f
-					.get(recordIndexer);
-
-			Field f2;
-			f2 = solrClientProviderImp.getClass().getDeclaredField("baseUrl");
-			f2.setAccessible(true);
-			String baseUrl = (String) f2.get(solrClientProviderImp);
-
-			assertEquals(baseUrl, "http://localhost:8983/solr/stuff");
-		} catch (Exception e) {
-			// if exception fail test
-			assertTrue(false);
-		}
+		SolrRecordIndexer recordIndexer = (SolrRecordIndexer) dependencyProvider.getRecordIndexer();
+		SolrClientProviderImp solrClientProviderImp = (SolrClientProviderImp) recordIndexer
+				.getSolrClientProvider();
+		assertEquals(solrClientProviderImp.getBaseURL(), "http://localhost:8983/solr/stuff");
 	}
 
 	@Test
 	public void testGetRecordSearchUsesSolrUrlWhenCreatingSolrClientProvider() {
-		RecordSearch recordSearcher = dependencyProvider.getRecordSearch();
-		assertNotNull(recordSearcher);
-		try {
-			Field f;
-			f = recordSearcher.getClass().getDeclaredField("solrClientProvider");
-			f.setAccessible(true);
-			SolrClientProviderImp solrClientProviderImp = (SolrClientProviderImp) f
-					.get(recordSearcher);
-
-			Field f2;
-			f2 = solrClientProviderImp.getClass().getDeclaredField("baseUrl");
-			f2.setAccessible(true);
-			String baseUrl = (String) f2.get(solrClientProviderImp);
-
-			assertEquals(baseUrl, "http://localhost:8983/solr/stuff");
-		} catch (Exception e) {
-			// if exception fail test
-			assertTrue(false);
-		}
+		SolrRecordSearch recordSearcher = (SolrRecordSearch) dependencyProvider.getRecordSearch();
+		SolrClientProviderImp solrClientProviderImp = (SolrClientProviderImp) recordSearcher
+				.getSolrClientProvider();
+		assertEquals(solrClientProviderImp.getBaseURL(), "http://localhost:8983/solr/stuff");
 	}
 
 	@Test
