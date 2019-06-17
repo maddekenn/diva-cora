@@ -65,6 +65,8 @@ import se.uu.ub.cora.spider.role.RulesProvider;
 import se.uu.ub.cora.spider.role.RulesProviderImp;
 import se.uu.ub.cora.spider.search.RecordIndexer;
 import se.uu.ub.cora.spider.stream.storage.StreamStorage;
+import se.uu.ub.cora.sqldatabase.DataReader;
+import se.uu.ub.cora.sqldatabase.DataReaderImp;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactoryImp;
 import se.uu.ub.cora.storage.StreamStorageOnDisk;
@@ -177,21 +179,24 @@ public class DivaDependencyProvider extends SpiderDependencyProvider {
 	private RecordStorage tryToCreateDivaDbToCoraStorage()
 			throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException,
 			InvocationTargetException, NamingException {
-		Class<?>[] cArg = new Class[3];
+		Class<?>[] cArg = new Class[4];
 		cArg[0] = RecordReaderFactory.class;
 		cArg[1] = DivaDbToCoraConverterFactory.class;
 		cArg[2] = DivaDbToCoraFactory.class;
+		cArg[3] = DataReader.class;
 		SqlConnectionProvider connectionProvider = createConnectionProvider();
 
-		Method constructor = Class.forName(divaDbToCoraStorageClassName)
-				.getMethod("usingRecordReaderFactoryConverterFactoryAndDbToCoraFactory", cArg);
+		Method constructor = Class.forName(divaDbToCoraStorageClassName).getMethod(
+				"usingRecordReaderFactoryConverterFactoryAndDbToCoraFactoryAndDataReader", cArg);
 		RecordReaderFactoryImp recordReaderFactoryImp = new RecordReaderFactoryImp(
 				connectionProvider);
+		DataReaderImp dataReader = DataReaderImp.usingSqlConnectionProvider(connectionProvider);
 		DivaDbToCoraConverterFactoryImp divaDbToCoraConverterFactoryImp = new DivaDbToCoraConverterFactoryImp();
 
 		return (RecordStorage) constructor.invoke(null, recordReaderFactoryImp,
-				divaDbToCoraConverterFactoryImp, new DivaDbToCoraFactoryImp(recordReaderFactoryImp,
-						divaDbToCoraConverterFactoryImp));
+				divaDbToCoraConverterFactoryImp,
+				new DivaDbToCoraFactoryImp(recordReaderFactoryImp, divaDbToCoraConverterFactoryImp),
+				dataReader);
 	}
 
 	private SqlConnectionProvider createConnectionProvider() throws NamingException {

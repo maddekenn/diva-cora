@@ -11,6 +11,7 @@ import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.searchstorage.SearchStorage;
 import se.uu.ub.cora.spider.data.SpiderReadResult;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
+import se.uu.ub.cora.sqldatabase.DataReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
 public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchStorage {
@@ -27,6 +28,7 @@ public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchS
 	public DivaDbToCoraFactory divaDbToCoraFactory;
 	public String fedoraUsername;
 	public String fedoraPassword;
+	public DataReader dataReader;
 
 	public static RecordStorageSpy createRecordStorageOnDiskWithBasePath(String basePath) {
 		return new RecordStorageSpy(basePath);
@@ -53,10 +55,11 @@ public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchS
 		return new RecordStorageSpy(basicStorage, divaFedoraToCoraStorage, divaDbToCoraStorage);
 	}
 
-	public static RecordStorage usingRecordReaderFactoryConverterFactoryAndDbToCoraFactory(
+	public static RecordStorage usingRecordReaderFactoryConverterFactoryAndDbToCoraFactoryAndDataReader(
 			RecordReaderFactory readerFactory, DivaDbToCoraConverterFactory converterFactory,
-			DivaDbToCoraFactory divaDbToCoraFactory) {
-		return new RecordStorageSpy(readerFactory, converterFactory, divaDbToCoraFactory);
+			DivaDbToCoraFactory divaDbToCoraFactory, DataReader dataReader) {
+		return new RecordStorageSpy(readerFactory, converterFactory, divaDbToCoraFactory,
+				dataReader);
 
 	}
 
@@ -71,12 +74,12 @@ public class RecordStorageSpy implements RecordStorage, MetadataStorage, SearchS
 	}
 
 	public RecordStorageSpy(RecordReaderFactory readerFactory,
-			DivaDbToCoraConverterFactory converterFactory,
-			DivaDbToCoraFactory divaDbToCoraFactory) {
+			DivaDbToCoraConverterFactory converterFactory, DivaDbToCoraFactory divaDbToCoraFactory,
+			DataReader dataReader) {
 		this.readerFactory = readerFactory;
 		dbConverterFactory = converterFactory;
 		this.divaDbToCoraFactory = divaDbToCoraFactory;
-
+		this.dataReader = dataReader;
 	}
 
 	public static RecordStorageSpy usingHttpHandlerFactoryAndConverterFactoryAndBaseURLAndUsernameAndPassword(

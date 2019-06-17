@@ -48,6 +48,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactoryImp;
 import se.uu.ub.cora.gatekeeperclient.authentication.AuthenticatorImp;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
+import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.metacreator.extended.MetacreatorExtendedFunctionalityProvider;
 import se.uu.ub.cora.solr.SolrClientProviderImp;
 import se.uu.ub.cora.solrindex.SolrRecordIndexer;
@@ -55,16 +56,20 @@ import se.uu.ub.cora.solrsearch.SolrRecordSearch;
 import se.uu.ub.cora.spider.authorization.PermissionRuleCalculator;
 import se.uu.ub.cora.spider.record.RecordSearch;
 import se.uu.ub.cora.spider.search.RecordIndexer;
+import se.uu.ub.cora.sqldatabase.DataReaderImp;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactoryImp;
 
 public class DivaDependencyProviderTest {
 	private DivaDependencyProvider dependencyProvider;
 	private String basePath = "/tmp/divaRecordStorageOnDiskTemp/";
 	private Map<String, String> initInfo;
+	private LoggerFactorySpy loggerFactorySpy;
 
 	@BeforeMethod
 	public void setUp() throws Exception {
 		try {
+			loggerFactorySpy = new LoggerFactorySpy();
+			LoggerProvider.setLoggerFactory(loggerFactorySpy);
 			makeSureBasePathExistsAndIsEmpty();
 			initInfo = new HashMap<>();
 			initInfo.put("mixedStorageClassName", "se.uu.ub.cora.diva.RecordStorageSpy");
@@ -171,6 +176,9 @@ public class DivaDependencyProviderTest {
 		DivaDbToCoraFactoryImp divaDbToCoraFactoryImp = (DivaDbToCoraFactoryImp) divaDbToCoraFactory;
 		assertEquals(divaDbToCoraFactoryImp.getReaderFactory(), readerFactory);
 		assertEquals(divaDbToCoraFactoryImp.getConverterFactory(), dbConverterFactory);
+
+		DataReaderImp dataReader = (DataReaderImp) recordStorage.divaDbToCoraStorage.dataReader;
+		assertTrue(dataReader instanceof DataReaderImp);
 
 		ContextConnectionProviderImp connectionProvider = (ContextConnectionProviderImp) readerFactory
 				.getConnectionProvider();

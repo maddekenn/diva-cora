@@ -32,14 +32,15 @@
 	<name>DiVA Cora</name>
 
 	<properties>
+	<logger.version>1.0.0</logger.version>
 		<httphandler.version>1.0.0</httphandler.version>
 		<spider.version>1.0.0</spider.version>
 		<basicstorage.version>1.1.0</basicstorage.version>
-		<userpicker.version>1.0.0</userpicker.version>
+		<userpicker.version>1.1.0</userpicker.version>
 		<gatekeeperclient.version>1.1.0</gatekeeperclient.version>
 		<metacreator.version>1.0.0</metacreator.version>
 		<solrsearch.version>1.1.0</solrsearch.version>
-		<divamixedstorage.version>1.1.0</divamixedstorage.version>
+		<divamixedstorage.version>1.2-SNAPSHOT</divamixedstorage.version>
 	</properties>
 
 	<scm>
@@ -65,6 +66,12 @@
 	</repositories>
 
 	<dependencies>
+	<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>logger</artifactId>
+			<version>${logger.version}</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>httphandler</artifactId>
