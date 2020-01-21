@@ -36,7 +36,7 @@
 
 	<properties>
 		<therest.version>4.6.0</therest.version>
-		<divamixedstorage.version>3.4.0</divamixedstorage.version>
+		<divamixedstorage.version>3.5.0</divamixedstorage.version>
 		<servlet-api.version>4.0.1</servlet-api.version>
 	</properties>
 
