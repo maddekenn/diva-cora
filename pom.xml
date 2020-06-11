@@ -35,7 +35,7 @@
 	</build>
 
 	<properties>
-		<therest.version>4.14.0</therest.version>
+		<therest.version>4.13.0</therest.version>
 		<divamixedstorage.version>3.13.0</divamixedstorage.version>
 		<servlet-api.version>4.0.1</servlet-api.version>
 	</properties>
