@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>se.uu.ub.cora</groupId>
 		<artifactId>cora-parent</artifactId>
-		<version>1.0.2</version>
+		<version>1.1.1</version>
 	</parent>
 
 	<artifactId>diva</artifactId>
@@ -35,7 +35,7 @@
 	</build>
 
 	<properties>
-		<therest.version>4.14.0</therest.version>
+		<therest.version>4.15.0</therest.version>
 		<divamixedstorage.version>3.13.0</divamixedstorage.version>
 		<servlet-api.version>4.0.1</servlet-api.version>
 	</properties>
