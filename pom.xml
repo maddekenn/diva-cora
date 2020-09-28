@@ -35,8 +35,20 @@
 	</build>
 
 	<properties>
-		<therest.version>4.15.0</therest.version>
-		<divamixedstorage.version>3.14.0</divamixedstorage.version>
+		<coralog4j.version>2.1.0</coralog4j.version>
+		<json.version>2.1.0</json.version>
+		<spider.version>3.15.0</spider.version>
+		<therest.version>4.16.0</therest.version>
+		<beefeater.version>3.2.0</beefeater.version>
+		<bookkeeper.version>4.9.0</bookkeeper.version>
+		<basicdata.version>1.11.0</basicdata.version>
+		<storage.version>3.7.0</storage.version>
+		<basicstorage.version>3.14.0</basicstorage.version>
+		<gatekeeper.version>3.5.0</gatekeeper.version>
+		<gatekeeperclient.version>3.8.0</gatekeeperclient.version>
+		<divamixedstorage.version>3.15-SNAPSHOT</divamixedstorage.version>
+		<solrsearch.version>3.5.0</solrsearch.version>
+		<metacreator.version>3.9.0</metacreator.version>
 		<servlet-api.version>4.0.1</servlet-api.version>
 	</properties>
 
@@ -63,23 +75,89 @@
 	</repositories>
 
 	<dependencies>
-<!-- compile -->
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${coralog4j.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>therest</artifactId>
 			<version>${therest.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>json</artifactId>
+			<version>${json.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>spider</artifactId>
+			<version>${spider.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>beefeater</artifactId>
+			<version>${beefeater.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>bookkeeper</artifactId>
+			<version>${bookkeeper.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>basicdata</artifactId>
+			<version>${basicdata.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>storage</artifactId>
+			<version>${storage.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>basicstorage</artifactId>
+			<version>${basicstorage.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>gatekeeper</artifactId>
+			<version>${gatekeeper.version}</version>
+ 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>gatekeeperclient</artifactId>
+			<version>${gatekeeperclient.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>divamixedstorage</artifactId>
 			<version>${divamixedstorage.version}</version>
+ 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.testng</groupId>
-			<artifactId>testng</artifactId>
-			<version>${testng.version}</version>
-			<scope>test</scope>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>solrsearch</artifactId>
+			<version>${solrsearch.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>metacreator</artifactId>
+			<version>${metacreator.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
