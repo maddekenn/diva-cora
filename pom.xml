@@ -39,7 +39,7 @@
 		<json.version>2.1.0</json.version>
 		<spider.version>3.16-SNAPSHOT</spider.version>
 		<therest.version>4.16.0</therest.version>
-		<beefeater.version>3.2.0</beefeater.version>
+		<beefeater.version>3.3-SNAPSHOT</beefeater.version>
 		<bookkeeper.version>4.9.0</bookkeeper.version>
 		<basicdata.version>1.11.0</basicdata.version>
 		<storage.version>3.7.0</storage.version>
