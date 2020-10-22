@@ -46,7 +46,7 @@
 		<basicstorage.version>3.14.0</basicstorage.version>
 		<gatekeeper.version>3.5.0</gatekeeper.version>
 		<gatekeeperclient.version>3.8.0</gatekeeperclient.version>
-		<divamixedstorage.version>3.15.0</divamixedstorage.version>
+		<divamixedstorage.version>3.16.0</divamixedstorage.version>
 		<solrsearch.version>3.5.0</solrsearch.version>
 		<metacreator.version>3.9.0</metacreator.version>
 		<httphandler.version>2.1.0</httphandler.version>
