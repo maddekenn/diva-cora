@@ -18,13 +18,32 @@
  */
 package se.uu.ub.cora.diva;
 
+import java.util.List;
+
 import se.uu.ub.cora.metacreator.extended.MetacreatorExtendedFunctionalityProvider;
 import se.uu.ub.cora.spider.dependency.SpiderDependencyProvider;
+import se.uu.ub.cora.spider.extended.ExtendedFunctionality;
 
 public class DivaExtendedFunctionalityProvider extends MetacreatorExtendedFunctionalityProvider {
 
 	public DivaExtendedFunctionalityProvider(SpiderDependencyProvider dependencyProvider) {
 		super(dependencyProvider);
+	}
+
+	@Override
+	public List<ExtendedFunctionality> getFunctionalityForUpdateBeforeMetadataValidation(
+			String recordType) {
+		List<ExtendedFunctionality> list = super.getFunctionalityForUpdateBeforeMetadataValidation(
+				recordType);
+		if ("commonOrganisation".equals(recordType)) {
+			list = ensureListExists(list);
+			list.add(new OrganisationExtendedFunctionality());
+		}
+		return list;
+	}
+
+	SpiderDependencyProvider getDependencyProvider() {
+		return dependencyProvider;
 	}
 
 }

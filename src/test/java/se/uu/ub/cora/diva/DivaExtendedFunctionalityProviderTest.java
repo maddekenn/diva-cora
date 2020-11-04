@@ -19,6 +19,8 @@
 package se.uu.ub.cora.diva;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,26 +29,31 @@ import java.util.List;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.metacreator.extended.MetacreatorExtendedFunctionalityProvider;
 import se.uu.ub.cora.spider.dependency.SpiderDependencyProvider;
 import se.uu.ub.cora.spider.extended.ExtendedFunctionality;
 
 public class DivaExtendedFunctionalityProviderTest {
 
-	private MetacreatorExtendedFunctionalityProvider provider;
+	private DivaExtendedFunctionalityProvider functionalityProvider;
 	private SpiderDependencyProvider dependencyProvider;
 
 	@BeforeMethod
 	public void setUp() {
 		dependencyProvider = new DependencyProviderSpy(new HashMap<>());
-		provider = new DivaExtendedFunctionalityProvider(dependencyProvider);
+		functionalityProvider = new DivaExtendedFunctionalityProvider(dependencyProvider);
 
+	}
+
+	@Test
+	public void testInit() {
+		// assertTrue(functionalityProvider instanceof MetacreatorExtendedFunctionalityProvider);
+		assertSame(functionalityProvider.getDependencyProvider(), dependencyProvider);
 	}
 
 	@Test
 	public void testUpdateBeforeMetadataValidationNotImplementedType() {
 
-		List<ExtendedFunctionality> functionalityList = provider
+		List<ExtendedFunctionality> functionalityList = functionalityProvider
 				.getFunctionalityForUpdateBeforeMetadataValidation("notImplemented");
 		assertEquals(functionalityList, Collections.emptyList());
 
@@ -54,9 +61,10 @@ public class DivaExtendedFunctionalityProviderTest {
 
 	@Test
 	public void testUpdateBeforeMetadataValidationCommonOrganisation() {
-		List<ExtendedFunctionality> functionalityList = provider
+		List<ExtendedFunctionality> functionalityList = functionalityProvider
 				.getFunctionalityForUpdateBeforeMetadataValidation("commonOrganisation");
 		assertEquals(functionalityList.size(), 1);
+		assertTrue(functionalityList.get(0) instanceof OrganisationExtendedFunctionality);
 
 	}
 }
