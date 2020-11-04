@@ -88,7 +88,7 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>log4j</artifactId>
 			<version>${coralog4j.version}</version>
-			<scope>runtime</scope>
+<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
@@ -100,7 +100,7 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>json</artifactId>
 			<version>${json.version}</version>
-			<scope>runtime</scope>
+<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
@@ -112,13 +112,13 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>beefeater</artifactId>
 			<version>${beefeater.version}</version>
-			<scope>runtime</scope>
+<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>bookkeeper</artifactId>
 			<version>${bookkeeper.version}</version>
-			<scope>runtime</scope>
+<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
@@ -130,7 +130,7 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>storage</artifactId>
 			<version>${storage.version}</version>
-			<scope>runtime</scope>
+<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
@@ -148,31 +148,31 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>gatekeeperclient</artifactId>
 			<version>${gatekeeperclient.version}</version>
-			<scope>runtime</scope>
+<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>divamixedstorage</artifactId>
 			<version>${divamixedstorage.version}</version>
- 			<scope>runtime</scope>
+<!--  			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>solrsearch</artifactId>
 			<version>${solrsearch.version}</version>
-			<scope>runtime</scope>
+<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>metacreator</artifactId>
 			<version>${metacreator.version}</version>
-			<scope>runtime</scope>
+<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>httphandler</artifactId>
 			<version>${httphandler.version}</version>
-			<scope>runtime</scope>
+<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
