@@ -18,20 +18,40 @@
  */
 package se.uu.ub.cora.diva;
 
-import java.util.List;
+import se.uu.ub.cora.data.DataAtomic;
 
-import se.uu.ub.cora.data.DataElement;
-import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.spider.extended.ExtendedFunctionality;
+public class DataAtomicSpy implements DataAtomic {
 
-public class OrganisationExtendedFunctionality implements ExtendedFunctionality {
+	public String nameInData;
+	public String value;
+
+	public DataAtomicSpy(String nameInData, String value) {
+		this.nameInData = nameInData;
+		this.value = value;
+	}
 
 	@Override
-	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
+	public void setRepeatId(String repeatId) {
+		// TODO Auto-generated method stub
 
-		List<DataElement> parentOrganisations = dataGroup
-				.getAllChildrenWithNameInData("parentOrganisation");
+	}
 
+	@Override
+	public String getRepeatId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getNameInData() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getValue() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

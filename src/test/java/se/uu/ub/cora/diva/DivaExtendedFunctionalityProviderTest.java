@@ -67,4 +67,14 @@ public class DivaExtendedFunctionalityProviderTest {
 		assertTrue(functionalityList.get(0) instanceof OrganisationExtendedFunctionality);
 
 	}
+
+	// TODO: are parents allowed in root organisation??
+	// @Test
+	// public void testUpdateBeforeMetadataValidationRootOrganisation() {
+	// List<ExtendedFunctionality> functionalityList = functionalityProvider
+	// .getFunctionalityForUpdateBeforeMetadataValidation("rootOrganisation");
+	// assertEquals(functionalityList.size(), 1);
+	// assertTrue(functionalityList.get(0) instanceof OrganisationExtendedFunctionality);
+	//
+	// }
 }
