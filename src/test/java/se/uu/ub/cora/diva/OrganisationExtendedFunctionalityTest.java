@@ -37,7 +37,6 @@ public class OrganisationExtendedFunctionalityTest {
 	@BeforeMethod
 	public void setUp() {
 		dataGroup = new DataGroupSpy("organisation");
-
 	}
 
 	@Test
@@ -56,12 +55,11 @@ public class OrganisationExtendedFunctionalityTest {
 		extendedFunctionality.useExtendedFunctionality("someToken", dataGroup);
 
 		assertEquals(dataGroup.addedChildren.size(), 0);
-
 		assertEquals(dataGroup.removeAllGroupsUsedNameInDatas.size(), 0);
 	}
 
 	@Test
-	public void testTwoSameParent2() {
+	public void testTwoSameParentOneOther() {
 		List<DataElement> parents = new ArrayList<>();
 
 		DataGroup parent1 = createOrganisationLinkUsingRepeatIdAndOrganisationId(
@@ -70,6 +68,9 @@ public class OrganisationExtendedFunctionalityTest {
 		DataGroup parent2 = createOrganisationLinkUsingRepeatIdAndOrganisationId(
 				"parentOrganisation", "1", "51");
 		parents.add(parent2);
+		DataGroup parent3 = createOrganisationLinkUsingRepeatIdAndOrganisationId(
+				"parentOrganisation", "1", "567");
+		parents.add(parent3);
 
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 
@@ -79,8 +80,9 @@ public class OrganisationExtendedFunctionalityTest {
 		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(0), "parentOrganisation");
 		assertEquals(dataGroup.removeAllGroupsUsedNameInDatas.get(0), "parentOrganisation");
 
-		assertEquals(dataGroup.addedChildren.size(), 1);
+		assertEquals(dataGroup.addedChildren.size(), 2);
 		assertSame(dataGroup.addedChildren.get(0), parent1);
+		assertSame(dataGroup.addedChildren.get(1), parent3);
 
 	}
 
