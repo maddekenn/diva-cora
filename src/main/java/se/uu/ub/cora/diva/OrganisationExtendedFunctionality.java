@@ -18,7 +18,10 @@
  */
 package se.uu.ub.cora.diva;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
@@ -29,9 +32,24 @@ public class OrganisationExtendedFunctionality implements ExtendedFunctionality 
 	@Override
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
 
-		List<DataElement> parentOrganisations = dataGroup
-				.getAllChildrenWithNameInData("parentOrganisation");
+		List<DataGroup> parentOrganisations = dataGroup
+				.getAllGroupsWithNameInData("parentOrganisation");
+		Map<String, DataElement> sortedParents = new HashMap<>();
+		List<DataElement> elementsToKeep = new ArrayList<>();
 
+		for (DataGroup parentGroup : parentOrganisations) {
+			DataGroup parentLink = parentGroup.getFirstGroupWithNameInData("organisationLink");
+			String organisationId = parentLink.getFirstAtomicValueWithNameInData("linkedRecordId");
+			if (!sortedParents.containsKey(organisationId)) {
+				elementsToKeep.add(parentGroup);
+				sortedParents.put(organisationId, parentGroup);
+			}
+		}
+
+		if (parentOrganisations.size() != elementsToKeep.size()) {
+			dataGroup.removeAllChildrenWithNameInData("parentOrganisation");
+			dataGroup.addChildren(elementsToKeep);
+		}
 	}
 
 }

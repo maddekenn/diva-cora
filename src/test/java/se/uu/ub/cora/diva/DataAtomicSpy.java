@@ -44,14 +44,12 @@ public class DataAtomicSpy implements DataAtomic {
 
 	@Override
 	public String getNameInData() {
-		// TODO Auto-generated method stub
-		return null;
+		return nameInData;
 	}
 
 	@Override
 	public String getValue() {
-		// TODO Auto-generated method stub
-		return null;
+		return value;
 	}
 
 }
