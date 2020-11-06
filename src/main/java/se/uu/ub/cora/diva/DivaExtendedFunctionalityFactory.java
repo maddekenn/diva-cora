@@ -19,7 +19,6 @@
 package se.uu.ub.cora.diva;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 
 import se.uu.ub.cora.spider.extended.ExtendedFunctionality;
@@ -32,8 +31,6 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	private static final String ROOT_ORGANISATION = "rootOrganisation";
 	private static final String COMMON_ORGANISATION = "commonOrganisation";
 	private List<ExtendedFunctionalityContext> contexts = new ArrayList<>();
-	private EnumMap<ExtendedFunctionalityPosition, List<String>> sortedContext = new EnumMap<>(
-			ExtendedFunctionalityPosition.class);
 
 	public DivaExtendedFunctionalityFactory() {
 		initializeContexts();
@@ -57,30 +54,12 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		List<String> recordTypes = new ArrayList<>();
 		recordTypes.add(COMMON_ORGANISATION);
 		recordTypes.add(ROOT_ORGANISATION);
-		sortedContext.put(ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION,
-				recordTypes);
 	}
 
 	@Override
 	public ExtendedFunctionality factor(ExtendedFunctionalityPosition position, String recordType) {
-		if (recordTypeIsOrganisation(recordType)
-				&& positionExistsForRecordType(position, recordType)) {
-			return new OrganisationExtendedFunctionality();
-		}
-		throw NotImplementedException
-				.withMessage("Extended functionality not implemented for recordType: " + recordType
-						+ " and position: " + position.toString());
+		return new OrganisationExtendedFunctionality();
 
-	}
-
-	private boolean recordTypeIsOrganisation(String recordType) {
-		return COMMON_ORGANISATION.equals(recordType) || ROOT_ORGANISATION.equals(recordType);
-	}
-
-	private boolean positionExistsForRecordType(ExtendedFunctionalityPosition position,
-			String recordType) {
-		return sortedContext.containsKey(position)
-				&& sortedContext.get(position).contains(recordType);
 	}
 
 	@Override

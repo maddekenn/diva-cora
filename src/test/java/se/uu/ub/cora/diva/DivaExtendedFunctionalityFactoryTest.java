@@ -41,17 +41,8 @@ public class DivaExtendedFunctionalityFactoryTest {
 	@Test
 	public void testInit() {
 		assertEquals(factory.getExtendedFunctionalityContexts().size(), 2);
-
-		int index = 0;
-		String recordType = "commonOrganisation";
-		assertCorrectContextUsingIndexAndRecordType(index, recordType);
-
-		ExtendedFunctionalityContext updateBefore2 = factory.getExtendedFunctionalityContexts()
-				.get(1);
-		assertEquals(updateBefore2.extendedFunctionalityPosition,
-				ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION);
-		assertEquals(updateBefore2.recordType, "rootOrganisation");
-		assertEquals(updateBefore2.runAsNumber, 1);
+		assertCorrectContextUsingIndexAndRecordType(0, "commonOrganisation");
+		assertCorrectContextUsingIndexAndRecordType(1, "rootOrganisation");
 	}
 
 	private void assertCorrectContextUsingIndexAndRecordType(int index, String recordType) {
@@ -61,22 +52,6 @@ public class DivaExtendedFunctionalityFactoryTest {
 				ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION);
 		assertEquals(updateBefore.recordType, recordType);
 		assertEquals(updateBefore.runAsNumber, 1);
-	}
-
-	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
-			+ "Extended functionality not implemented for recordType: notImplementedRecordType "
-			+ "and position: UPDATE_BEFORE_METADATA_VALIDATION")
-	public void testFactorNotImplementedRecordType() {
-		factory.factor(ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION,
-				"notImplementedRecordType");
-	}
-
-	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
-			+ "Extended functionality not implemented for recordType: commonOrganisation "
-			+ "and position: UPDATE_AFTER_METADATA_VALIDATION")
-	public void testFactorNotImplmentedPosition() {
-		factory.factor(ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION,
-				"commonOrganisation");
 	}
 
 	@Test
