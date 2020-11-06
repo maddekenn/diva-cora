@@ -38,6 +38,7 @@ public class DataGroupSpy implements DataGroup {
 	public Map<String, List<DataElement>> childrenToReturn = new HashMap<>();
 	public List<String> removeAllGroupsUsedNameInDatas = new ArrayList<>();
 	public List<DataElement> addedChildren = new ArrayList<>();
+	public List<String> returnContainsTrueNameInDatas = new ArrayList<>();
 
 	public DataGroupSpy(String nameInData) {
 		this.nameInData = nameInData;
@@ -68,8 +69,7 @@ public class DataGroupSpy implements DataGroup {
 
 	@Override
 	public boolean containsChildWithNameInData(String nameInData) {
-		// TODO Auto-generated method stub
-		return false;
+		return returnContainsTrueNameInDatas.contains(nameInData);
 	}
 
 	@Override

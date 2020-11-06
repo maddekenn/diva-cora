@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2018 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,26 +18,16 @@
  */
 package se.uu.ub.cora.diva;
 
-public class DivaExtendedFunctionalityProvider {
+public final class NotImplementedException extends RuntimeException {
 
-	// public DivaExtendedFunctionalityProvider(SpiderDependencyProvider dependencyProvider) {
-	// super(dependencyProvider);
-	// }
-	//
-	// @Override
-	// public List<ExtendedFunctionality> getFunctionalityForUpdateBeforeMetadataValidation(
-	// String recordType) {
-	// List<ExtendedFunctionality> list = super.getFunctionalityForUpdateBeforeMetadataValidation(
-	// recordType);
-	// if ("commonOrganisation".equals(recordType)) {
-	// list = ensureListExists(list);
-	// list.add(new OrganisationExtendedFunctionality());
-	// }
-	// return list;
-	// }
-	//
-	// SpiderDependencyProvider getDependencyProvider() {
-	// return dependencyProvider;
-	// }
+	private static final long serialVersionUID = 1L;
+
+	public static NotImplementedException withMessage(String message) {
+		return new NotImplementedException(message);
+	}
+
+	private NotImplementedException(String message) {
+		super(message);
+	}
 
 }

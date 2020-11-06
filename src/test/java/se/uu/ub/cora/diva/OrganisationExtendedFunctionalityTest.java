@@ -41,6 +41,7 @@ public class OrganisationExtendedFunctionalityTest {
 
 	@Test
 	public void testTwoDifferentParents() {
+		dataGroup.returnContainsTrueNameInDatas.add("parentOrganisation");
 		List<DataElement> parents = new ArrayList<>();
 
 		DataGroup parent1 = createOrganisationLinkUsingRepeatIdAndOrganisationId(
@@ -60,6 +61,7 @@ public class OrganisationExtendedFunctionalityTest {
 
 	@Test
 	public void testTwoSameParentOneOther() {
+		dataGroup.returnContainsTrueNameInDatas.add("parentOrganisation");
 		List<DataElement> parents = new ArrayList<>();
 
 		DataGroup parent1 = createOrganisationLinkUsingRepeatIdAndOrganisationId(
@@ -95,6 +97,55 @@ public class OrganisationExtendedFunctionalityTest {
 		organisationLink.addChild(linkedRecordId);
 		parentGroup.addChild(organisationLink);
 		return parentGroup;
+	}
+
+	@Test
+	public void testTwoDifferentPredecessors() {
+		dataGroup.returnContainsTrueNameInDatas.add("formerName");
+		List<DataElement> predecessors = new ArrayList<>();
+
+		DataGroup predecessor1 = createOrganisationLinkUsingRepeatIdAndOrganisationId("formerName", "0",
+				"51");
+		predecessors.add(predecessor1);
+		DataGroup predecessor2 = createOrganisationLinkUsingRepeatIdAndOrganisationId("formerName", "1",
+				"52");
+		predecessors.add(predecessor2);
+		dataGroup.childrenToReturn.put("formerName", predecessors);
+
+		OrganisationExtendedFunctionality extendedFunctionality = new OrganisationExtendedFunctionality();
+		extendedFunctionality.useExtendedFunctionality("someToken", dataGroup);
+
+		assertEquals(dataGroup.addedChildren.size(), 0);
+		assertEquals(dataGroup.removeAllGroupsUsedNameInDatas.size(), 0);
+	}
+
+	@Test
+	public void testTwoSamePredecessorsOneOther() {
+		dataGroup.returnContainsTrueNameInDatas.add("formerName");
+		List<DataElement> parents = new ArrayList<>();
+
+		DataGroup predecessor1 = createOrganisationLinkUsingRepeatIdAndOrganisationId("formerName", "0",
+				"51");
+		parents.add(predecessor1);
+		DataGroup predecessor2 = createOrganisationLinkUsingRepeatIdAndOrganisationId("formerName", "1",
+				"51");
+		parents.add(predecessor2);
+		DataGroup predecessor3 = createOrganisationLinkUsingRepeatIdAndOrganisationId("formerName", "1",
+				"567");
+		parents.add(predecessor3);
+
+		dataGroup.childrenToReturn.put("formerName", parents);
+
+		OrganisationExtendedFunctionality extendedFunctionality = new OrganisationExtendedFunctionality();
+		extendedFunctionality.useExtendedFunctionality("someToken", dataGroup);
+
+		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(0), "formerName");
+		assertEquals(dataGroup.removeAllGroupsUsedNameInDatas.get(0), "formerName");
+
+		assertEquals(dataGroup.addedChildren.size(), 2);
+		assertSame(dataGroup.addedChildren.get(0), predecessor1);
+		assertSame(dataGroup.addedChildren.get(1), predecessor3);
+
 	}
 
 }

@@ -31,25 +31,49 @@ public class OrganisationExtendedFunctionality implements ExtendedFunctionality 
 
 	@Override
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
+		handleChildrenInDataGroupUsingNameInData(dataGroup, "parentOrganisation");
+		handleChildrenInDataGroupUsingNameInData(dataGroup, "formerName");
+	}
 
-		List<DataGroup> parentOrganisations = dataGroup
-				.getAllGroupsWithNameInData("parentOrganisation");
-		Map<String, DataElement> sortedParents = new HashMap<>();
-		List<DataElement> elementsToKeep = new ArrayList<>();
+	private void handleChildrenInDataGroupUsingNameInData(DataGroup dataGroup, String nameInData) {
+		if (dataGroup.containsChildWithNameInData(nameInData)) {
+			List<DataGroup> organisations = dataGroup.getAllGroupsWithNameInData(nameInData);
+			List<DataElement> elementsToKeep = calculateParentsToKeep(organisations);
 
-		for (DataGroup parentGroup : parentOrganisations) {
-			DataGroup parentLink = parentGroup.getFirstGroupWithNameInData("organisationLink");
-			String organisationId = parentLink.getFirstAtomicValueWithNameInData("linkedRecordId");
-			if (!sortedParents.containsKey(organisationId)) {
-				elementsToKeep.add(parentGroup);
-				sortedParents.put(organisationId, parentGroup);
+			if (organisationListHasBeenReduced(organisations, elementsToKeep)) {
+				dataGroup.removeAllChildrenWithNameInData(nameInData);
+				dataGroup.addChildren(elementsToKeep);
 			}
 		}
+	}
 
-		if (parentOrganisations.size() != elementsToKeep.size()) {
-			dataGroup.removeAllChildrenWithNameInData("parentOrganisation");
-			dataGroup.addChildren(elementsToKeep);
+	private boolean organisationListHasBeenReduced(List<DataGroup> organisations,
+			List<DataElement> elementsToKeep) {
+		return organisations.size() != elementsToKeep.size();
+	}
+
+	private List<DataElement> calculateParentsToKeep(List<DataGroup> parentOrganisations) {
+		Map<String, DataElement> sortedParents = new HashMap<>();
+		List<DataElement> elementsToKeep = new ArrayList<>();
+		for (DataGroup parentGroup : parentOrganisations) {
+			calculateWhetherToKeepOrganisation(sortedParents, elementsToKeep, parentGroup);
 		}
+		return elementsToKeep;
+	}
+
+	private void calculateWhetherToKeepOrganisation(Map<String, DataElement> sortedParents,
+			List<DataElement> elementsToKeep, DataGroup parentGroup) {
+		DataGroup parentLink = parentGroup.getFirstGroupWithNameInData("organisationLink");
+		String organisationId = parentLink.getFirstAtomicValueWithNameInData("linkedRecordId");
+		if (organisationDoesNotAlreadyExist(sortedParents, organisationId)) {
+			elementsToKeep.add(parentGroup);
+			sortedParents.put(organisationId, parentGroup);
+		}
+	}
+
+	private boolean organisationDoesNotAlreadyExist(Map<String, DataElement> sortedParents,
+			String organisationId) {
+		return !sortedParents.containsKey(organisationId);
 	}
 
 }
