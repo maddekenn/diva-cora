@@ -20,14 +20,14 @@ package se.uu.ub.cora.diva;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.spider.extended.ExtendedFunctionality;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory;
-import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition;
 
 public class DivaExtendedFunctionalityFactoryTest {
 
@@ -49,16 +49,14 @@ public class DivaExtendedFunctionalityFactoryTest {
 	private void assertCorrectContextUsingIndexAndRecordType(int index, String recordType) {
 		ExtendedFunctionalityContext updateBefore = factory.getExtendedFunctionalityContexts()
 				.get(index);
-		assertEquals(updateBefore.extendedFunctionalityPosition,
-				ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION);
+		assertEquals(updateBefore.position, UPDATE_BEFORE_METADATA_VALIDATION);
 		assertEquals(updateBefore.recordType, recordType);
 		assertEquals(updateBefore.runAsNumber, 0);
 	}
 
 	@Test
 	public void factorCommonOrganisationUpdateBefore() {
-		ExtendedFunctionality functionality = factory.factor(
-				ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION,
+		ExtendedFunctionality functionality = factory.factor(UPDATE_BEFORE_METADATA_VALIDATION,
 				"commonOrganisation");
 		assertTrue(functionality instanceof OrganisationExtendedFunctionality);
 
@@ -66,8 +64,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void factorRootOrganisationUpdateBefore() {
-		ExtendedFunctionality functionality = factory.factor(
-				ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION,
+		ExtendedFunctionality functionality = factory.factor(UPDATE_BEFORE_METADATA_VALIDATION,
 				"rootOrganisation");
 		assertTrue(functionality instanceof OrganisationExtendedFunctionality);
 

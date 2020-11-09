@@ -25,7 +25,7 @@ import java.util.Map;
 
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.spider.extended.ExtendedFunctionality;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 
 public class OrganisationExtendedFunctionality implements ExtendedFunctionality {
 
