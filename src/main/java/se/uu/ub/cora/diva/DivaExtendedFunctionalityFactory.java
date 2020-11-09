@@ -18,9 +18,12 @@
  */
 package se.uu.ub.cora.diva;
 
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import se.uu.ub.cora.spider.dependency.SpiderDependencyProvider;
 import se.uu.ub.cora.spider.extended.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory;
@@ -32,39 +35,29 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	private static final String COMMON_ORGANISATION = "commonOrganisation";
 	private List<ExtendedFunctionalityContext> contexts = new ArrayList<>();
 
-	public DivaExtendedFunctionalityFactory() {
-		initializeContexts();
-	}
-
-	private void initializeContexts() {
-		createAndAddUpdateBeforeContextForRecordTypeAndNumber(contexts, COMMON_ORGANISATION, 1);
-		createAndAddUpdateBeforeContextForRecordTypeAndNumber(contexts, ROOT_ORGANISATION, 1);
-		createHolderForPositionAndRecordType();
-	}
-
-	private void createAndAddUpdateBeforeContextForRecordTypeAndNumber(
-			List<ExtendedFunctionalityContext> contexts, String recordType, int runAsNumber) {
-		ExtendedFunctionalityContext context = new ExtendedFunctionalityContext(
-				ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION, recordType,
-				runAsNumber);
-		contexts.add(context);
-	}
-
-	private void createHolderForPositionAndRecordType() {
-		List<String> recordTypes = new ArrayList<>();
-		recordTypes.add(COMMON_ORGANISATION);
-		recordTypes.add(ROOT_ORGANISATION);
-	}
-
 	@Override
-	public ExtendedFunctionality factor(ExtendedFunctionalityPosition position, String recordType) {
-		return new OrganisationExtendedFunctionality();
+	public void initializeUsingDependencyProvider(SpiderDependencyProvider dependencyProvider) {
+		createListOfContexts();
+	}
 
+	private void createListOfContexts() {
+		createContext(COMMON_ORGANISATION);
+		createContext(ROOT_ORGANISATION);
+	}
+
+	private void createContext(String recordType) {
+		contexts.add(
+				new ExtendedFunctionalityContext(UPDATE_BEFORE_METADATA_VALIDATION, recordType, 0));
 	}
 
 	@Override
 	public List<ExtendedFunctionalityContext> getExtendedFunctionalityContexts() {
 		return contexts;
+	}
+
+	@Override
+	public ExtendedFunctionality factor(ExtendedFunctionalityPosition position, String recordType) {
+		return new OrganisationExtendedFunctionality();
 	}
 
 }

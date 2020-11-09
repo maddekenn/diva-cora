@@ -36,6 +36,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 	@BeforeMethod
 	public void setUp() {
 		factory = new DivaExtendedFunctionalityFactory();
+		factory.initializeUsingDependencyProvider(null);
 	}
 
 	@Test
@@ -51,7 +52,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 		assertEquals(updateBefore.extendedFunctionalityPosition,
 				ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION);
 		assertEquals(updateBefore.recordType, recordType);
-		assertEquals(updateBefore.runAsNumber, 1);
+		assertEquals(updateBefore.runAsNumber, 0);
 	}
 
 	@Test
