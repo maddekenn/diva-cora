@@ -22,6 +22,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION;
 
+import java.util.List;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -56,17 +58,17 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void factorCommonOrganisationUpdateBefore() {
-		ExtendedFunctionality functionality = factory.factor(UPDATE_BEFORE_METADATA_VALIDATION,
-				"commonOrganisation");
-		assertTrue(functionality instanceof OrganisationExtendedFunctionality);
+		List<ExtendedFunctionality> functionalities = factory
+				.factor(UPDATE_BEFORE_METADATA_VALIDATION, "commonOrganisation");
+		assertTrue(functionalities.get(0) instanceof OrganisationExtendedFunctionality);
 
 	}
 
 	@Test
 	public void factorRootOrganisationUpdateBefore() {
-		ExtendedFunctionality functionality = factory.factor(UPDATE_BEFORE_METADATA_VALIDATION,
-				"rootOrganisation");
-		assertTrue(functionality instanceof OrganisationExtendedFunctionality);
+		List<ExtendedFunctionality> functionalities = factory
+				.factor(UPDATE_BEFORE_METADATA_VALIDATION, "rootOrganisation");
+		assertTrue(functionalities.get(0) instanceof OrganisationExtendedFunctionality);
 
 	}
 

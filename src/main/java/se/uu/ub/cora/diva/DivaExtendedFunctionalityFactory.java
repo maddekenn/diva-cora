@@ -21,6 +21,7 @@ package se.uu.ub.cora.diva;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import se.uu.ub.cora.spider.dependency.SpiderDependencyProvider;
@@ -56,8 +57,9 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	}
 
 	@Override
-	public ExtendedFunctionality factor(ExtendedFunctionalityPosition position, String recordType) {
-		return new OrganisationExtendedFunctionality();
+	public List<ExtendedFunctionality> factor(ExtendedFunctionalityPosition position,
+			String recordType) {
+		return Arrays.asList(new OrganisationExtendedFunctionality());
 	}
 
 }
