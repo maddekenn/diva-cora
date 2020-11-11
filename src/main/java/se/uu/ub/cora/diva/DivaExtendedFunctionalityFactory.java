@@ -59,7 +59,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	@Override
 	public List<ExtendedFunctionality> factor(ExtendedFunctionalityPosition position,
 			String recordType) {
-		return Arrays.asList(new OrganisationExtendedFunctionality());
+		return Arrays.asList(new OrganisationDuplicateLinksRemover());
 	}
 
 }

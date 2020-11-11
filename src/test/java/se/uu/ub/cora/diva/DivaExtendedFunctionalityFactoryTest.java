@@ -60,7 +60,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 	public void factorCommonOrganisationUpdateBefore() {
 		List<ExtendedFunctionality> functionalities = factory
 				.factor(UPDATE_BEFORE_METADATA_VALIDATION, "commonOrganisation");
-		assertTrue(functionalities.get(0) instanceof OrganisationExtendedFunctionality);
+		assertTrue(functionalities.get(0) instanceof OrganisationDuplicateLinksRemover);
 
 	}
 
@@ -68,7 +68,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 	public void factorRootOrganisationUpdateBefore() {
 		List<ExtendedFunctionality> functionalities = factory
 				.factor(UPDATE_BEFORE_METADATA_VALIDATION, "rootOrganisation");
-		assertTrue(functionalities.get(0) instanceof OrganisationExtendedFunctionality);
+		assertTrue(functionalities.get(0) instanceof OrganisationDuplicateLinksRemover);
 
 	}
 

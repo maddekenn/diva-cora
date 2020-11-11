@@ -27,7 +27,7 @@ import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 
-public class OrganisationExtendedFunctionality implements ExtendedFunctionality {
+public class OrganisationDuplicateLinksRemover implements ExtendedFunctionality {
 
 	@Override
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {

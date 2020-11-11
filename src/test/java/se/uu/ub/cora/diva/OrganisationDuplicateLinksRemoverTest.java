@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
 
-public class OrganisationExtendedFunctionalityTest {
+public class OrganisationDuplicateLinksRemoverTest {
 
 	private DataGroupSpy dataGroup;
 
@@ -52,7 +52,7 @@ public class OrganisationExtendedFunctionalityTest {
 		parents.add(parent2);
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 
-		OrganisationExtendedFunctionality extendedFunctionality = new OrganisationExtendedFunctionality();
+		OrganisationDuplicateLinksRemover extendedFunctionality = new OrganisationDuplicateLinksRemover();
 		extendedFunctionality.useExtendedFunctionality("someToken", dataGroup);
 
 		assertEquals(dataGroup.addedChildren.size(), 0);
@@ -76,7 +76,7 @@ public class OrganisationExtendedFunctionalityTest {
 
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 
-		OrganisationExtendedFunctionality extendedFunctionality = new OrganisationExtendedFunctionality();
+		OrganisationDuplicateLinksRemover extendedFunctionality = new OrganisationDuplicateLinksRemover();
 		extendedFunctionality.useExtendedFunctionality("someToken", dataGroup);
 
 		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(0), "parentOrganisation");
@@ -112,7 +112,7 @@ public class OrganisationExtendedFunctionalityTest {
 		predecessors.add(predecessor2);
 		dataGroup.childrenToReturn.put("formerName", predecessors);
 
-		OrganisationExtendedFunctionality extendedFunctionality = new OrganisationExtendedFunctionality();
+		OrganisationDuplicateLinksRemover extendedFunctionality = new OrganisationDuplicateLinksRemover();
 		extendedFunctionality.useExtendedFunctionality("someToken", dataGroup);
 
 		assertEquals(dataGroup.addedChildren.size(), 0);
@@ -136,7 +136,7 @@ public class OrganisationExtendedFunctionalityTest {
 
 		dataGroup.childrenToReturn.put("formerName", parents);
 
-		OrganisationExtendedFunctionality extendedFunctionality = new OrganisationExtendedFunctionality();
+		OrganisationDuplicateLinksRemover extendedFunctionality = new OrganisationDuplicateLinksRemover();
 		extendedFunctionality.useExtendedFunctionality("someToken", dataGroup);
 
 		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(0), "formerName");
