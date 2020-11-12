@@ -20,25 +20,35 @@ package se.uu.ub.cora.diva;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.connection.ContextConnectionProviderImp;
+import se.uu.ub.cora.spider.dependency.SpiderDependencyProviderSpy;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory;
+import se.uu.ub.cora.sqldatabase.DataReaderImp;
 
 public class DivaExtendedFunctionalityFactoryTest {
 
 	private ExtendedFunctionalityFactory factory;
+	private Map<String, String> initInfo;
+	private SpiderDependencyProviderSpy spiderDependencyProvider;
 
 	@BeforeMethod
 	public void setUp() {
 		factory = new DivaExtendedFunctionalityFactory();
-		factory.initializeUsingDependencyProvider(null);
+		initInfo = new HashMap<>();
+		spiderDependencyProvider = new SpiderDependencyProviderSpy(initInfo);
+
+		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
 	}
 
 	@Test
@@ -51,24 +61,39 @@ public class DivaExtendedFunctionalityFactoryTest {
 	private void assertCorrectContextUsingIndexAndRecordType(int index, String recordType) {
 		ExtendedFunctionalityContext updateBefore = factory.getExtendedFunctionalityContexts()
 				.get(index);
-		assertEquals(updateBefore.position, UPDATE_BEFORE_METADATA_VALIDATION);
+		assertEquals(updateBefore.position, UPDATE_AFTER_METADATA_VALIDATION);
 		assertEquals(updateBefore.recordType, recordType);
 		assertEquals(updateBefore.runAsNumber, 0);
 	}
 
 	@Test
-	public void factorCommonOrganisationUpdateBefore() {
+	public void factorCommonOrganisationUpdateAfter() {
 		List<ExtendedFunctionality> functionalities = factory
-				.factor(UPDATE_BEFORE_METADATA_VALIDATION, "commonOrganisation");
+				.factor(UPDATE_AFTER_METADATA_VALIDATION, "commonOrganisation");
+		assertEquals(functionalities.size(), 2);
 		assertTrue(functionalities.get(0) instanceof OrganisationDuplicateLinksRemover);
+
+		OrganisationDisallowedDependencyDetector dependencyDetector = (OrganisationDisallowedDependencyDetector) functionalities
+				.get(1);
+		assertTrue(dependencyDetector.getDataReader() instanceof DataReaderImp);
+
+		DataReaderImp dataReader = (DataReaderImp) dependencyDetector.getDataReader();
+		ContextConnectionProviderImp sqlConnectionProvider = (ContextConnectionProviderImp) dataReader
+				.getSqlConnectionProvider();
+		sqlConnectionProvider.getContext();
+		sqlConnectionProvider.getName();
+
+		assertTrue(functionalities.get(1) instanceof OrganisationDisallowedDependencyDetector);
 
 	}
 
 	@Test
-	public void factorRootOrganisationUpdateBefore() {
+	public void factorRootOrganisationUpdateAfter() {
 		List<ExtendedFunctionality> functionalities = factory
-				.factor(UPDATE_BEFORE_METADATA_VALIDATION, "rootOrganisation");
+				.factor(UPDATE_AFTER_METADATA_VALIDATION, "rootOrganisation");
+		assertEquals(functionalities.size(), 2);
 		assertTrue(functionalities.get(0) instanceof OrganisationDuplicateLinksRemover);
+		assertTrue(functionalities.get(1) instanceof OrganisationDisallowedDependencyDetector);
 
 	}
 

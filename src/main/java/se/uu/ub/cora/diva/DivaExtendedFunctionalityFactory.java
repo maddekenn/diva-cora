@@ -18,12 +18,15 @@
  */
 package se.uu.ub.cora.diva;
 
-import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import javax.naming.InitialContext;
+
+import se.uu.ub.cora.connection.ContextConnectionProviderImp;
+import se.uu.ub.cora.connection.SqlConnectionProvider;
 import se.uu.ub.cora.spider.dependency.SpiderDependencyProvider;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
@@ -48,7 +51,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 
 	private void createContext(String recordType) {
 		contexts.add(
-				new ExtendedFunctionalityContext(UPDATE_BEFORE_METADATA_VALIDATION, recordType, 0));
+				new ExtendedFunctionalityContext(UPDATE_AFTER_METADATA_VALIDATION, recordType, 0));
 	}
 
 	@Override
@@ -59,7 +62,42 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	@Override
 	public List<ExtendedFunctionality> factor(ExtendedFunctionalityPosition position,
 			String recordType) {
-		return Arrays.asList(new OrganisationDuplicateLinksRemover());
+		List<ExtendedFunctionality> functionalities = new ArrayList<>();
+		functionalities.add(new OrganisationDuplicateLinksRemover());
+		functionalities.add(new OrganisationDisallowedDependencyDetector(null));
+		return functionalities;
 	}
+
+	private SqlConnectionProvider tryToCreateConnectionProvider() {
+		try {
+			InitialContext context = new InitialContext();
+			String databaseLookupName = tryToGetInitParameterLogIfFound("databaseLookupName");
+			return ContextConnectionProviderImp.usingInitialContextAndName(context,
+					databaseLookupName);
+		} catch (Exception e) {
+			throw new RuntimeException();
+			// DataStorageException.withMessageAndException(e.getMessage(), e);
+		}
+	}
+
+	private String tryToGetInitParameterLogIfFound(String parameterName) {
+		String basePath = tryToGetInitParameter(parameterName);
+		// log.logInfoUsingMessage("Found " + basePath + " as " + parameterName);
+		return basePath;
+	}
+
+	private String tryToGetInitParameter(String parameterName) {
+		// throwErrorIfKeyIsMissingFromInitInfo(parameterName);
+		// return dep.get(parameterName);
+		return null;
+	}
+
+	// private void throwErrorIfKeyIsMissingFromInitInfo(String key) {
+	// if (!initInfo.containsKey(key)) {
+	// String errorMessage = "InitInfo must contain " + key;
+	// log.logFatalUsingMessage(errorMessage);
+	// throw DataStorageException.withMessage(errorMessage);
+	// }
+	// }
 
 }
