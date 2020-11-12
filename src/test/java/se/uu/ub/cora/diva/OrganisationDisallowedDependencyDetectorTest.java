@@ -18,218 +18,182 @@
  */
 package se.uu.ub.cora.diva;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
+import se.uu.ub.cora.sqldatabase.SqlStorageException;
 
 public class OrganisationDisallowedDependencyDetectorTest {
 
-	@Test
-	public void testInit() {
-		ExtendedFunctionality functionality = new OrganisationDisallowedDependencyDetector();
+	private String authToken = "someAuthToken";
+	private OrganisationDisallowedDependencyDetector functionality;
+	private DataReaderSpy dataReader;
+	private DataGroupSpy dataGroup;
+
+	@BeforeMethod
+	public void setUp() {
+		dataReader = new DataReaderSpy();
+		functionality = new OrganisationDisallowedDependencyDetector(dataReader);
+		createDefultDataGroup();
 	}
 
-	// @Test
-	// public void testWhenNoParentOrPredecessorInDataGroupNoCallForDependecyCheck() {
-	// organisationUpdater.update(dataGroup);
-	// assertFalse(dataReader.executePreparedStatementWasCalled);
-	// }
-	//
-	// @Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
-	// + "Organisation not updated due to link to self")
-	// public void testWhenSelfPresentAsParentInDataGroup() {
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-	// "0", "4567");
-	//
-	// organisationUpdater.update(dataGroup);
-	// }
-	//
-	// @Test
-	// public void testWhenSelfPresentAsParentInDataGroupNoStatementIsExecuted() {
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-	// "0", "4567");
-	// try {
-	// organisationUpdater.update(dataGroup);
-	// } catch (SqlStorageException e) {
-	// // do nothing
-	// }
-	// assertFalse(dataReader.executePreparedStatementWasCalled);
-	// }
-	//
-	// @Test
-	// public void testWhenOneParentInDataGroup() {
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-	// "0", "51");
-	//
-	// organisationUpdater.update(dataGroup);
-	// assertTrue(dataReader.executePreparedStatementWasCalled);
-	// String sql = getExpectedSql("?");
-	//
-	// assertEquals(dataReader.sqlSentToReader, sql);
-	// List<Object> expectedValues = new ArrayList<>();
-	// expectedValues.add(51);
-	// expectedValues.add(4567);
-	// assertEquals(dataReader.valuesSentToReader, expectedValues);
-	// }
-	//
-	// private void createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-	// String nameInData, String repeatId, String parentId) {
-	// DataGroupSpy parentGroup = new DataGroupSpy(nameInData);
-	// parentGroup.setRepeatId(repeatId);
-	// DataGroupSpy organisationLink = new DataGroupSpy("organisationLink");
-	// DataAtomicSpy linkedRecordId = new DataAtomicSpy("linkedRecordId", parentId);
-	// organisationLink.addChild(linkedRecordId);
-	// parentGroup.addChild(organisationLink);
-	// dataGroup.addChild(parentGroup);
-	// }
-	//
-	// private String getExpectedSql(String questionsMarks) {
-	// String sql = "with recursive org_tree as (select distinct organisation_id, relation"
-	// + " from organisationrelations where organisation_id in (" + questionsMarks + ") "
-	// + "union all" + " select distinct relation.organisation_id, relation.relation from"
-	// + " organisationrelations as relation"
-	// + " join org_tree as child on child.relation = relation.organisation_id)"
-	// + " select * from org_tree where relation = ?";
-	// return sql;
-	// }
-	//
-	// @Test
-	// public void testWhenTwoParentsInDataGroup() {
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-	// "0", "51");
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-	// "1", "3");
-	//
-	// organisationUpdater.update(dataGroup);
-	// assertTrue(dataReader.executePreparedStatementWasCalled);
-	// String sql = getExpectedSql("?, ?");
-	//
-	// assertEquals(dataReader.sqlSentToReader, sql);
-	// List<Object> expectedValues = new ArrayList<>();
-	// expectedValues.add(51);
-	// expectedValues.add(3);
-	// expectedValues.add(4567);
-	// assertEquals(dataReader.valuesSentToReader, expectedValues);
-	// }
-	//
-	// @Test
-	// public void testWhenOneParentAndOnePredecessorInDataGroup() {
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-	// "0", "51");
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("formerName", "0",
-	// "78");
-	//
-	// organisationUpdater.update(dataGroup);
-	// assertTrue(dataReader.executePreparedStatementWasCalled);
-	// String sql = getExpectedSql("?, ?");
-	//
-	// assertEquals(dataReader.sqlSentToReader, sql);
-	// List<Object> expectedValues = new ArrayList<>();
-	// expectedValues.add(51);
-	// expectedValues.add(78);
-	// expectedValues.add(4567);
-	// assertEquals(dataReader.valuesSentToReader, expectedValues);
-	//
-	// RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
-	// assertEquals(factoredReader.usedTableNames.get(0), "organisationview");
-	// }
-	//
-	// @Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
-	// + "Organisation not updated due to circular dependency with parent or predecessor")
-	// public void testWhenParentInDataGroupCircularDependencyExist() {
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-	// "0", "51");
-	// dataReader.numOfRowsToReturn = 2;
-	// organisationUpdater.update(dataGroup);
-	// }
-	//
-	// @Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
-	// + "Organisation not updated due to same parent and predecessor")
-	// public void testWhenSamePresentInParentAndPredecessor() {
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-	// "0", "5");
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-	// "1", "7");
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("formerName", "0", "5");
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("formerName", "1",
-	// "89");
-	//
-	// organisationUpdater.update(dataGroup);
-	// }
-	//
-	// @Test
-	// public void testWhenSamePresentInParentAndPredecessorNoStatementIsExecuted() {
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-	// "0", "5");
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("formerName", "0", "5");
-	// try {
-	// organisationUpdater.update(dataGroup);
-	// } catch (SqlStorageException e) {
-	// // do nothing
-	// }
-	// assertFalse(dataReader.executePreparedStatementWasCalled);
-	// }
-	//
-	// @Test
-	// public void testConnectionAutoCommitIsFirstSetToFalseAndThenTrueOnException() {
-	// preparedStatementCreator.throwExceptionOnGenerateStatement = true;
-	// try {
-	// organisationUpdater.update(dataGroup);
-	// } catch (Exception sqlException) {
-	// }
-	// ConnectionSpy factoredConnection = connectionProvider.factoredConnection;
-	// assertFalse(factoredConnection.autoCommitChanges.get(0));
-	// assertTrue(factoredConnection.autoCommitChanges.get(1));
-	// }
-	//
-	// @Test
-	// public void testSQLConnectionConfiguration() {
-	// organisationUpdater.update(dataGroup);
-	// assertTrue(connectionProvider.getConnectionHasBeenCalled);
-	// ConnectionSpy factoredConnection = connectionProvider.factoredConnection;
-	// assertFalse(factoredConnection.autoCommitChanges.get(0));
-	// assertTrue(factoredConnection.autoCommitChanges.get(1));
-	// assertTrue(factoredConnection.commitWasCalled);
-	// assertTrue(factoredConnection.closeWasCalled);
-	// }
-	//
-	// @Test
-	// public void testConnectionClosedOnSQLException() throws Exception {
-	// preparedStatementCreator.throwExceptionOnGenerateStatement = true;
-	// try {
-	// organisationUpdater.update(dataGroup);
-	// } catch (Exception sqlException) {
-	// }
-	// ConnectionSpy factoredConnection = connectionProvider.factoredConnection;
-	// assertTrue(factoredConnection.closeWasCalled);
-	// }
-	//
-	// @Test
-	// public void testConnectionRollbackOnSQLException() throws Exception {
-	// preparedStatementCreator.throwExceptionOnGenerateStatement = true;
-	// try {
-	// organisationUpdater.update(dataGroup);
-	// } catch (Exception sqlException) {
-	// }
-	// ConnectionSpy factoredConnection = connectionProvider.factoredConnection;
-	// assertTrue(factoredConnection.rollbackWasCalled);
-	// }
-	//
-	// @Test
-	// public void testPreparedStatements() {
-	// organisationUpdater.update(dataGroup);
-	// assertTrue(preparedStatementCreator.createWasCalled);
-	// assertSame(preparedStatementCreator.connection, connectionProvider.factoredConnection);
-	// int orgStatementAndStatmentsFromSpy = 5;
-	// assertEquals(preparedStatementCreator.dbStatements.size(), orgStatementAndStatmentsFromSpy);
-	//
-	// }
-	//
-	// @Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
-	// + "Error executing prepared statement: Error executing statement: error from spy")
-	// public void testPreparedStatementThrowsException() {
-	// preparedStatementCreator.throwExceptionOnGenerateStatement = true;
-	// organisationUpdater.update(dataGroup);
-	// }
+	private void createDefultDataGroup() {
+		dataGroup = new DataGroupSpy("organisation");
+		DataGroupSpy recordInfo = new DataGroupSpy("recordInfo");
+		recordInfo.addChild(new DataAtomicSpy("id", "4567"));
+		dataGroup.addChild(recordInfo);
+	}
+
+	@Test
+	public void testInit() {
+		assertSame(functionality.getDataReader(), dataReader);
+	}
+
+	@Test
+	public void testWhenNoParentOrPredecessorInDataGroupNoCallForDependecyCheck() {
+		functionality.useExtendedFunctionality(authToken, dataGroup);
+		assertFalse(dataReader.executePreparedStatementWasCalled);
+	}
+
+	@Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
+			+ "Organisation not updated due to link to self")
+	public void testWhenSelfPresentAsParentInDataGroup() {
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"0", "4567");
+
+		functionality.useExtendedFunctionality(authToken, dataGroup);
+	}
+
+	@Test
+	public void testWhenSelfPresentAsParentInDataGroupNoStatementIsExecuted() {
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"0", "4567");
+		try {
+			functionality.useExtendedFunctionality(authToken, dataGroup);
+		} catch (SqlStorageException e) {
+			// do nothing
+		}
+		assertFalse(dataReader.executePreparedStatementWasCalled);
+	}
+
+	@Test
+	public void testWhenOneParentInDataGroup() {
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"0", "51");
+
+		functionality.useExtendedFunctionality(authToken, dataGroup);
+		assertTrue(dataReader.executePreparedStatementWasCalled);
+		String sql = getExpectedSql("?");
+
+		assertEquals(dataReader.sqlSentToReader, sql);
+		List<Object> expectedValues = new ArrayList<>();
+		expectedValues.add(51);
+		expectedValues.add(4567);
+		assertEquals(dataReader.valuesSentToReader, expectedValues);
+	}
+
+	private void createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
+			String nameInData, String repeatId, String parentId) {
+		DataGroupSpy parentGroup = new DataGroupSpy(nameInData);
+		parentGroup.setRepeatId(repeatId);
+		DataGroupSpy organisationLink = new DataGroupSpy("organisationLink");
+		DataAtomicSpy linkedRecordId = new DataAtomicSpy("linkedRecordId", parentId);
+		organisationLink.addChild(linkedRecordId);
+		parentGroup.addChild(organisationLink);
+		dataGroup.addChild(parentGroup);
+	}
+
+	private String getExpectedSql(String questionsMarks) {
+		String sql = "with recursive org_tree as (select distinct organisation_id, relation"
+				+ " from organisationrelations where organisation_id in (" + questionsMarks + ") "
+				+ "union all" + " select distinct relation.organisation_id, relation.relation from"
+				+ " organisationrelations as relation"
+				+ " join org_tree as child on child.relation = relation.organisation_id)"
+				+ " select * from org_tree where relation = ?";
+		return sql;
+	}
+
+	@Test
+	public void testWhenTwoParentsInDataGroup() {
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"0", "51");
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"1", "3");
+
+		functionality.useExtendedFunctionality(authToken, dataGroup);
+		assertTrue(dataReader.executePreparedStatementWasCalled);
+		String sql = getExpectedSql("?, ?");
+
+		assertEquals(dataReader.sqlSentToReader, sql);
+		List<Object> expectedValues = new ArrayList<>();
+		expectedValues.add(51);
+		expectedValues.add(3);
+		expectedValues.add(4567);
+		assertEquals(dataReader.valuesSentToReader, expectedValues);
+	}
+
+	@Test
+	public void testWhenOneParentAndOnePredecessorInDataGroup() {
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"0", "51");
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("formerName", "0",
+				"78");
+
+		functionality.useExtendedFunctionality(authToken, dataGroup);
+
+		assertTrue(dataReader.executePreparedStatementWasCalled);
+		String sql = getExpectedSql("?, ?");
+		assertEquals(dataReader.sqlSentToReader, sql);
+
+		List<Object> expectedValues = new ArrayList<>();
+		expectedValues.add(51);
+		expectedValues.add(78);
+		expectedValues.add(4567);
+		assertEquals(dataReader.valuesSentToReader, expectedValues);
+	}
+
+	@Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
+			+ "Organisation not updated due to circular dependency with parent or predecessor")
+	public void testWhenParentInDataGroupCircularDependencyExist() {
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"0", "51");
+		dataReader.numOfRowsToReturn = 2;
+		functionality.useExtendedFunctionality(authToken, dataGroup);
+	}
+
+	@Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
+			+ "Organisation not updated due to same parent and predecessor")
+	public void testWhenSamePresentInParentAndPredecessor() {
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"0", "5");
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"1", "7");
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("formerName", "0", "5");
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("formerName", "1",
+				"89");
+
+		functionality.useExtendedFunctionality(authToken, dataGroup);
+	}
+
+	@Test
+	public void testWhenSamePresentInParentAndPredecessorNoStatementIsExecuted() {
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"0", "5");
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("formerName", "0", "5");
+		try {
+			functionality.useExtendedFunctionality(authToken, dataGroup);
+		} catch (SqlStorageException e) {
+			// do nothing
+		}
+		assertFalse(dataReader.executePreparedStatementWasCalled);
+	}
 
 }

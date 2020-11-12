@@ -151,12 +151,11 @@ public class DataGroupSpy implements DataGroup {
 	public List<DataGroup> getAllGroupsWithNameInData(String nameInData) {
 		getAllGroupsUsedNameInDatas.add(nameInData);
 		List<DataGroup> matchingDataGroups = new ArrayList<>();
-		for (DataElement dataElement : childrenToReturn.get(nameInData)) {
-			matchingDataGroups.add((DataGroup) dataElement);
-			// if (nameInData.equals(dataElement.getNameInData())
-			// && dataElement instanceof DataGroup) {
-			// matchingDataGroups.add((DataGroup) dataElement);
-			// }
+		for (DataElement dataElement : children) {
+			if (nameInData.equals(dataElement.getNameInData())
+					&& dataElement instanceof DataGroup) {
+				matchingDataGroups.add((DataGroup) dataElement);
+			}
 		}
 		return matchingDataGroups;
 	}
