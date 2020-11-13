@@ -22,15 +22,17 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.naming.InitialContext;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.connection.ContextConnectionProviderImp;
-import se.uu.ub.cora.spider.dependency.SpiderDependencyProviderSpy;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory;
@@ -46,6 +48,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 	public void setUp() {
 		factory = new DivaExtendedFunctionalityFactory();
 		initInfo = new HashMap<>();
+		initInfo.put("databaseLookupName", "someDBName");
 		spiderDependencyProvider = new SpiderDependencyProviderSpy(initInfo);
 
 		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
@@ -77,14 +80,28 @@ public class DivaExtendedFunctionalityFactoryTest {
 				.get(1);
 		assertTrue(dependencyDetector.getDataReader() instanceof DataReaderImp);
 
-		DataReaderImp dataReader = (DataReaderImp) dependencyDetector.getDataReader();
-		ContextConnectionProviderImp sqlConnectionProvider = (ContextConnectionProviderImp) dataReader
-				.getSqlConnectionProvider();
-		sqlConnectionProvider.getContext();
-		sqlConnectionProvider.getName();
+		assertCorrectDbReader(dependencyDetector);
 
 		assertTrue(functionalities.get(1) instanceof OrganisationDisallowedDependencyDetector);
 
+	}
+
+	private void assertCorrectDbReader(
+			OrganisationDisallowedDependencyDetector dependencyDetector) {
+		DataReaderImp dataReader = (DataReaderImp) dependencyDetector.getDataReader();
+		ContextConnectionProviderImp sqlConnectionProvider = (ContextConnectionProviderImp) dataReader
+				.getSqlConnectionProvider();
+		assertTrue(sqlConnectionProvider.getContext() instanceof InitialContext);
+		assertEquals(sqlConnectionProvider.getName(), initInfo.get("databaseLookupName"));
+		assertTrue(spiderDependencyProvider.getInitInfoValueUsingKeyWasCalled);
+	}
+
+	@Test(expectedExceptions = RuntimeException.class)
+	public void testNoDnLookupName() {
+		spiderDependencyProvider = new SpiderDependencyProviderSpy(Collections.emptyMap());
+
+		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
+		factory.factor(UPDATE_AFTER_METADATA_VALIDATION, "commonOrganisation");
 	}
 
 	@Test

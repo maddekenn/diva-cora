@@ -32,15 +32,18 @@ import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition;
+import se.uu.ub.cora.sqldatabase.DataReaderImp;
 
 public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFactory {
 
 	private static final String ROOT_ORGANISATION = "rootOrganisation";
 	private static final String COMMON_ORGANISATION = "commonOrganisation";
 	private List<ExtendedFunctionalityContext> contexts = new ArrayList<>();
+	private SpiderDependencyProvider dependencyProvider;
 
 	@Override
 	public void initializeUsingDependencyProvider(SpiderDependencyProvider dependencyProvider) {
+		this.dependencyProvider = dependencyProvider;
 		createListOfContexts();
 	}
 
@@ -64,40 +67,23 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			String recordType) {
 		List<ExtendedFunctionality> functionalities = new ArrayList<>();
 		functionalities.add(new OrganisationDuplicateLinksRemover());
-		functionalities.add(new OrganisationDisallowedDependencyDetector(null));
+		SqlConnectionProvider connectionProvider = tryToCreateConnectionProvider();
+		DataReaderImp dataReader = DataReaderImp.usingSqlConnectionProvider(connectionProvider);
+		functionalities.add(new OrganisationDisallowedDependencyDetector(dataReader));
 		return functionalities;
 	}
 
 	private SqlConnectionProvider tryToCreateConnectionProvider() {
 		try {
 			InitialContext context = new InitialContext();
-			String databaseLookupName = tryToGetInitParameterLogIfFound("databaseLookupName");
+			String databaseLookupName = dependencyProvider
+					.getInitInfoValueUsingKey("databaseLookupName");
 			return ContextConnectionProviderImp.usingInitialContextAndName(context,
 					databaseLookupName);
 		} catch (Exception e) {
+			// TODO:what exception??
 			throw new RuntimeException();
-			// DataStorageException.withMessageAndException(e.getMessage(), e);
 		}
 	}
-
-	private String tryToGetInitParameterLogIfFound(String parameterName) {
-		String basePath = tryToGetInitParameter(parameterName);
-		// log.logInfoUsingMessage("Found " + basePath + " as " + parameterName);
-		return basePath;
-	}
-
-	private String tryToGetInitParameter(String parameterName) {
-		// throwErrorIfKeyIsMissingFromInitInfo(parameterName);
-		// return dep.get(parameterName);
-		return null;
-	}
-
-	// private void throwErrorIfKeyIsMissingFromInitInfo(String key) {
-	// if (!initInfo.containsKey(key)) {
-	// String errorMessage = "InitInfo must contain " + key;
-	// log.logFatalUsingMessage(errorMessage);
-	// throw DataStorageException.withMessage(errorMessage);
-	// }
-	// }
 
 }
