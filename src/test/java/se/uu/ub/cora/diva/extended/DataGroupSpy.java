@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva;
+package se.uu.ub.cora.diva.extended;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -151,10 +151,12 @@ public class DataGroupSpy implements DataGroup {
 	public List<DataGroup> getAllGroupsWithNameInData(String nameInData) {
 		getAllGroupsUsedNameInDatas.add(nameInData);
 		List<DataGroup> matchingDataGroups = new ArrayList<>();
-		for (DataElement dataElement : children) {
-			if (nameInData.equals(dataElement.getNameInData())
-					&& dataElement instanceof DataGroup) {
-				matchingDataGroups.add((DataGroup) dataElement);
+		if (childrenToReturn.containsKey(nameInData)) {
+			for (DataElement dataElement : childrenToReturn.get(nameInData)) {
+				if (nameInData.equals(dataElement.getNameInData())
+						&& dataElement instanceof DataGroup) {
+					matchingDataGroups.add((DataGroup) dataElement);
+				}
 			}
 		}
 		return matchingDataGroups;
@@ -176,7 +178,6 @@ public class DataGroupSpy implements DataGroup {
 	@Override
 	public boolean removeAllChildrenWithNameInData(String childNameInData) {
 		removeAllGroupsUsedNameInDatas.add(childNameInData);
-		// TODO Auto-generated method stub
 		return false;
 	}
 
