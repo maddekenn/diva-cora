@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.sqldatabase.SqlStorageException;
+import se.uu.ub.cora.spider.record.DataException;
 
 public class OrganisationDisallowedDependencyDetectorTest {
 
@@ -65,19 +65,17 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		assertFalse(dataReader.executePreparedStatementWasCalled);
 	}
 
-	@Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
+	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
 			+ "Organisation not updated due to link to self")
 	public void testWhenSelfPresentAsParentInDataGroup() {
 		addSelfAsParent();
-
 		functionality.useExtendedFunctionality(authToken, dataGroup);
 	}
 
 	private void addSelfAsParent() {
-		List<DataElement> parents = new ArrayList<>();
-		DataGroup parent = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-				"parentOrganisation", "0", "4567");
-		parents.add(parent);
+		List<DataElement> parents = OrganisationDataCreator
+				.createListWithOneParentUsingRepeatIdAndParentId(dataGroup, "0", "4567");
+
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 	}
 
@@ -87,7 +85,7 @@ public class OrganisationDisallowedDependencyDetectorTest {
 
 		try {
 			functionality.useExtendedFunctionality(authToken, dataGroup);
-		} catch (SqlStorageException e) {
+		} catch (DataException e) {
 			// do nothing
 		}
 		assertFalse(dataReader.executePreparedStatementWasCalled);
@@ -99,6 +97,7 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 
 		functionality.useExtendedFunctionality(authToken, dataGroup);
+
 		assertTrue(dataReader.executePreparedStatementWasCalled);
 		String sql = getExpectedSql("?");
 
@@ -110,23 +109,8 @@ public class OrganisationDisallowedDependencyDetectorTest {
 	}
 
 	private List<DataElement> createListAndAddDefaultParent() {
-		List<DataElement> parents = new ArrayList<>();
-		DataGroup parent = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-				"parentOrganisation", "0", "51");
-		parents.add(parent);
-		return parents;
-	}
-
-	private DataGroup createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-			String nameInData, String repeatId, String parentId) {
-		DataGroupSpy parentGroup = new DataGroupSpy(nameInData);
-		parentGroup.setRepeatId(repeatId);
-		DataGroupSpy organisationLink = new DataGroupSpy("organisationLink");
-		DataAtomicSpy linkedRecordId = new DataAtomicSpy("linkedRecordId", parentId);
-		organisationLink.addChild(linkedRecordId);
-		parentGroup.addChild(organisationLink);
-		dataGroup.addChild(parentGroup);
-		return parentGroup;
+		return OrganisationDataCreator.createListWithOneParentUsingRepeatIdAndParentId(dataGroup,
+				"0", "51");
 	}
 
 	private String getExpectedSql(String questionsMarks) {
@@ -142,8 +126,9 @@ public class OrganisationDisallowedDependencyDetectorTest {
 	@Test
 	public void testWhenTwoParentsInDataGroup() {
 		List<DataElement> parents = createListAndAddDefaultParent();
-		DataGroup parent2 = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-				"parentOrganisation", "1", "3");
+		DataGroup parent2 = OrganisationDataCreator
+				.createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(dataGroup,
+						"parentOrganisation", "1", "3");
 		parents.add(parent2);
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 
@@ -164,10 +149,8 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		List<DataElement> parents = createListAndAddDefaultParent();
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 
-		List<DataElement> predecessors = new ArrayList<>();
-		DataGroup predecessor = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-				"formerName", "0", "78");
-		predecessors.add(predecessor);
+		List<DataElement> predecessors = OrganisationDataCreator
+				.createListAndAddPredecessorUsingRepeatIdAndId(dataGroup, "0", "78");
 		dataGroup.childrenToReturn.put("formerName", predecessors);
 
 		functionality.useExtendedFunctionality(authToken, dataGroup);
@@ -183,34 +166,33 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		assertEquals(dataReader.valuesSentToReader, expectedValues);
 	}
 
-	@Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
+	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
 			+ "Organisation not updated due to circular dependency with parent or predecessor")
 	public void testWhenParentInDataGroupCircularDependencyExist() {
 		List<DataElement> parents = createListAndAddDefaultParent();
-		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-				"0", "51");
+		OrganisationDataCreator.createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
+				dataGroup, "parentOrganisation", "0", "51");
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 		dataReader.numOfRowsToReturn = 2;
 		functionality.useExtendedFunctionality(authToken, dataGroup);
 	}
 
-	@Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
+	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
 			+ "Organisation not updated due to same parent and predecessor")
 	public void testWhenSamePresentInParentAndPredecessor() {
-		List<DataElement> parents = new ArrayList<>();
-		DataGroup parent = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-				"parentOrganisation", "0", "5");
-		parents.add(parent);
-		DataGroup parent2 = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-				"parentOrganisation", "1", "7");
+		List<DataElement> parents = OrganisationDataCreator
+				.createListWithOneParentUsingRepeatIdAndParentId(dataGroup, "0", "5");
+		DataGroup parent2 = OrganisationDataCreator
+				.createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(dataGroup,
+						"parentOrganisation", "1", "7");
 		parents.add(parent2);
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
-		List<DataElement> predecessors = new ArrayList<>();
-		DataGroup predecessor = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-				"formerName", "0", "5");
-		predecessors.add(predecessor);
-		DataGroup predecessor2 = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-				"formerName", "1", "89");
+
+		List<DataElement> predecessors = OrganisationDataCreator
+				.createListAndAddPredecessorUsingRepeatIdAndId(dataGroup, "0", "5");
+		DataGroup predecessor2 = OrganisationDataCreator
+				.createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(dataGroup,
+						"formerName", "1", "89");
 		predecessors.add(predecessor2);
 		dataGroup.childrenToReturn.put("formerName", predecessors);
 
@@ -219,17 +201,17 @@ public class OrganisationDisallowedDependencyDetectorTest {
 
 	@Test
 	public void testWhenSamePresentInParentAndPredecessorNoStatementIsExecuted() {
-		List<DataElement> parents = new ArrayList<>();
-		DataGroup parent = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-				"parentOrganisation", "0", "5");
+		List<DataElement> parents = OrganisationDataCreator
+				.createListWithOneParentUsingRepeatIdAndParentId(dataGroup, "0", "5");
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
-		List<DataElement> predecessors = new ArrayList<>();
-		DataGroup predecessor = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-				"formerName", "0", "5");
+
+		List<DataElement> predecessors = OrganisationDataCreator
+				.createListAndAddPredecessorUsingRepeatIdAndId(dataGroup, "0", "5");
+
 		dataGroup.childrenToReturn.put("formerName", predecessors);
 		try {
 			functionality.useExtendedFunctionality(authToken, dataGroup);
-		} catch (SqlStorageException e) {
+		} catch (DataException e) {
 			// do nothing
 		}
 		assertFalse(dataReader.executePreparedStatementWasCalled);

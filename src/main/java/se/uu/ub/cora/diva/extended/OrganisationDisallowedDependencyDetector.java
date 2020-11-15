@@ -25,10 +25,10 @@ import java.util.StringJoiner;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
+import se.uu.ub.cora.spider.record.DataException;
 //import se.uu.ub.cora.sqldatabase.SqlStorageException;
 //import se.uu.ub.cora.sqldatabase.DataReader;
 import se.uu.ub.cora.sqldatabase.DataReader;
-import se.uu.ub.cora.sqldatabase.SqlStorageException;
 
 public class OrganisationDisallowedDependencyDetector implements ExtendedFunctionality {
 
@@ -69,8 +69,7 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 			List<Integer> predecessorIds) {
 		boolean sameIdInBothList = parentIds.stream().anyMatch(predecessorIds::contains);
 		if (sameIdInBothList) {
-			throw SqlStorageException
-					.withMessage("Organisation not updated due to same parent and predecessor");
+			throw new DataException("Organisation not updated due to same parent and predecessor");
 		}
 	}
 
@@ -95,7 +94,7 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 	private void throwErrorIfLinkToSelf(List<Integer> parentsAndPredecessorIds) {
 		int organisationsId = getIdFromDataGroup();
 		if (parentsAndPredecessorIds.contains(organisationsId)) {
-			throw SqlStorageException.withMessage("Organisation not updated due to link to self");
+			throw new DataException("Organisation not updated due to link to self");
 		}
 	}
 
@@ -140,7 +139,6 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 				+ " organisationrelations as relation"
 				+ " join org_tree as child on child.relation = relation.organisation_id)"
 				+ " select * from org_tree where relation = ?";
-
 	}
 
 	private List<Object> createValuesForCircularDependencyQuery(
@@ -155,7 +153,7 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 		List<Map<String, Object>> result = dataReader
 				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
 		if (!result.isEmpty()) {
-			throw SqlStorageException.withMessage(
+			throw new DataException(
 					"Organisation not updated due to circular dependency with parent or predecessor");
 		}
 	}

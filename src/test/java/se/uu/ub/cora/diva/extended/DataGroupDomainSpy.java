@@ -20,28 +20,26 @@ package se.uu.ub.cora.diva.extended;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataAttribute;
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
 
-public class DataGroupSpy implements DataGroup {
+public class DataGroupDomainSpy implements DataGroup {
 
 	public String nameInData;
 	public List<DataElement> children = new ArrayList<>();
 	public List<DataElement> groupChildren = new ArrayList<>();
 	public List<String> getAllGroupsUsedNameInDatas = new ArrayList<>();
-	public Map<String, List<DataElement>> childrenToReturn = new HashMap<>();
 	public List<String> removeAllGroupsUsedNameInDatas = new ArrayList<>();
 	public List<DataElement> addedChildren = new ArrayList<>();
 	public List<String> returnContainsTrueNameInDatas = new ArrayList<>();
 	public List<String> requestedAtomicNameInDatas = new ArrayList<>();
+	public List<DataGroup> totalReturnedDataGroups = new ArrayList<>();
 
-	public DataGroupSpy(String nameInData) {
+	public DataGroupDomainSpy(String nameInData) {
 		this.nameInData = nameInData;
 	}
 
@@ -70,15 +68,19 @@ public class DataGroupSpy implements DataGroup {
 
 	@Override
 	public boolean containsChildWithNameInData(String nameInData) {
-		return returnContainsTrueNameInDatas.contains(nameInData);
+		for (DataElement dataElement : children) {
+			if (nameInData.equals(dataElement.getNameInData())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
 	public void addChildren(Collection<DataElement> dataElements) {
 		for (DataElement dataElement : dataElements) {
-			addedChildren.add(dataElement);
+			children.add(dataElement);
 		}
-
 	}
 
 	@Override
@@ -89,10 +91,6 @@ public class DataGroupSpy implements DataGroup {
 
 	@Override
 	public List<DataElement> getAllChildrenWithNameInData(String nameInData) {
-		// getAllGroupsUsedNameInDatas.add(nameInData);
-		if (childrenToReturn.containsKey(nameInData)) {
-			return childrenToReturn.get(nameInData);
-		}
 		return null;
 	}
 
@@ -133,6 +131,7 @@ public class DataGroupSpy implements DataGroup {
 		for (DataElement dataElement : children) {
 			if (childNameInData.equals(dataElement.getNameInData())) {
 				if (dataElement instanceof DataGroup) {
+					totalReturnedDataGroups.add((DataGroup) dataElement);
 					return ((DataGroup) dataElement);
 				}
 			}
@@ -152,16 +151,15 @@ public class DataGroupSpy implements DataGroup {
 	@Override
 	public List<DataGroup> getAllGroupsWithNameInData(String nameInData) {
 		getAllGroupsUsedNameInDatas.add(nameInData);
-		List<DataGroup> matchingDataGroups = new ArrayList<>();
-		if (childrenToReturn.containsKey(nameInData)) {
-			for (DataElement dataElement : childrenToReturn.get(nameInData)) {
-				if (nameInData.equals(dataElement.getNameInData())
-						&& dataElement instanceof DataGroup) {
-					matchingDataGroups.add((DataGroup) dataElement);
-				}
+		List<DataGroup> currentListToReturn = new ArrayList<>();
+		for (DataElement dataElement : children) {
+			if (nameInData.equals(dataElement.getNameInData())
+					&& dataElement instanceof DataGroup) {
+				totalReturnedDataGroups.add((DataGroup) dataElement);
+				currentListToReturn.add((DataGroup) dataElement);
 			}
 		}
-		return matchingDataGroups;
+		return currentListToReturn;
 	}
 
 	@Override
