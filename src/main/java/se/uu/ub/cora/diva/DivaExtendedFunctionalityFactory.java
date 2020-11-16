@@ -69,10 +69,15 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			String recordType) {
 		List<ExtendedFunctionality> functionalities = new ArrayList<>();
 		functionalities.add(new OrganisationDuplicateLinksRemover());
+		addDisallowedDependencyDetector(functionalities);
+		functionalities.add(new OrganisationDuplicateLinksRemover());
+		return functionalities;
+	}
+
+	private void addDisallowedDependencyDetector(List<ExtendedFunctionality> functionalities) {
 		SqlConnectionProvider connectionProvider = tryToCreateConnectionProvider();
 		DataReaderImp dataReader = DataReaderImp.usingSqlConnectionProvider(connectionProvider);
 		functionalities.add(new OrganisationDisallowedDependencyDetector(dataReader));
-		return functionalities;
 	}
 
 	private SqlConnectionProvider tryToCreateConnectionProvider() {

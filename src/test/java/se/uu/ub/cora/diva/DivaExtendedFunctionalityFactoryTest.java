@@ -76,7 +76,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 	public void factorCommonOrganisationUpdateAfter() {
 		List<ExtendedFunctionality> functionalities = factory
 				.factor(UPDATE_AFTER_METADATA_VALIDATION, "commonOrganisation");
-		assertEquals(functionalities.size(), 2);
+		assertEquals(functionalities.size(), 3);
 		assertTrue(functionalities.get(0) instanceof OrganisationDuplicateLinksRemover);
 
 		OrganisationDisallowedDependencyDetector dependencyDetector = (OrganisationDisallowedDependencyDetector) functionalities
@@ -86,6 +86,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 		assertCorrectDbReader(dependencyDetector);
 
 		assertTrue(functionalities.get(1) instanceof OrganisationDisallowedDependencyDetector);
+		assertTrue(functionalities.get(2) instanceof OrganisationDuplicateLinksRemover);
 
 	}
 
@@ -111,9 +112,10 @@ public class DivaExtendedFunctionalityFactoryTest {
 	public void factorRootOrganisationUpdateAfter() {
 		List<ExtendedFunctionality> functionalities = factory
 				.factor(UPDATE_AFTER_METADATA_VALIDATION, "rootOrganisation");
-		assertEquals(functionalities.size(), 2);
+		assertEquals(functionalities.size(), 3);
 		assertTrue(functionalities.get(0) instanceof OrganisationDuplicateLinksRemover);
 		assertTrue(functionalities.get(1) instanceof OrganisationDisallowedDependencyDetector);
+		assertTrue(functionalities.get(2) instanceof OrganisationDuplicateLinksRemover);
 
 	}
 
