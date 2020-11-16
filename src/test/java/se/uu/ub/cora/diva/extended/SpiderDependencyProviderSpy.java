@@ -73,9 +73,4 @@ public class SpiderDependencyProviderSpy extends SpiderDependencyProvider {
 		return initInfo.get(key);
 	}
 
-	@Override
-	protected void initializeExtendedFunctionality() {
-		// prevent starting of extended functionality in tests
-	}
-
 }
