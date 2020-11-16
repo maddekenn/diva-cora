@@ -18,6 +18,7 @@
  */
 package se.uu.ub.cora.diva.extended;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
@@ -36,22 +37,38 @@ public class OrganisationDifferentDomainDetector implements ExtendedFunctionalit
 	@Override
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
 		String domain = dataGroup.getFirstAtomicValueWithNameInData("domain");
+		List<DataGroup> combinedList = getListOfParentsAndPredecessors(dataGroup);
+		checkLinksAndThrowErrorIfDifferentDomain(domain, combinedList);
+
+	}
+
+	private List<DataGroup> getListOfParentsAndPredecessors(DataGroup dataGroup) {
 		List<DataGroup> parents = dataGroup.getAllGroupsWithNameInData("parentOrganisation");
-		dataGroup.getAllGroupsWithNameInData("formerName");
+		List<DataGroup> predecessors = dataGroup.getAllGroupsWithNameInData("formerName");
+		return combineToOneList(parents, predecessors);
+	}
 
-		checkLinksAndThrowErrorIfDifferentDomain(domain, parents);
-
+	private List<DataGroup> combineToOneList(List<DataGroup> parents,
+			List<DataGroup> predecessors) {
+		List<DataGroup> combinedList = new ArrayList<>();
+		combinedList.addAll(parents);
+		combinedList.addAll(predecessors);
+		return combinedList;
 	}
 
 	private void checkLinksAndThrowErrorIfDifferentDomain(String domain,
 			List<DataGroup> linkedOrganisations) {
 		for (DataGroup parent : linkedOrganisations) {
-			DataGroup organisationLink = parent.getFirstGroupWithNameInData("organisationLink");
-			String recordId = organisationLink.getFirstAtomicValueWithNameInData("linkedRecordId");
-			String recordType = organisationLink
-					.getFirstAtomicValueWithNameInData("linkedRecordType");
-			readLinkedOrgFromStorageAndPossiblyThrowException(domain, recordType, recordId);
+			checkLinkAndThrowErrorIfDifferentDomain(domain, parent);
 		}
+	}
+
+	private void checkLinkAndThrowErrorIfDifferentDomain(String domain, DataGroup parent) {
+		DataGroup organisationLink = parent.getFirstGroupWithNameInData("organisationLink");
+		String recordId = organisationLink.getFirstAtomicValueWithNameInData("linkedRecordId");
+		String recordType = organisationLink
+				.getFirstAtomicValueWithNameInData("linkedRecordType");
+		readLinkedOrgFromStorageAndPossiblyThrowException(domain, recordType, recordId);
 	}
 
 	private void readLinkedOrgFromStorageAndPossiblyThrowException(String domain, String recordType,

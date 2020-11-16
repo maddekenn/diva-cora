@@ -135,7 +135,8 @@ public class OrganisationDifferentDomainDetectorTest {
 		return predecessors;
 	}
 
-	@Test(expectedExceptions = DataException.class)
+	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
+			+ "Links to organisations from antoher domain is not allowed.")
 	public void testOneParentNoPredecessorDifferentDomain() {
 		List<DataElement> parents = createParentsUsingNumOfParents(1);
 		dataGroup.addChildren(parents);
@@ -171,130 +172,44 @@ public class OrganisationDifferentDomainDetectorTest {
 		assertEquals(recordStorage.readRecordTypes.get(0), "organisation");
 		assertEquals(recordStorage.readRecordIds.get(0), "predecessor0");
 	}
-	// private List<DataElement> createListWithOneParentUsingRepeatIdAndParentIa(String repeatId,
-	// String parentId) {
-	// List<DataElement> parents = new ArrayList<>();
-	// DataGroup parent = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-	// "parentOrganisation", repeatId, parentId);
-	// parents.add(parent);
-	// return parents;
-	// }
-	//
-	// private DataGroup createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-	// String nameInData, String repeatId, String parentId) {
-	// DataGroupSpy parentGroup = new DataGroupSpy(nameInData);
-	// parentGroup.setRepeatId(repeatId);
-	// DataGroupSpy organisationLink = new DataGroupSpy("organisationLink");
-	// DataAtomicSpy linkedRecordId = new DataAtomicSpy("linkedRecordId", parentId);
-	// organisationLink.addChild(linkedRecordId);
-	// parentGroup.addChild(organisationLink);
-	// dataGroup.addChild(parentGroup);
-	// return parentGroup;
-	// }
-	//
-	// private String getExpectedSql(String questionsMarks) {
-	// String sql = "with recursive org_tree as (select distinct organisation_id, relation"
-	// + " from organisationrelations where organisation_id in (" + questionsMarks + ") "
-	// + "union all" + " select distinct relation.organisation_id, relation.relation from"
-	// + " organisationrelations as relation"
-	// + " join org_tree as child on child.relation = relation.organisation_id)"
-	// + " select * from org_tree where relation = ?";
-	// return sql;
-	// }
-	//
-	// @Test
-	// public void testWhenTwoParentsInDataGroup() {
-	// List<DataElement> parents = createListAndAddDefaultParent();
-	// DataGroup parent2 = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-	// "parentOrganisation", "1", "3");
-	// parents.add(parent2);
-	// dataGroup.childrenToReturn.put("parentOrganisation", parents);
-	//
-	// functionality.useExtendedFunctionality(authToken, dataGroup);
-	// assertTrue(dataReader.executePreparedStatementWasCalled);
-	// String sql = getExpectedSql("?, ?");
-	//
-	// assertEquals(dataReader.sqlSentToReader, sql);
-	// List<Object> expectedValues = new ArrayList<>();
-	// expectedValues.add(51);
-	// expectedValues.add(3);
-	// expectedValues.add(4567);
-	// assertEquals(dataReader.valuesSentToReader, expectedValues);
-	// }
-	//
-	// @Test
-	// public void testWhenOneParentAndOnePredecessorInDataGroup() {
-	// List<DataElement> parents = createListAndAddDefaultParent();
-	// dataGroup.childrenToReturn.put("parentOrganisation", parents);
-	//
-	// List<DataElement> predecessors = createListAndAddPredecessorUsingRepeatIdAndId("0", "78");
-	// dataGroup.childrenToReturn.put("formerName", predecessors);
-	//
-	// functionality.useExtendedFunctionality(authToken, dataGroup);
-	//
-	// assertTrue(dataReader.executePreparedStatementWasCalled);
-	// String sql = getExpectedSql("?, ?");
-	// assertEquals(dataReader.sqlSentToReader, sql);
-	//
-	// List<Object> expectedValues = new ArrayList<>();
-	// expectedValues.add(51);
-	// expectedValues.add(78);
-	// expectedValues.add(4567);
-	// assertEquals(dataReader.valuesSentToReader, expectedValues);
-	// }
-	//
-	// private List<DataElement> createListAndAddPredecessorUsingRepeatIdAndId(String repeatId,
-	// String parentId) {
-	// List<DataElement> predecessors = new ArrayList<>();
-	// DataGroup predecessor = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-	// "formerName", repeatId, parentId);
-	// predecessors.add(predecessor);
-	// return predecessors;
-	// }
-	//
-	// @Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
-	// + "Organisation not updated due to circular dependency with parent or predecessor")
-	// public void testWhenParentInDataGroupCircularDependencyExist() {
-	// List<DataElement> parents = createListAndAddDefaultParent();
-	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-	// "0", "51");
-	// dataGroup.childrenToReturn.put("parentOrganisation", parents);
-	// dataReader.numOfRowsToReturn = 2;
-	// functionality.useExtendedFunctionality(authToken, dataGroup);
-	// }
-	//
-	// @Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
-	// + "Organisation not updated due to same parent and predecessor")
-	// public void testWhenSamePresentInParentAndPredecessor() {
-	// List<DataElement> parents = createListWithOneParentUsingRepeatIdAndParentIa("0", "5");
-	// DataGroup parent2 = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-	// "parentOrganisation", "1", "7");
-	// parents.add(parent2);
-	// dataGroup.childrenToReturn.put("parentOrganisation", parents);
-	//
-	// List<DataElement> predecessors = createListAndAddPredecessorUsingRepeatIdAndId("0", "5");
-	// DataGroup predecessor2 = createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
-	// "formerName", "1", "89");
-	// predecessors.add(predecessor2);
-	// dataGroup.childrenToReturn.put("formerName", predecessors);
-	//
-	// functionality.useExtendedFunctionality(authToken, dataGroup);
-	// }
-	//
-	// @Test
-	// public void testWhenSamePresentInParentAndPredecessorNoStatementIsExecuted() {
-	// List<DataElement> parents = createListWithOneParentUsingRepeatIdAndParentIa("0", "5");
-	// dataGroup.childrenToReturn.put("parentOrganisation", parents);
-	//
-	// List<DataElement> predecessors = createListAndAddPredecessorUsingRepeatIdAndId("0", "5");
-	//
-	// dataGroup.childrenToReturn.put("formerName", predecessors);
-	// try {
-	// functionality.useExtendedFunctionality(authToken, dataGroup);
-	// } catch (SqlStorageException e) {
-	// // do nothing
-	// }
-	// assertFalse(dataReader.executePreparedStatementWasCalled);
-	// }
+
+	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
+			+ "Links to organisations from antoher domain is not allowed.")
+	public void testNoParentOnePredecessorDifferentDomain() {
+		List<DataElement> predecessors = createPredecessorsUsingNumOfPredecessors(1);
+		dataGroup.addChildren(predecessors);
+		addOrganisationToReturnFromStorage("organisation_predecessor0", "someOtherDomain");
+
+		functionality.useExtendedFunctionality(authToken, dataGroup);
+	}
+
+	@Test
+	public void testOneParentOnePredecessorSameDomain() {
+		List<DataElement> parents = createParentsUsingNumOfParents(1);
+		dataGroup.addChildren(parents);
+		List<DataElement> predecessors = createPredecessorsUsingNumOfPredecessors(1);
+		dataGroup.addChildren(predecessors);
+
+		addOrganisationToReturnFromStorage("organisation_parent0", "someDomain");
+		addOrganisationToReturnFromStorage("organisation_predecessor0", "someDomain");
+
+		functionality.useExtendedFunctionality(authToken, dataGroup);
+		assertEquals(dataGroup.totalReturnedDataGroups.size(), 2);
+		DataGroupDomainSpy returnedParent = (DataGroupDomainSpy) dataGroup.totalReturnedDataGroups
+				.get(0);
+		assertCorrectOrganisationLink(returnedParent, "parent0", 0);
+		DataGroupDomainSpy returnedPredecessor = (DataGroupDomainSpy) dataGroup.totalReturnedDataGroups
+				.get(1);
+		assertCorrectOrganisationLink(returnedPredecessor, "predecessor0", 1);
+	}
+
+	private void assertCorrectOrganisationLink(DataGroupDomainSpy returnedParent, String recordId,
+			int indexInStorage) {
+		DataGroupDomainSpy organisationLink = (DataGroupDomainSpy) returnedParent.totalReturnedDataGroups
+				.get(0);
+		assertEquals(organisationLink.requestedAtomicNameInDatas.get(0), "linkedRecordId");
+		assertEquals(recordStorage.readRecordTypes.get(0), "organisation");
+		assertEquals(recordStorage.readRecordIds.get(indexInStorage), recordId);
+	}
 
 }
