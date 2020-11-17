@@ -136,7 +136,7 @@ public class OrganisationDifferentDomainDetectorTest {
 	}
 
 	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
-			+ "Links to organisations from antoher domain is not allowed.")
+			+ "Links to organisations from another domain is not allowed.")
 	public void testOneParentNoPredecessorDifferentDomain() {
 		List<DataElement> parents = createParentsUsingNumOfParents(1);
 		dataGroup.addChildren(parents);

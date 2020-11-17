@@ -66,8 +66,7 @@ public class OrganisationDifferentDomainDetector implements ExtendedFunctionalit
 	private void checkLinkAndThrowErrorIfDifferentDomain(String domain, DataGroup parent) {
 		DataGroup organisationLink = parent.getFirstGroupWithNameInData("organisationLink");
 		String recordId = organisationLink.getFirstAtomicValueWithNameInData("linkedRecordId");
-		String recordType = organisationLink
-				.getFirstAtomicValueWithNameInData("linkedRecordType");
+		String recordType = organisationLink.getFirstAtomicValueWithNameInData("linkedRecordType");
 		readLinkedOrgFromStorageAndPossiblyThrowException(domain, recordType, recordId);
 	}
 
@@ -80,7 +79,7 @@ public class OrganisationDifferentDomainDetector implements ExtendedFunctionalit
 
 	private void throwErrorIfDifferentDomain(String domain, String parentDomain) {
 		if (!parentDomain.equals(domain)) {
-			throw new DataException("Links to organisations from antoher domain is not allowed.");
+			throw new DataException("Links to organisations from another domain is not allowed.");
 		}
 	}
 
