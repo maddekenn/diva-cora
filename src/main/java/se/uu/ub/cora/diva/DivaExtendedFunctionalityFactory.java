@@ -95,8 +95,8 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			return ContextConnectionProviderImp.usingInitialContextAndName(context,
 					databaseLookupName);
 		} catch (Exception e) {
-			// TODO:what exception??
-			throw new RuntimeException();
+			throw new RuntimeException(
+					"Error starting ContextConnectionProviderImp in extended functionality", e);
 		}
 	}
 

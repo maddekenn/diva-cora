@@ -111,8 +111,9 @@ public class DivaExtendedFunctionalityFactoryTest {
 		assertTrue(spiderDependencyProvider.getInitInfoValueUsingKeyWasCalled);
 	}
 
-	@Test(expectedExceptions = RuntimeException.class)
-	public void testNoDnLookupName() {
+	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ""
+			+ "Error starting ContextConnectionProviderImp in extended functionality")
+	public void testNoDbLookupName() {
 		spiderDependencyProvider = new SpiderDependencyProviderSpy(Collections.emptyMap());
 
 		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
