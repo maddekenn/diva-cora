@@ -27,6 +27,7 @@ import javax.naming.InitialContext;
 
 import se.uu.ub.cora.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.connection.SqlConnectionProvider;
+import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.spider.dependency.SpiderDependencyProvider;
@@ -35,6 +36,7 @@ import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition;
 import se.uu.ub.cora.sqldatabase.DataReaderImp;
+import se.uu.ub.cora.storage.RecordStorage;
 
 public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFactory {
 
@@ -70,8 +72,13 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		List<ExtendedFunctionality> functionalities = new ArrayList<>();
 		functionalities.add(new OrganisationDuplicateLinksRemover());
 		addDisallowedDependencyDetector(functionalities);
-		functionalities.add(new OrganisationDuplicateLinksRemover());
+		addDifferentDomainDetector(functionalities);
 		return functionalities;
+	}
+
+	private void addDifferentDomainDetector(List<ExtendedFunctionality> functionalities) {
+		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
+		functionalities.add(new OrganisationDifferentDomainDetector(recordStorage));
 	}
 
 	private void addDisallowedDependencyDetector(List<ExtendedFunctionality> functionalities) {

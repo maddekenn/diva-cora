@@ -19,6 +19,8 @@
 package se.uu.ub.cora.diva;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
 
@@ -33,6 +35,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.connection.ContextConnectionProviderImp;
+import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.extended.SpiderDependencyProviderSpy;
@@ -46,13 +49,16 @@ public class DivaExtendedFunctionalityFactoryTest {
 	private ExtendedFunctionalityFactory factory;
 	private Map<String, String> initInfo;
 	private SpiderDependencyProviderSpy spiderDependencyProvider;
+	private RecordStorageProviderSpy recordStorageProvider;
 
 	@BeforeMethod
 	public void setUp() {
 		factory = new DivaExtendedFunctionalityFactory();
 		initInfo = new HashMap<>();
 		initInfo.put("databaseLookupName", "someDBName");
+		recordStorageProvider = new RecordStorageProviderSpy();
 		spiderDependencyProvider = new SpiderDependencyProviderSpy(initInfo);
+		spiderDependencyProvider.setRecordStorageProvider(recordStorageProvider);
 
 		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
 	}
@@ -76,6 +82,10 @@ public class DivaExtendedFunctionalityFactoryTest {
 	public void factorCommonOrganisationUpdateAfter() {
 		List<ExtendedFunctionality> functionalities = factory
 				.factor(UPDATE_AFTER_METADATA_VALIDATION, "commonOrganisation");
+		assertCorrectFactoredFunctionalities(functionalities);
+	}
+
+	private void assertCorrectFactoredFunctionalities(List<ExtendedFunctionality> functionalities) {
 		assertEquals(functionalities.size(), 3);
 		assertTrue(functionalities.get(0) instanceof OrganisationDuplicateLinksRemover);
 
@@ -85,9 +95,10 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 		assertCorrectDbReader(dependencyDetector);
 
-		assertTrue(functionalities.get(1) instanceof OrganisationDisallowedDependencyDetector);
-		assertTrue(functionalities.get(2) instanceof OrganisationDuplicateLinksRemover);
-
+		OrganisationDifferentDomainDetector differentDomainDetector = (OrganisationDifferentDomainDetector) functionalities
+				.get(2);
+		assertNotNull(differentDomainDetector.getRecordStorage());
+		assertSame(differentDomainDetector.getRecordStorage(), recordStorageProvider.recordStorage);
 	}
 
 	private void assertCorrectDbReader(
@@ -112,11 +123,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 	public void factorRootOrganisationUpdateAfter() {
 		List<ExtendedFunctionality> functionalities = factory
 				.factor(UPDATE_AFTER_METADATA_VALIDATION, "rootOrganisation");
-		assertEquals(functionalities.size(), 3);
-		assertTrue(functionalities.get(0) instanceof OrganisationDuplicateLinksRemover);
-		assertTrue(functionalities.get(1) instanceof OrganisationDisallowedDependencyDetector);
-		assertTrue(functionalities.get(2) instanceof OrganisationDuplicateLinksRemover);
-
+		assertCorrectFactoredFunctionalities(functionalities);
 	}
 
 }
