@@ -49,7 +49,6 @@
 		<divamixedstorage.version>4.0-SNAPSHOT</divamixedstorage.version>
 		<solrsearch.version>3.5.0</solrsearch.version>
 		<metacreator.version>4.0-SNAPSHOT</metacreator.version>
-		<apptokenstorage.version>2.1.0</apptokenstorage.version>
 		<httphandler.version>2.1.0</httphandler.version>
 		<sqldatabase.version>2.5.0</sqldatabase.version>
 		<servlet-api.version>4.0.1</servlet-api.version>
@@ -89,49 +88,43 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>log4j</artifactId>
 			<version>${coralog4j.version}</version>
-<!-- 			<scope>runtime</scope> -->
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>therest</artifactId>
 			<version>${therest.version}</version>
-<!-- 			<scope>runtime</scope> -->
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>json</artifactId>
 			<version>${json.version}</version>
-<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>spider</artifactId>
 			<version>${spider.version}</version>
-<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>beefeater</artifactId>
 			<version>${beefeater.version}</version>
-<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>bookkeeper</artifactId>
 			<version>${bookkeeper.version}</version>
-<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>basicdata</artifactId>
 			<version>${basicdata.version}</version>
-<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>storage</artifactId>
 			<version>${storage.version}</version>
-<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
@@ -149,42 +142,35 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>gatekeeperclient</artifactId>
 			<version>${gatekeeperclient.version}</version>
-<!-- 			<scope>runtime</scope> -->
+ 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>divamixedstorage</artifactId>
 			<version>${divamixedstorage.version}</version>
-<!--  			<scope>runtime</scope> -->
+ 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>solrsearch</artifactId>
 			<version>${solrsearch.version}</version>
-<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>metacreator</artifactId>
 			<version>${metacreator.version}</version>
-<!-- 			<scope>runtime</scope> -->
+ 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>httphandler</artifactId>
 			<version>${httphandler.version}</version>
-<!-- 			<scope>runtime</scope> -->
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>sqldatabase</artifactId>
 			<version>${sqldatabase.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>se.uu.ub.cora</groupId>
-			<artifactId>apptokenstorage</artifactId>
-			<version>${apptokenstorage.version}</version>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
