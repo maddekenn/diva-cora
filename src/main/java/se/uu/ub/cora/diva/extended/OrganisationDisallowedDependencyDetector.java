@@ -101,12 +101,12 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 	private int getIdFromDataGroup() {
 		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
 		String id = recordInfo.getFirstAtomicValueWithNameInData("id");
-		return Integer.valueOf(id);
+		return Integer.parseInt(id);
 	}
 
 	private List<Integer> getIdListOfParentsAndPredecessors(
 			List<DataGroup> parentsAndPredecessors) {
-		List<Integer> organisationIds = new ArrayList<>();
+		List<Integer> organisationIds = new ArrayList<>(parentsAndPredecessors.size());
 		for (DataGroup parent : parentsAndPredecessors) {
 			int organisationId = extractOrganisationIdFromLink(parent);
 			organisationIds.add(organisationId);
