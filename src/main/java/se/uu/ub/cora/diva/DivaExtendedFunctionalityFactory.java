@@ -18,7 +18,7 @@
  */
 package se.uu.ub.cora.diva;
 
-import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +59,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	}
 
 	private void createContext(String recordType) {
-		contexts.add(
-				new ExtendedFunctionalityContext(UPDATE_AFTER_METADATA_VALIDATION, recordType, 0));
+		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_STORE, recordType, 0));
 	}
 
 	@Override

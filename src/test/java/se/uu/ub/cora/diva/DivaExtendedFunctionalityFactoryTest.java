@@ -22,7 +22,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
-import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -74,15 +74,15 @@ public class DivaExtendedFunctionalityFactoryTest {
 	private void assertCorrectContextUsingIndexAndRecordType(int index, String recordType) {
 		ExtendedFunctionalityContext updateBefore = factory.getExtendedFunctionalityContexts()
 				.get(index);
-		assertEquals(updateBefore.position, UPDATE_AFTER_METADATA_VALIDATION);
+		assertEquals(updateBefore.position, UPDATE_BEFORE_STORE);
 		assertEquals(updateBefore.recordType, recordType);
 		assertEquals(updateBefore.runAsNumber, 0);
 	}
 
 	@Test
 	public void factorSubOrganisationUpdateAfter() {
-		List<ExtendedFunctionality> functionalities = factory
-				.factor(UPDATE_AFTER_METADATA_VALIDATION, "subOrganisation");
+		List<ExtendedFunctionality> functionalities = factory.factor(UPDATE_BEFORE_STORE,
+				"subOrganisation");
 		assertCorrectFactoredFunctionalities(functionalities);
 	}
 
@@ -118,20 +118,20 @@ public class DivaExtendedFunctionalityFactoryTest {
 		spiderDependencyProvider = new SpiderDependencyProviderSpy(Collections.emptyMap());
 
 		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
-		factory.factor(UPDATE_AFTER_METADATA_VALIDATION, "subOrganisation");
+		factory.factor(UPDATE_BEFORE_STORE, "subOrganisation");
 	}
 
 	@Test
 	public void factorRootOrganisationUpdateAfter() {
-		List<ExtendedFunctionality> functionalities = factory
-				.factor(UPDATE_AFTER_METADATA_VALIDATION, "rootOrganisation");
+		List<ExtendedFunctionality> functionalities = factory.factor(UPDATE_BEFORE_STORE,
+				"rootOrganisation");
 		assertCorrectFactoredFunctionalities(functionalities);
 	}
 
 	@Test
 	public void factorTopOrganisationUpdateAfter() {
-		List<ExtendedFunctionality> functionalities = factory
-				.factor(UPDATE_AFTER_METADATA_VALIDATION, "topOrganisation");
+		List<ExtendedFunctionality> functionalities = factory.factor(UPDATE_BEFORE_STORE,
+				"topOrganisation");
 		assertCorrectFactoredFunctionalities(functionalities);
 	}
 
