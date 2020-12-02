@@ -54,7 +54,7 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 		List<Integer> parentIds = getIdsFromOrganisationLinkUsingNameInData(dataGroup,
 				"parentOrganisation");
 		List<Integer> predecessorIds = getIdsFromOrganisationLinkUsingNameInData(dataGroup,
-				"formerName");
+				"earlierOrganisation");
 		throwErrorIfSameParentAndPredecessor(parentIds, predecessorIds);
 		possiblyThrowErrorIfCircularDependencyDetected(parentIds, predecessorIds);
 	}

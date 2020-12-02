@@ -101,16 +101,16 @@ public class OrganisationDuplicateLinksRemoverTest {
 
 	@Test
 	public void testTwoDifferentPredecessors() {
-		dataGroup.returnContainsTrueNameInDatas.add("formerName");
+		dataGroup.returnContainsTrueNameInDatas.add("earlierOrganisation");
 		List<DataElement> predecessors = new ArrayList<>();
 
-		DataGroup predecessor1 = createOrganisationLinkUsingRepeatIdAndOrganisationId("formerName", "0",
-				"51");
+		DataGroup predecessor1 = createOrganisationLinkUsingRepeatIdAndOrganisationId(
+				"earlierOrganisation", "0", "51");
 		predecessors.add(predecessor1);
-		DataGroup predecessor2 = createOrganisationLinkUsingRepeatIdAndOrganisationId("formerName", "1",
-				"52");
+		DataGroup predecessor2 = createOrganisationLinkUsingRepeatIdAndOrganisationId(
+				"earlierOrganisation", "1", "52");
 		predecessors.add(predecessor2);
-		dataGroup.childrenToReturn.put("formerName", predecessors);
+		dataGroup.childrenToReturn.put("earlierOrganisation", predecessors);
 
 		OrganisationDuplicateLinksRemover extendedFunctionality = new OrganisationDuplicateLinksRemover();
 		extendedFunctionality.useExtendedFunctionality("someToken", dataGroup);
@@ -121,26 +121,26 @@ public class OrganisationDuplicateLinksRemoverTest {
 
 	@Test
 	public void testTwoSamePredecessorsOneOther() {
-		dataGroup.returnContainsTrueNameInDatas.add("formerName");
+		dataGroup.returnContainsTrueNameInDatas.add("earlierOrganisation");
 		List<DataElement> parents = new ArrayList<>();
 
-		DataGroup predecessor1 = createOrganisationLinkUsingRepeatIdAndOrganisationId("formerName", "0",
-				"51");
+		DataGroup predecessor1 = createOrganisationLinkUsingRepeatIdAndOrganisationId(
+				"earlierOrganisation", "0", "51");
 		parents.add(predecessor1);
-		DataGroup predecessor2 = createOrganisationLinkUsingRepeatIdAndOrganisationId("formerName", "1",
-				"51");
+		DataGroup predecessor2 = createOrganisationLinkUsingRepeatIdAndOrganisationId(
+				"earlierOrganisation", "1", "51");
 		parents.add(predecessor2);
-		DataGroup predecessor3 = createOrganisationLinkUsingRepeatIdAndOrganisationId("formerName", "1",
-				"567");
+		DataGroup predecessor3 = createOrganisationLinkUsingRepeatIdAndOrganisationId(
+				"earlierOrganisation", "1", "567");
 		parents.add(predecessor3);
 
-		dataGroup.childrenToReturn.put("formerName", parents);
+		dataGroup.childrenToReturn.put("earlierOrganisation", parents);
 
 		OrganisationDuplicateLinksRemover extendedFunctionality = new OrganisationDuplicateLinksRemover();
 		extendedFunctionality.useExtendedFunctionality("someToken", dataGroup);
 
-		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(0), "formerName");
-		assertEquals(dataGroup.removeAllGroupsUsedNameInDatas.get(0), "formerName");
+		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(0), "earlierOrganisation");
+		assertEquals(dataGroup.removeAllGroupsUsedNameInDatas.get(0), "earlierOrganisation");
 
 		assertEquals(dataGroup.addedChildren.size(), 2);
 		assertSame(dataGroup.addedChildren.get(0), predecessor1);

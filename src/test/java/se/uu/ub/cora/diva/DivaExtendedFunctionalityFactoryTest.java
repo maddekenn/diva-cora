@@ -65,9 +65,10 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void testInit() {
-		assertEquals(factory.getExtendedFunctionalityContexts().size(), 2);
-		assertCorrectContextUsingIndexAndRecordType(0, "commonOrganisation");
-		assertCorrectContextUsingIndexAndRecordType(1, "rootOrganisation");
+		assertEquals(factory.getExtendedFunctionalityContexts().size(), 3);
+		assertCorrectContextUsingIndexAndRecordType(0, "subOrganisation");
+		assertCorrectContextUsingIndexAndRecordType(1, "topOrganisation");
+		assertCorrectContextUsingIndexAndRecordType(2, "rootOrganisation");
 	}
 
 	private void assertCorrectContextUsingIndexAndRecordType(int index, String recordType) {
@@ -79,9 +80,9 @@ public class DivaExtendedFunctionalityFactoryTest {
 	}
 
 	@Test
-	public void factorCommonOrganisationUpdateAfter() {
+	public void factorSubOrganisationUpdateAfter() {
 		List<ExtendedFunctionality> functionalities = factory
-				.factor(UPDATE_AFTER_METADATA_VALIDATION, "commonOrganisation");
+				.factor(UPDATE_AFTER_METADATA_VALIDATION, "subOrganisation");
 		assertCorrectFactoredFunctionalities(functionalities);
 	}
 
@@ -117,13 +118,20 @@ public class DivaExtendedFunctionalityFactoryTest {
 		spiderDependencyProvider = new SpiderDependencyProviderSpy(Collections.emptyMap());
 
 		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
-		factory.factor(UPDATE_AFTER_METADATA_VALIDATION, "commonOrganisation");
+		factory.factor(UPDATE_AFTER_METADATA_VALIDATION, "subOrganisation");
 	}
 
 	@Test
 	public void factorRootOrganisationUpdateAfter() {
 		List<ExtendedFunctionality> functionalities = factory
 				.factor(UPDATE_AFTER_METADATA_VALIDATION, "rootOrganisation");
+		assertCorrectFactoredFunctionalities(functionalities);
+	}
+
+	@Test
+	public void factorTopOrganisationUpdateAfter() {
+		List<ExtendedFunctionality> functionalities = factory
+				.factor(UPDATE_AFTER_METADATA_VALIDATION, "topOrganisation");
 		assertCorrectFactoredFunctionalities(functionalities);
 	}
 

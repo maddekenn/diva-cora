@@ -60,7 +60,7 @@ public class OrganisationDataCreator {
 		List<DataElement> predecessors = new ArrayList<>();
 		DataGroup predecessor = OrganisationDataCreator
 				.createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(dataGroup,
-						"formerName", repeatId, parentId);
+						"earlierOrganisation", repeatId, parentId);
 		predecessors.add(predecessor);
 		return predecessors;
 	}

@@ -40,8 +40,9 @@ import se.uu.ub.cora.storage.RecordStorage;
 
 public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFactory {
 
+	private static final String TOP_ORGANISATION = "topOrganisation";
 	private static final String ROOT_ORGANISATION = "rootOrganisation";
-	private static final String COMMON_ORGANISATION = "commonOrganisation";
+	private static final String SUB_ORGANISATION = "subOrganisation";
 	private List<ExtendedFunctionalityContext> contexts = new ArrayList<>();
 	private SpiderDependencyProvider dependencyProvider;
 
@@ -52,7 +53,8 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	}
 
 	private void createListOfContexts() {
-		createContext(COMMON_ORGANISATION);
+		createContext(SUB_ORGANISATION);
+		createContext(TOP_ORGANISATION);
 		createContext(ROOT_ORGANISATION);
 	}
 

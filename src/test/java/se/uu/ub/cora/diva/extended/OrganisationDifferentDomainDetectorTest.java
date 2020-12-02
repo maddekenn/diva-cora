@@ -63,7 +63,7 @@ public class OrganisationDifferentDomainDetectorTest {
 		functionality.useExtendedFunctionality(authToken, dataGroup);
 		assertEquals(dataGroup.requestedAtomicNameInDatas.get(0), "domain");
 		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(0), "parentOrganisation");
-		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(1), "formerName");
+		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(1), "earlierOrganisation");
 	}
 
 	@Test
@@ -96,7 +96,7 @@ public class OrganisationDifferentDomainDetectorTest {
 	}
 
 	public List<DataElement> createPredecessorsUsingNumOfPredecessors(int numOf) {
-		String nameInData = "formerName";
+		String nameInData = "earlierOrganisation";
 		return createOrganisationLinksUsingNameInDataAndNumOf(nameInData, numOf, "predecessor");
 
 	}
@@ -129,8 +129,8 @@ public class OrganisationDifferentDomainDetectorTest {
 	public List<DataElement> createListAndAddPredecessorUsingRepeatIdAndId(DataGroup dataGroup,
 			String repeatId, String parentId) {
 		List<DataElement> predecessors = new ArrayList<>();
-		DataGroup predecessor = createOrganisationLinkUsingNameInDataRepeatIdAndOrgId("formerName",
-				repeatId, parentId);
+		DataGroup predecessor = createOrganisationLinkUsingNameInDataRepeatIdAndOrgId(
+				"earlierOrganisation", repeatId, parentId);
 		predecessors.add(predecessor);
 		return predecessors;
 	}

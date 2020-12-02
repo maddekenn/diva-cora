@@ -44,7 +44,7 @@ public class OrganisationDifferentDomainDetector implements ExtendedFunctionalit
 
 	private List<DataGroup> getListOfParentsAndPredecessors(DataGroup dataGroup) {
 		List<DataGroup> parents = dataGroup.getAllGroupsWithNameInData("parentOrganisation");
-		List<DataGroup> predecessors = dataGroup.getAllGroupsWithNameInData("formerName");
+		List<DataGroup> predecessors = dataGroup.getAllGroupsWithNameInData("earlierOrganisation");
 		return combineToOneList(parents, predecessors);
 	}
 

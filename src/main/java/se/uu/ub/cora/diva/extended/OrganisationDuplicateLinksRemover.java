@@ -32,7 +32,7 @@ public class OrganisationDuplicateLinksRemover implements ExtendedFunctionality 
 	@Override
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
 		handleChildrenInDataGroupUsingNameInData(dataGroup, "parentOrganisation");
-		handleChildrenInDataGroupUsingNameInData(dataGroup, "formerName");
+		handleChildrenInDataGroupUsingNameInData(dataGroup, "earlierOrganisation");
 	}
 
 	private void handleChildrenInDataGroupUsingNameInData(DataGroup dataGroup, String nameInData) {

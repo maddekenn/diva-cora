@@ -151,7 +151,7 @@ public class OrganisationDisallowedDependencyDetectorTest {
 
 		List<DataElement> predecessors = OrganisationDataCreator
 				.createListAndAddPredecessorUsingRepeatIdAndId(dataGroup, "0", "78");
-		dataGroup.childrenToReturn.put("formerName", predecessors);
+		dataGroup.childrenToReturn.put("earlierOrganisation", predecessors);
 
 		functionality.useExtendedFunctionality(authToken, dataGroup);
 
@@ -192,9 +192,9 @@ public class OrganisationDisallowedDependencyDetectorTest {
 				.createListAndAddPredecessorUsingRepeatIdAndId(dataGroup, "0", "5");
 		DataGroup predecessor2 = OrganisationDataCreator
 				.createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(dataGroup,
-						"formerName", "1", "89");
+						"earlierOrganisation", "1", "89");
 		predecessors.add(predecessor2);
-		dataGroup.childrenToReturn.put("formerName", predecessors);
+		dataGroup.childrenToReturn.put("earlierOrganisation", predecessors);
 
 		functionality.useExtendedFunctionality(authToken, dataGroup);
 	}
@@ -208,7 +208,7 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		List<DataElement> predecessors = OrganisationDataCreator
 				.createListAndAddPredecessorUsingRepeatIdAndId(dataGroup, "0", "5");
 
-		dataGroup.childrenToReturn.put("formerName", predecessors);
+		dataGroup.childrenToReturn.put("earlierOrganisation", predecessors);
 		try {
 			functionality.useExtendedFunctionality(authToken, dataGroup);
 		} catch (DataException e) {
