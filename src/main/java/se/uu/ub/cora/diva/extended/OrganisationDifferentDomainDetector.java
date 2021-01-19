@@ -36,7 +36,8 @@ public class OrganisationDifferentDomainDetector implements ExtendedFunctionalit
 
 	@Override
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
-		String domain = dataGroup.getFirstAtomicValueWithNameInData("domain");
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
+		String domain = recordInfo.getFirstAtomicValueWithNameInData("domain");
 		List<DataGroup> combinedList = getListOfParentsAndPredecessors(dataGroup);
 		checkLinksAndThrowErrorIfDifferentDomain(domain, combinedList);
 
@@ -73,7 +74,8 @@ public class OrganisationDifferentDomainDetector implements ExtendedFunctionalit
 	private void readLinkedOrgFromStorageAndPossiblyThrowException(String domain, String recordType,
 			String recordId) {
 		DataGroup readParent = recordStorage.read(recordType, recordId);
-		String linkedOrganisationDomain = readParent.getFirstAtomicValueWithNameInData("domain");
+		DataGroup recordInfo = readParent.getFirstGroupWithNameInData("recordInfo");
+		String linkedOrganisationDomain = recordInfo.getFirstAtomicValueWithNameInData("domain");
 		throwErrorIfDifferentDomain(domain, linkedOrganisationDomain);
 	}
 
