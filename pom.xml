@@ -37,10 +37,10 @@
 	<properties>
 		<coralog4j.version>2.1.0</coralog4j.version>
 		<json.version>2.1.0</json.version>
-		<spider.version>4.2-SNAPSHOT</spider.version>
+		<spider.version>4.2.0</spider.version>
 		<therest.version>5.1-SNAPSHOT</therest.version>
 		<beefeater.version>3.3.0</beefeater.version>
-		<bookkeeper.version>4.10-SNAPSHOT</bookkeeper.version>
+		<bookkeeper.version>4.10.0</bookkeeper.version>
 		<basicdata.version>1.11.0</basicdata.version>
 		<storage.version>3.7.0</storage.version>
 		<basicstorage.version>3.14.0</basicstorage.version>
