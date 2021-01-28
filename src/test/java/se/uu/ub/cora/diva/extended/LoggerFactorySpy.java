@@ -18,28 +18,18 @@
  */
 package se.uu.ub.cora.diva.extended;
 
-import se.uu.ub.cora.httphandler.HttpHandler;
-import se.uu.ub.cora.httphandler.HttpHandlerFactory;
-import se.uu.ub.cora.httphandler.HttpMultiPartUploader;
+import se.uu.ub.cora.logger.Logger;
+import se.uu.ub.cora.logger.LoggerFactory;
 
-public class HttpHandlerFactorySpy implements HttpHandlerFactory {
+public class LoggerFactorySpy implements LoggerFactory {
 
-	public HttpHandlerSpy factoredHttpHandlerSpy;
-	public String url;
-	public int responseCode = 200;
+	public LoggerSpy logger;
 
 	@Override
-	public HttpHandler factor(String url) {
-		factoredHttpHandlerSpy = new HttpHandlerSpy();
-		factoredHttpHandlerSpy.responseCode = responseCode;
-		this.url = url;
-		return factoredHttpHandlerSpy;
-	}
-
-	@Override
-	public HttpMultiPartUploader factorHttpMultiPartUploader(String url) {
-		// TODO Auto-generated method stub
-		return null;
+	public Logger factorForClass(Class<? extends Object> javaClass) {
+		String name = javaClass.getSimpleName();
+		logger = new LoggerSpy();
+		return logger;
 	}
 
 }

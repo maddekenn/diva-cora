@@ -23,6 +23,7 @@ import static org.testng.Assert.assertEquals;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 
 public class ClassicOrganisationReloaderTest {
@@ -30,23 +31,114 @@ public class ClassicOrganisationReloaderTest {
 	private ExtendedFunctionality classicOrganisationReloader;
 	private HttpHandlerFactorySpy httpHandlerFactory;
 	private String url;
+	private DataGroupDomainSpy dataGroup;
+	private LoggerFactorySpy loggerFactorySpy;
 
 	@BeforeMethod
 	public void setUp() {
-		url = "https://somethingWithDiva/";
+		loggerFactorySpy = new LoggerFactorySpy();
+		LoggerProvider.setLoggerFactory(loggerFactorySpy);
+		url = "https://somethingWithDiva/servlet";
 		httpHandlerFactory = new HttpHandlerFactorySpy();
+		createDefaultDataGroup("someDomain");
 		classicOrganisationReloader = new ClassicOrganisationReloader(httpHandlerFactory, url);
 
 	}
 
+	private void createDefaultDataGroup(String domain) {
+		dataGroup = new DataGroupDomainSpy("organisation");
+		DataGroupDomainSpy recordInfo = new DataGroupDomainSpy("recordInfo");
+		recordInfo.addChild(new DataAtomicSpy("id", "4567"));
+		recordInfo.addChild(new DataAtomicSpy("domain", domain));
+		dataGroup.addChild(recordInfo);
+	}
+
 	@Test
 	public void testServletHasBeenCalled() {
-		classicOrganisationReloader.useExtendedFunctionality("authToken", null);
+		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
 
-		assertEquals(httpHandlerFactory.url, url);
+		assertHandlerFactoryReceivesCorrectURL("someDomain");
 
-		HttpHandlerSpy factoredHttpHandlerSpy = httpHandlerFactory.factoredHttpHandlerSpy;
+		HttpHandlerSpy httpHandlerSpy = httpHandlerFactory.factoredHttpHandlerSpy;
+		assertEquals(httpHandlerSpy.requestMethod, "GET");
 
+	}
+
+	@Test
+	public void testServletWithOtherDomain() {
+		String otherDomain = "otherDomain";
+		createDefaultDataGroup(otherDomain);
+
+		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+
+		assertHandlerFactoryReceivesCorrectURL(otherDomain);
+
+	}
+
+	private void assertHandlerFactoryReceivesCorrectURL(String domain) {
+		String urlWithParameters = this.url + "?list=ORGANISATION&domain=" + domain;
+		assertEquals(httpHandlerFactory.url, urlWithParameters);
+	}
+
+	@Test
+	public void testResponseCode200() {
+		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+		LoggerSpy logger = loggerFactorySpy.logger;
+		assertEquals(logger.errorMessages.size(), 0);
+		assertEquals(logger.infoMessages.size(), 1);
+		assertEquals(logger.infoMessages.get(0),
+				"List update succesful for parameters ORGANISATION and someDomain.");
+	}
+
+	@Test
+	public void testResponseCode200OtherDomain() {
+		String otherDomain = "otherDomain";
+		createDefaultDataGroup(otherDomain);
+		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+		LoggerSpy logger = loggerFactorySpy.logger;
+		assertEquals(logger.errorMessages.size(), 0);
+		assertEquals(logger.infoMessages.size(), 1);
+		assertEquals(logger.infoMessages.get(0),
+				"List update succesful for parameters ORGANISATION and otherDomain.");
+	}
+
+	@Test
+	public void testResponseCode400() {
+		httpHandlerFactory.responseCode = 400;
+		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+		LoggerSpy logger = loggerFactorySpy.logger;
+		assertEquals(logger.errorMessages.size(), 1);
+		assertEquals(logger.errorMessages.get(0),
+				getErrorMessageWithDomainAndError("someDomain", "Invalid argument"));
+	}
+
+	private String getErrorMessageWithDomainAndError(String domain, String errorMessage) {
+		return "Error when updating list for organisation for parameters ORGANISATION and " + domain
+				+ ". " + errorMessage + ".";
+	}
+
+	@Test
+	public void testResponseCode500() {
+		String otherDomain = "otherDomain";
+		createDefaultDataGroup(otherDomain);
+		httpHandlerFactory.responseCode = 500;
+
+		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+		LoggerSpy logger = loggerFactorySpy.logger;
+		assertEquals(logger.errorMessages.size(), 1);
+		assertEquals(logger.errorMessages.get(0),
+				getErrorMessageWithDomainAndError(otherDomain, "Internal server error"));
+	}
+
+	@Test
+	public void testUnexpectedResponseCode() {
+		httpHandlerFactory.responseCode = 418;
+
+		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+		LoggerSpy logger = loggerFactorySpy.logger;
+		assertEquals(logger.errorMessages.size(), 1);
+		assertEquals(logger.errorMessages.get(0),
+				getErrorMessageWithDomainAndError("someDomain", "Unexpected error"));
 	}
 
 }

@@ -42,6 +42,7 @@ import se.uu.ub.cora.diva.extended.SpiderDependencyProviderSpy;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition;
 import se.uu.ub.cora.sqldatabase.DataReaderImp;
 
 public class DivaExtendedFunctionalityFactoryTest {
@@ -133,6 +134,12 @@ public class DivaExtendedFunctionalityFactoryTest {
 		List<ExtendedFunctionality> functionalities = factory.factor(UPDATE_BEFORE_STORE,
 				"topOrganisation");
 		assertCorrectFactoredFunctionalities(functionalities);
+	}
+
+	@Test
+	public void factorClassicOrganisationUpdaterUpdateAfterStore() {
+		List<ExtendedFunctionality> functionalities = factory
+				.factor(ExtendedFunctionalityPosition.UPDATE_AFTER_STORE, null);
 	}
 
 }

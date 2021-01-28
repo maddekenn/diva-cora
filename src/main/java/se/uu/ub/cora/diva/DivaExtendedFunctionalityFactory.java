@@ -74,6 +74,10 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		functionalities.add(new OrganisationDuplicateLinksRemover());
 		addDisallowedDependencyDetector(functionalities);
 		addDifferentDomainDetector(functionalities);
+
+		// String url = dependencyProvider.getInitInfoValueUsingKey("ClassicListUpdateURL");
+
+		// dependencyProvider.getInitInfo
 		return functionalities;
 	}
 

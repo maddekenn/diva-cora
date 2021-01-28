@@ -19,32 +19,65 @@
 package se.uu.ub.cora.diva.extended;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
+import se.uu.ub.cora.logger.Logger;
+import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 
 public class ClassicOrganisationReloader implements ExtendedFunctionality {
 
 	private HttpHandlerFactory httpHandlerFactory;
+	private String url;
+	private Logger log = LoggerProvider.getLoggerForClass(ClassicOrganisationReloader.class);
 
 	public ClassicOrganisationReloader(HttpHandlerFactory httpHandlerFactory, String url) {
-		// this.httpHandlerFactory = httpHandlerFactory;
-		// TODO Auto-generated constructor stub
+		this.url = url;
+		this.httpHandlerFactory = httpHandlerFactory;
+
 	}
 
 	@Override
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
-		// TODO Auto-generated method stub
-		// DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
-		// String domain = recordInfo.getFirstAtomicValueWithNameInData("domain");
-		// String url = "https://divanånting/listUpdateServlet?list=organisation&domain=uu";
-		// HttpHandler factor = httpHandlerFactory.factor(url);
-		// factor.setRequestMethod("GET");
-		// factor.getResponseCode();
+		String domain = extractDomain(dataGroup);
+		HttpHandler httpHandler = factorHttpHandler(domain);
+		int responseCode = httpHandler.getResponseCode();
+		logResponse(domain, responseCode);
 
-		// Anropa servlet oavsett dataGroup
-		// URL
-		// HTTP Request
+	}
 
+	private String extractDomain(DataGroup dataGroup) {
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
+		return recordInfo.getFirstAtomicValueWithNameInData("domain");
+	}
+
+	private HttpHandler factorHttpHandler(String domain) {
+		String urlWithParameters = this.url + "?list=ORGANISATION&domain=" + domain;
+
+		HttpHandler httpHandler = httpHandlerFactory.factor(urlWithParameters);
+		httpHandler.setRequestMethod("GET");
+		return httpHandler;
+	}
+
+	private void logResponse(String domain, int responseCode) {
+		if (responseCode == 200) {
+			log.logInfoUsingMessage(
+					"List update succesful for parameters ORGANISATION and " + domain + ".");
+		} else {
+			logErrorResponse(domain, responseCode);
+		}
+	}
+
+	private void logErrorResponse(String domain, int responseCode) {
+		String errorMessageBase = "Error when updating list for organisation for parameters "
+				+ "ORGANISATION and " + domain + ". ";
+		if (responseCode == 400) {
+			log.logErrorUsingMessage(errorMessageBase + "Invalid argument.");
+		} else if (responseCode == 500) {
+			log.logErrorUsingMessage(errorMessageBase + "Internal server error.");
+		} else {
+			log.logErrorUsingMessage(errorMessageBase + "Unexpected error.");
+		}
 	}
 
 }

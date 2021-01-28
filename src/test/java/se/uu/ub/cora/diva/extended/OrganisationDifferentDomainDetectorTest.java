@@ -42,10 +42,10 @@ public class OrganisationDifferentDomainDetectorTest {
 	public void setUp() {
 		recordStorage = new RecordStorageSpy();
 		functionality = new OrganisationDifferentDomainDetector(recordStorage);
-		createDefultDataGroup();
+		createDefaultDataGroup();
 	}
 
-	private void createDefultDataGroup() {
+	private void createDefaultDataGroup() {
 		dataGroup = new DataGroupDomainSpy("organisation");
 		DataGroupDomainSpy recordInfo = new DataGroupDomainSpy("recordInfo");
 		recordInfo.addChild(new DataAtomicSpy("id", "4567"));

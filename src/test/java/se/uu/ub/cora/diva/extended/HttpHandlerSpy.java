@@ -6,11 +6,12 @@ import se.uu.ub.cora.httphandler.HttpHandler;
 
 public class HttpHandlerSpy implements HttpHandler {
 
-	public String requestMetod;
+	public String requestMethod;
+	public int responseCode;
 
 	@Override
-	public void setRequestMethod(String requestMetod) {
-		this.requestMetod = requestMetod;
+	public void setRequestMethod(String requestMethod) {
+		this.requestMethod = requestMethod;
 		// TODO Auto-generated method stub
 
 	}
@@ -23,8 +24,7 @@ public class HttpHandlerSpy implements HttpHandler {
 
 	@Override
 	public int getResponseCode() {
-		// TODO Auto-generated method stub
-		return 0;
+		return responseCode;
 	}
 
 	@Override
