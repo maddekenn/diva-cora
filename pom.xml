@@ -165,7 +165,7 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>httphandler</artifactId>
 			<version>${httphandler.version}</version>
-			<scope>runtime</scope>
+<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
