@@ -80,4 +80,14 @@ public class ClassicOrganisationReloader implements ExtendedFunctionality {
 		}
 	}
 
+	public HttpHandlerFactory getHttpHandlerFactory() {
+		// needed for test
+		return httpHandlerFactory;
+	}
+
+	public String getUrl() {
+		// needed for test
+		return url;
+	}
+
 }
