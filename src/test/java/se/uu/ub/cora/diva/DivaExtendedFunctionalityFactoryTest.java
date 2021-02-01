@@ -26,7 +26,6 @@ import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPo
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,12 +37,15 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.diva.extended.ClassicOrganisationReloader;
+import se.uu.ub.cora.diva.extended.LoggerFactorySpy;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.extended.SpiderDependencyProviderSpy;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
+import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.spider.dependency.SpiderInitializationException;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory;
@@ -56,9 +58,12 @@ public class DivaExtendedFunctionalityFactoryTest {
 	private Map<String, String> initInfo;
 	private SpiderDependencyProviderSpy spiderDependencyProvider;
 	private RecordStorageProviderSpy recordStorageProvider;
+	private LoggerFactorySpy loggerFactorySpy;
 
 	@BeforeMethod
 	public void setUp() {
+		loggerFactorySpy = new LoggerFactorySpy();
+		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 		factory = new DivaExtendedFunctionalityFactory();
 		initInfo = new HashMap<>();
 		initInfo.put("databaseLookupName", "someDBName");
@@ -94,6 +99,13 @@ public class DivaExtendedFunctionalityFactoryTest {
 		assertEquals(updateBefore.position, position);
 		assertEquals(updateBefore.recordType, recordType);
 		assertEquals(updateBefore.runAsNumber, 0);
+	}
+
+	@Test(expectedExceptions = SpiderInitializationException.class, expectedExceptionsMessageRegExp = ""
+			+ "some error message from spy")
+	public void testNoClassicListUpdateURL() {
+		initInfo.remove("classicListUpdateURL");
+		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
 	}
 
 	@Test
@@ -132,7 +144,8 @@ public class DivaExtendedFunctionalityFactoryTest {
 	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error starting ContextConnectionProviderImp in extended functionality")
 	public void testNoDbLookupName() {
-		spiderDependencyProvider = new SpiderDependencyProviderSpy(Collections.emptyMap());
+		initInfo.remove("databaseLookupName");
+		spiderDependencyProvider = new SpiderDependencyProviderSpy(initInfo);
 
 		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
 		factory.factor(UPDATE_BEFORE_STORE, "subOrganisation");

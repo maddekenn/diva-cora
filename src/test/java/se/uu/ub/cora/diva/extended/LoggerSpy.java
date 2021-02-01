@@ -28,6 +28,7 @@ public class LoggerSpy implements Logger {
 
 	public List<String> errorMessages = new ArrayList<>();
 	public List<String> infoMessages = new ArrayList<>();
+	public List<String> warningMessages = new ArrayList<>();
 
 	@Override
 	public void logFatalUsingMessage(String message) {
@@ -55,7 +56,7 @@ public class LoggerSpy implements Logger {
 
 	@Override
 	public void logWarnUsingMessage(String message) {
-		// TODO Auto-generated method stub
+		warningMessages.add(message);
 
 	}
 

@@ -49,10 +49,12 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	private static final String SUB_ORGANISATION = "subOrganisation";
 	private List<ExtendedFunctionalityContext> contexts = new ArrayList<>();
 	private SpiderDependencyProvider dependencyProvider;
+	private String url;
 
 	@Override
 	public void initializeUsingDependencyProvider(SpiderDependencyProvider dependencyProvider) {
 		this.dependencyProvider = dependencyProvider;
+		url = dependencyProvider.getInitInfoValueUsingKey("classicListUpdateURL");
 		createListOfContexts();
 	}
 
@@ -125,9 +127,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	}
 
 	private ClassicOrganisationReloader createClassicReloader() {
-		// ska vi göra så här, eller ska vi läsa in klassnamnet?
 		HttpHandlerFactory factory = new HttpHandlerFactoryImp();
-		String url = dependencyProvider.getInitInfoValueUsingKey("classicListUpdateURL");
 		return new ClassicOrganisationReloader(factory, url);
 	}
 
