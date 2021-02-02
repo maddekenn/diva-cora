@@ -18,6 +18,7 @@
  */
 package se.uu.ub.cora.diva;
 
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
 
 import java.util.ArrayList;
@@ -27,9 +28,12 @@ import javax.naming.InitialContext;
 
 import se.uu.ub.cora.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.connection.SqlConnectionProvider;
+import se.uu.ub.cora.diva.extended.ClassicOrganisationReloader;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
+import se.uu.ub.cora.httphandler.HttpHandlerFactory;
+import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.spider.dependency.SpiderDependencyProvider;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
@@ -45,10 +49,12 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	private static final String SUB_ORGANISATION = "subOrganisation";
 	private List<ExtendedFunctionalityContext> contexts = new ArrayList<>();
 	private SpiderDependencyProvider dependencyProvider;
+	private String url;
 
 	@Override
 	public void initializeUsingDependencyProvider(SpiderDependencyProvider dependencyProvider) {
 		this.dependencyProvider = dependencyProvider;
+		url = dependencyProvider.getInitInfoValueUsingKey("classicListUpdateURL");
 		createListOfContexts();
 	}
 
@@ -60,6 +66,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 
 	private void createContext(String recordType) {
 		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_STORE, recordType, 0));
+		contexts.add(new ExtendedFunctionalityContext(UPDATE_AFTER_STORE, recordType, 0));
 	}
 
 	@Override
@@ -71,10 +78,23 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	public List<ExtendedFunctionality> factor(ExtendedFunctionalityPosition position,
 			String recordType) {
 		List<ExtendedFunctionality> functionalities = new ArrayList<>();
-		functionalities.add(new OrganisationDuplicateLinksRemover());
+		if (UPDATE_BEFORE_STORE == position) {
+			addFunctionalityForBeforeStore(functionalities);
+		} else if (UPDATE_AFTER_STORE == position) {
+			addFunctionalityForAfterStore(functionalities);
+		}
+
+		return functionalities;
+	}
+
+	private void addFunctionalityForBeforeStore(List<ExtendedFunctionality> functionalities) {
+		addDuplicateLinksRemover(functionalities);
 		addDisallowedDependencyDetector(functionalities);
 		addDifferentDomainDetector(functionalities);
-		return functionalities;
+	}
+
+	private void addDuplicateLinksRemover(List<ExtendedFunctionality> functionalities) {
+		functionalities.add(new OrganisationDuplicateLinksRemover());
 	}
 
 	private void addDifferentDomainDetector(List<ExtendedFunctionality> functionalities) {
@@ -99,6 +119,16 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			throw new RuntimeException(
 					"Error starting ContextConnectionProviderImp in extended functionality", e);
 		}
+	}
+
+	private void addFunctionalityForAfterStore(List<ExtendedFunctionality> functionalities) {
+		ClassicOrganisationReloader classicOrganisationReloader = createClassicReloader();
+		functionalities.add(classicOrganisationReloader);
+	}
+
+	private ClassicOrganisationReloader createClassicReloader() {
+		HttpHandlerFactory factory = new HttpHandlerFactoryImp();
+		return ClassicOrganisationReloader.usingHttpHandlerFactoryAndUrl(factory, url);
 	}
 
 }

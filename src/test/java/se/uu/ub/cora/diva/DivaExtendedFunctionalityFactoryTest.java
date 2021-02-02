@@ -22,9 +22,10 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,13 +36,20 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.connection.ContextConnectionProviderImp;
+import se.uu.ub.cora.diva.extended.ClassicOrganisationReloader;
+import se.uu.ub.cora.diva.extended.LoggerFactorySpy;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.extended.SpiderDependencyProviderSpy;
+import se.uu.ub.cora.httphandler.HttpHandlerFactory;
+import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
+import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.spider.dependency.SpiderInitializationException;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition;
 import se.uu.ub.cora.sqldatabase.DataReaderImp;
 
 public class DivaExtendedFunctionalityFactoryTest {
@@ -50,12 +58,16 @@ public class DivaExtendedFunctionalityFactoryTest {
 	private Map<String, String> initInfo;
 	private SpiderDependencyProviderSpy spiderDependencyProvider;
 	private RecordStorageProviderSpy recordStorageProvider;
+	private LoggerFactorySpy loggerFactorySpy;
 
 	@BeforeMethod
 	public void setUp() {
+		loggerFactorySpy = new LoggerFactorySpy();
+		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 		factory = new DivaExtendedFunctionalityFactory();
 		initInfo = new HashMap<>();
 		initInfo.put("databaseLookupName", "someDBName");
+		initInfo.put("classicListUpdateURL", "someUpdateUrl");
 		recordStorageProvider = new RecordStorageProviderSpy();
 		spiderDependencyProvider = new SpiderDependencyProviderSpy(initInfo);
 		spiderDependencyProvider.setRecordStorageProvider(recordStorageProvider);
@@ -65,18 +77,35 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void testInit() {
-		assertEquals(factory.getExtendedFunctionalityContexts().size(), 3);
-		assertCorrectContextUsingIndexAndRecordType(0, "subOrganisation");
-		assertCorrectContextUsingIndexAndRecordType(1, "topOrganisation");
-		assertCorrectContextUsingIndexAndRecordType(2, "rootOrganisation");
+		assertEquals(factory.getExtendedFunctionalityContexts().size(), 6);
+		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_STORE, "subOrganisation",
+				0);
+		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "subOrganisation",
+				1);
+		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_STORE, "topOrganisation",
+				2);
+		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "topOrganisation",
+				3);
+		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_STORE, "rootOrganisation",
+				4);
+		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "rootOrganisation",
+				5);
 	}
 
-	private void assertCorrectContextUsingIndexAndRecordType(int index, String recordType) {
+	private void assertCorrectContextUsingPositionRecordTypeAndIndex(
+			ExtendedFunctionalityPosition position, String recordType, int index) {
 		ExtendedFunctionalityContext updateBefore = factory.getExtendedFunctionalityContexts()
 				.get(index);
-		assertEquals(updateBefore.position, UPDATE_BEFORE_STORE);
+		assertEquals(updateBefore.position, position);
 		assertEquals(updateBefore.recordType, recordType);
 		assertEquals(updateBefore.runAsNumber, 0);
+	}
+
+	@Test(expectedExceptions = SpiderInitializationException.class, expectedExceptionsMessageRegExp = ""
+			+ "some error message from spy")
+	public void testNoClassicListUpdateURL() {
+		initInfo.remove("classicListUpdateURL");
+		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
 	}
 
 	@Test
@@ -115,7 +144,8 @@ public class DivaExtendedFunctionalityFactoryTest {
 	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error starting ContextConnectionProviderImp in extended functionality")
 	public void testNoDbLookupName() {
-		spiderDependencyProvider = new SpiderDependencyProviderSpy(Collections.emptyMap());
+		initInfo.remove("databaseLookupName");
+		spiderDependencyProvider = new SpiderDependencyProviderSpy(initInfo);
 
 		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
 		factory.factor(UPDATE_BEFORE_STORE, "subOrganisation");
@@ -133,6 +163,26 @@ public class DivaExtendedFunctionalityFactoryTest {
 		List<ExtendedFunctionality> functionalities = factory.factor(UPDATE_BEFORE_STORE,
 				"topOrganisation");
 		assertCorrectFactoredFunctionalities(functionalities);
+	}
+
+	@Test
+	public void factorTopOrganisationForPositionNotHandled() {
+		List<ExtendedFunctionality> functionalities = factory
+				.factor(UPDATE_AFTER_METADATA_VALIDATION, "topOrganisation");
+		assertEquals(functionalities.size(), 0);
+	}
+
+	@Test
+	public void factorClassicOrganisationUpdaterUpdateAfterStore() {
+		List<ExtendedFunctionality> functionalities = factory
+				.factor(ExtendedFunctionalityPosition.UPDATE_AFTER_STORE, null);
+		assertEquals(functionalities.size(), 1);
+		assertTrue(functionalities.get(0) instanceof ClassicOrganisationReloader);
+		ClassicOrganisationReloader functionality = (ClassicOrganisationReloader) functionalities
+				.get(0);
+		HttpHandlerFactory httpHandlerFactory = functionality.getHttpHandlerFactory();
+		assertTrue(httpHandlerFactory instanceof HttpHandlerFactoryImp);
+		assertEquals(functionality.getUrl(), initInfo.get("classicListUpdateURL"));
 	}
 
 }
