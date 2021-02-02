@@ -19,6 +19,7 @@
 package se.uu.ub.cora.diva.extended;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -33,6 +34,7 @@ public class ClassicOrganisationReloaderTest {
 	private String url;
 	private DataGroupDomainSpy dataGroup;
 	private LoggerFactorySpy loggerFactorySpy;
+	private String otherDomain = "otherDomain";
 
 	@BeforeMethod
 	public void setUp() {
@@ -41,7 +43,8 @@ public class ClassicOrganisationReloaderTest {
 		url = "https://somethingWithDiva/servlet";
 		httpHandlerFactory = new HttpHandlerFactorySpy();
 		createDefaultDataGroup("someDomain");
-		classicOrganisationReloader = new ClassicOrganisationReloader(httpHandlerFactory, url);
+		classicOrganisationReloader = ClassicOrganisationReloader
+				.usingHttpHandlerFactoryAndUrl(httpHandlerFactory, url);
 
 	}
 
@@ -54,25 +57,36 @@ public class ClassicOrganisationReloaderTest {
 	}
 
 	@Test
+	public void testNoCallWhenEmptyUrl() {
+		classicOrganisationReloader = ClassicOrganisationReloader
+				.usingHttpHandlerFactoryAndUrl(httpHandlerFactory, "");
+
+		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+
+		assertNull(httpHandlerFactory.factoredHttpHandlerSpy);
+
+		LoggerSpy logger = loggerFactorySpy.logger;
+		assertEquals(logger.errorMessages.size(), 0);
+		assertEquals(logger.infoMessages.size(), 1);
+		assertEquals(logger.infoMessages.get(0),
+				"Empty URL, no call made to list update in classic.");
+	}
+
+	@Test
 	public void testServletHasBeenCalled() {
 		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
 
 		assertHandlerFactoryReceivesCorrectURL("someDomain");
-
 		HttpHandlerSpy httpHandlerSpy = httpHandlerFactory.factoredHttpHandlerSpy;
 		assertEquals(httpHandlerSpy.requestMethod, "GET");
-
 	}
 
 	@Test
 	public void testServletWithOtherDomain() {
-		String otherDomain = "otherDomain";
 		createDefaultDataGroup(otherDomain);
 
 		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
-
 		assertHandlerFactoryReceivesCorrectURL(otherDomain);
-
 	}
 
 	private void assertHandlerFactoryReceivesCorrectURL(String domain) {
@@ -92,7 +106,6 @@ public class ClassicOrganisationReloaderTest {
 
 	@Test
 	public void testResponseCode200OtherDomain() {
-		String otherDomain = "otherDomain";
 		createDefaultDataGroup(otherDomain);
 		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
 		LoggerSpy logger = loggerFactorySpy.logger;
@@ -119,7 +132,6 @@ public class ClassicOrganisationReloaderTest {
 
 	@Test
 	public void testResponseCode500() {
-		String otherDomain = "otherDomain";
 		createDefaultDataGroup(otherDomain);
 		httpHandlerFactory.responseCode = 500;
 

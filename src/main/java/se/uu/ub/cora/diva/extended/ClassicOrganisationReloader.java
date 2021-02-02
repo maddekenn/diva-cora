@@ -31,19 +31,34 @@ public class ClassicOrganisationReloader implements ExtendedFunctionality {
 	private String url;
 	private Logger log = LoggerProvider.getLoggerForClass(ClassicOrganisationReloader.class);
 
-	public ClassicOrganisationReloader(HttpHandlerFactory httpHandlerFactory, String url) {
+	public static ClassicOrganisationReloader usingHttpHandlerFactoryAndUrl(
+			HttpHandlerFactory httpHandlerFactory, String url) {
+		return new ClassicOrganisationReloader(httpHandlerFactory, url);
+	}
+
+	private ClassicOrganisationReloader(HttpHandlerFactory httpHandlerFactory, String url) {
 		this.url = url;
 		this.httpHandlerFactory = httpHandlerFactory;
-
 	}
 
 	@Override
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
+		if (urlIsEmpty()) {
+			log.logInfoUsingMessage("Empty URL, no call made to list update in classic.");
+		} else {
+			callListUpdateInClassic(dataGroup);
+		}
+	}
+
+	private boolean urlIsEmpty() {
+		return "".equals(url);
+	}
+
+	private void callListUpdateInClassic(DataGroup dataGroup) {
 		String domain = extractDomain(dataGroup);
 		HttpHandler httpHandler = factorHttpHandler(domain);
 		int responseCode = httpHandler.getResponseCode();
 		logResponse(domain, responseCode);
-
 	}
 
 	private String extractDomain(DataGroup dataGroup) {

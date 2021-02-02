@@ -128,7 +128,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 
 	private ClassicOrganisationReloader createClassicReloader() {
 		HttpHandlerFactory factory = new HttpHandlerFactoryImp();
-		return new ClassicOrganisationReloader(factory, url);
+		return ClassicOrganisationReloader.usingHttpHandlerFactoryAndUrl(factory, url);
 	}
 
 }
