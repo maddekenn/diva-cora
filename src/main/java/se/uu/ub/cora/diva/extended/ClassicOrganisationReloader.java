@@ -27,6 +27,9 @@ import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 
 public class ClassicOrganisationReloader implements ExtendedFunctionality {
 
+	private static final int HTTP_STATUS_OK = 200;
+	private static final int HTTP_STATUS_BAD_REQUEST = 400;
+	private static final int HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
 	private HttpHandlerFactory httpHandlerFactory;
 	private String url;
 	private Logger log = LoggerProvider.getLoggerForClass(ClassicOrganisationReloader.class);
@@ -75,7 +78,7 @@ public class ClassicOrganisationReloader implements ExtendedFunctionality {
 	}
 
 	private void logResponse(String domain, int responseCode) {
-		if (responseCode == 200) {
+		if (responseCode == HTTP_STATUS_OK) {
 			log.logInfoUsingMessage(
 					"List update succesful for parameters ORGANISATION and " + domain + ".");
 		} else {
@@ -86,9 +89,9 @@ public class ClassicOrganisationReloader implements ExtendedFunctionality {
 	private void logErrorResponse(String domain, int responseCode) {
 		String errorMessageBase = "Error when updating list for organisation for parameters "
 				+ "ORGANISATION and " + domain + ". ";
-		if (responseCode == 400) {
+		if (responseCode == HTTP_STATUS_BAD_REQUEST) {
 			log.logErrorUsingMessage(errorMessageBase + "Invalid argument.");
-		} else if (responseCode == 500) {
+		} else if (responseCode == HTTP_STATUS_INTERNAL_SERVER_ERROR) {
 			log.logErrorUsingMessage(errorMessageBase + "Internal server error.");
 		} else {
 			log.logErrorUsingMessage(errorMessageBase + "Unexpected error.");
