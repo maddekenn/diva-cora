@@ -26,8 +26,6 @@ import java.util.StringJoiner;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.record.DataException;
-//import se.uu.ub.cora.sqldatabase.SqlStorageException;
-//import se.uu.ub.cora.sqldatabase.DataReader;
 import se.uu.ub.cora.sqldatabase.DataReader;
 
 public class OrganisationDisallowedDependencyDetector implements ExtendedFunctionality {
