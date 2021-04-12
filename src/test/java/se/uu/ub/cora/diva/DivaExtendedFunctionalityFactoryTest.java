@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -41,6 +41,7 @@ import se.uu.ub.cora.diva.extended.LoggerFactorySpy;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
+import se.uu.ub.cora.diva.extended.PersonDomainPartIndexer;
 import se.uu.ub.cora.diva.extended.SpiderDependencyProviderSpy;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
@@ -77,7 +78,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void testInit() {
-		assertEquals(factory.getExtendedFunctionalityContexts().size(), 6);
+		assertEquals(factory.getExtendedFunctionalityContexts().size(), 7);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_STORE, "subOrganisation",
 				0);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "subOrganisation",
@@ -90,6 +91,8 @@ public class DivaExtendedFunctionalityFactoryTest {
 				4);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "rootOrganisation",
 				5);
+		assertCorrectContextUsingPositionRecordTypeAndIndex(
+				ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN, "workOrder", 6);
 	}
 
 	private void assertCorrectContextUsingPositionRecordTypeAndIndex(
@@ -183,6 +186,14 @@ public class DivaExtendedFunctionalityFactoryTest {
 		HttpHandlerFactory httpHandlerFactory = functionality.getHttpHandlerFactory();
 		assertTrue(httpHandlerFactory instanceof HttpHandlerFactoryImp);
 		assertEquals(functionality.getUrl(), initInfo.get("classicListUpdateURL"));
+	}
+
+	@Test
+	public void factorWorkOrderForDomanPartCreateBeforeReturn() {
+		List<ExtendedFunctionality> functionalities = factory
+				.factor(ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN, null);
+		assertEquals(functionalities.size(), 1);
+		assertTrue(functionalities.get(0) instanceof PersonDomainPartIndexer);
 	}
 
 }
