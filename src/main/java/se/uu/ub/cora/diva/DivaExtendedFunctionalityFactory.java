@@ -87,7 +87,6 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			addFunctionalityForAfterStore(functionalities);
 		} else if (CREATE_BEFORE_RETURN == position) {
 			addFunctionalityCreateBeforeReturn(functionalities);
-			// new PersonDomainPartIndexer
 		}
 
 		return functionalities;

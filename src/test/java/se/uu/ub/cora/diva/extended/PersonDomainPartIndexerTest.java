@@ -49,8 +49,23 @@ public class PersonDomainPartIndexerTest {
 	}
 
 	@Test
+	public void testExtendedFunctionalityNotPerson() {
+		DataGroup workOrder = new DataGroupSpy("workOrder");
+
+		DataGroup recordTypeLink = new DataGroupSpy("recordType");
+		recordTypeLink.addChild(new DataAtomicSpy("linkedRecordType", "recordType"));
+		recordTypeLink.addChild(new DataAtomicSpy("linkedRecordId", "NOTperson"));
+		workOrder.addChild(recordTypeLink);
+
+		functionality.useExtendedFunctionality(authToken, workOrder);
+
+		assertEquals(instanceFactory.spiderRecordReaders.size(), 0);
+
+	}
+
+	@Test
 	public void testExtendedFunctionalityOneDomainPart() {
-		DataGroup workOrder = createWorkOrder();
+		DataGroup workOrder = createWorkOrder("index");
 
 		functionality.useExtendedFunctionality(authToken, workOrder);
 
@@ -61,7 +76,7 @@ public class PersonDomainPartIndexerTest {
 		assertCorrectlyCreated(1, 2);
 
 		assertCorrectlyFactoredDataGroups();
-		assertCorrectlyFactoredDataAtomics();
+		assertCorrectlyFactoredDataAtomics("index");
 	}
 
 	private void assertCorrectCalledRecordReader() {
@@ -94,21 +109,21 @@ public class PersonDomainPartIndexerTest {
 		assertEquals(dataGroupFactory.usedRecordIds.get(1), "personDomainPart");
 	}
 
-	private void assertCorrectlyFactoredDataAtomics() {
+	private void assertCorrectlyFactoredDataAtomics(String indexType) {
 		String idCreatedInReaderSpy = "somePerson:uu";
 		assertEquals(dataAtomicFactory.usedNameInDatas.get(0), "recordId");
 		assertEquals(dataAtomicFactory.usedValues.get(0), idCreatedInReaderSpy);
 		assertEquals(dataAtomicFactory.usedNameInDatas.get(1), "type");
-		assertEquals(dataAtomicFactory.usedValues.get(1), "index");
+		assertEquals(dataAtomicFactory.usedValues.get(1), indexType);
 
 		String secondIdCreatedInReaderSpy = "somePerson:test";
 		assertEquals(dataAtomicFactory.usedNameInDatas.get(2), "recordId");
 		assertEquals(dataAtomicFactory.usedValues.get(2), secondIdCreatedInReaderSpy);
 		assertEquals(dataAtomicFactory.usedNameInDatas.get(3), "type");
-		assertEquals(dataAtomicFactory.usedValues.get(3), "index");
+		assertEquals(dataAtomicFactory.usedValues.get(3), indexType);
 	}
 
-	public DataGroup createWorkOrder() {
+	public DataGroup createWorkOrder(String indexType) {
 		DataGroup workOrder = new DataGroupSpy("workOrder");
 
 		DataGroup recordTypeLink = new DataGroupSpy("recordType");
@@ -117,7 +132,23 @@ public class PersonDomainPartIndexerTest {
 		workOrder.addChild(recordTypeLink);
 
 		workOrder.addChild(new DataAtomicSpy("recordId", "personOne"));
-		workOrder.addChild(new DataAtomicSpy("type", "index"));
+		workOrder.addChild(new DataAtomicSpy("type", indexType));
 		return workOrder;
+	}
+
+	@Test
+	public void testExtendedFunctionalityOneDomainPartRemoveFromIndex() {
+		DataGroup workOrder = createWorkOrder("removeFromIndex");
+
+		functionality.useExtendedFunctionality(authToken, workOrder);
+
+		assertCorrectCalledRecordReader();
+		assertEquals(instanceFactory.spiderRecordCreators.size(), 2);
+
+		assertCorrectlyCreated(0, 0);
+		assertCorrectlyCreated(1, 2);
+
+		assertCorrectlyFactoredDataGroups();
+		assertCorrectlyFactoredDataAtomics("removeFromIndex");
 	}
 }

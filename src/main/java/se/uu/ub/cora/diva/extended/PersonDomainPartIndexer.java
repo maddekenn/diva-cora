@@ -33,23 +33,14 @@ public class PersonDomainPartIndexer implements ExtendedFunctionality {
 
 	@Override
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
-		DataGroup readDataGroup = readPersonDataGroup(authToken, dataGroup);
-		createWorkOrdersForDomainParts(authToken, readDataGroup);
-	}
-
-	private void createWorkOrdersForDomainParts(String authToken, DataGroup readDataGroup) {
-		for (DataGroup domainPart : readDataGroup.getAllGroupsWithNameInData("personDomainPart")) {
-			createWorkOrderForDomainPart(authToken, domainPart);
+		if (workOrderIsForPerson(dataGroup)) {
+			createWorkOrderForDomainPart(authToken, dataGroup);
 		}
 	}
 
-	private DataGroup readPersonDataGroup(String authToken, DataGroup dataGroup) {
+	private boolean workOrderIsForPerson(DataGroup dataGroup) {
 		String recordType = extractLinkedRecordType(dataGroup);
-		String recordId = dataGroup.getFirstAtomicValueWithNameInData("recordId");
-
-		SpiderRecordReader spiderRecordReader = SpiderInstanceProvider.getSpiderRecordReader();
-		DataRecord readRecord = spiderRecordReader.readRecord(authToken, recordType, recordId);
-		return readRecord.getDataGroup();
+		return "person".equals(recordType);
 	}
 
 	private String extractLinkedRecordType(DataGroup dataGroup) {
@@ -57,19 +48,42 @@ public class PersonDomainPartIndexer implements ExtendedFunctionality {
 		return recordTypeLink.getFirstAtomicValueWithNameInData("linkedRecordId");
 	}
 
-	private void createWorkOrderForDomainPart(String authToken, DataGroup domainPart) {
-		DataGroup newWorkOrder = createWorkOrderDataGroup(domainPart);
+	private void createWorkOrderForDomainPart(String authToken, DataGroup dataGroup) {
+		DataGroup readDataGroup = readPersonDataGroup(authToken, dataGroup);
+		String indexType = dataGroup.getFirstAtomicValueWithNameInData("type");
+		createWorkOrdersForDomainParts(authToken, readDataGroup, indexType);
+	}
+
+	private DataGroup readPersonDataGroup(String authToken, DataGroup dataGroup) {
+		String recordId = dataGroup.getFirstAtomicValueWithNameInData("recordId");
+
+		SpiderRecordReader spiderRecordReader = SpiderInstanceProvider.getSpiderRecordReader();
+		DataRecord readRecord = spiderRecordReader.readRecord(authToken, "person", recordId);
+		return readRecord.getDataGroup();
+	}
+
+	private void createWorkOrdersForDomainParts(String authToken, DataGroup readDataGroup,
+			String indexType) {
+		for (DataGroup domainPart : readDataGroup.getAllGroupsWithNameInData("personDomainPart")) {
+			createWorkOrderForDomainPart(authToken, domainPart, indexType);
+		}
+	}
+
+	private void createWorkOrderForDomainPart(String authToken, DataGroup domainPart,
+			String indexType) {
+		DataGroup newWorkOrder = createWorkOrderDataGroup(domainPart, indexType);
 
 		SpiderRecordCreator spiderRecordCreator = SpiderInstanceProvider.getSpiderRecordCreator();
 		spiderRecordCreator.createAndStoreRecord(authToken, "workOrder", newWorkOrder);
 	}
 
-	private DataGroup createWorkOrderDataGroup(DataGroup personDomainPart) {
+	private DataGroup createWorkOrderDataGroup(DataGroup personDomainPart, String indexType) {
 		String personDomainPartId = personDomainPart
 				.getFirstAtomicValueWithNameInData("linkedRecordId");
 
 		DataGroup newWorkOrder = DataGroupProvider.getDataGroupUsingNameInData("workOrder");
-		addAtomicValues(personDomainPartId, newWorkOrder);
+		addRecordTypeLink(newWorkOrder);
+		addAtomicValues(personDomainPartId, newWorkOrder, indexType);
 		return newWorkOrder;
 	}
 
@@ -79,12 +93,12 @@ public class PersonDomainPartIndexer implements ExtendedFunctionality {
 		newWorkOrder.addChild(recordTypeLink);
 	}
 
-	private void addAtomicValues(String personDomainPartId, DataGroup newWorkOrder) {
-		addRecordTypeLink(newWorkOrder);
+	private void addAtomicValues(String personDomainPartId, DataGroup newWorkOrder,
+			String indexType) {
 		newWorkOrder.addChild(DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("recordId",
 				personDomainPartId));
-		newWorkOrder
-				.addChild(DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("type", "index"));
+		newWorkOrder.addChild(
+				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("type", indexType));
 	}
 
 }
