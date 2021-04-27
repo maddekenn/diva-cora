@@ -40,9 +40,17 @@ public class DataGroupSpy implements DataGroup {
 	public List<DataElement> addedChildren = new ArrayList<>();
 	public List<String> returnContainsTrueNameInDatas = new ArrayList<>();
 	public List<String> requestedAtomicNameInDatas = new ArrayList<>();
+	public String recordType;
+	public String recordId;
 
 	public DataGroupSpy(String nameInData) {
 		this.nameInData = nameInData;
+	}
+
+	public DataGroupSpy(String nameInData, String recordType, String recordId) {
+		this.nameInData = nameInData;
+		this.recordType = recordType;
+		this.recordId = recordId;
 	}
 
 	@Override
