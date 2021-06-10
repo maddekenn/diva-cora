@@ -98,12 +98,6 @@ public class RecordStorageSpy implements RecordStorage {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	//
-	// @Override
-	// public boolean recordsExistForRecordType(String type) {
-	// // TODO Auto-generated method stub
-	// return false;
-	// }
 
 	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
