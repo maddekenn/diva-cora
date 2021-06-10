@@ -19,6 +19,7 @@
 package se.uu.ub.cora.diva;
 
 import java.util.Collection;
+import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -82,17 +83,30 @@ public class RecordStorageSpy implements RecordStorage {
 		return null;
 	}
 
-	@Override
-	public boolean recordsExistForRecordType(String type) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	// @Override
+	// public boolean recordsExistForRecordType(String type) {
+	// // TODO Auto-generated method stub
+	// return false;
+	// }
 
 	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+			List<String> implementingTypes, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

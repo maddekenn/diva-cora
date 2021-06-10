@@ -98,18 +98,31 @@ public class RecordStorageSpy implements RecordStorage {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public boolean recordsExistForRecordType(String type) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	//
+	// @Override
+	// public boolean recordsExistForRecordType(String type) {
+	// // TODO Auto-generated method stub
+	// return false;
+	// }
 
 	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+			List<String> implementingTypes, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }
