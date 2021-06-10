@@ -18,8 +18,11 @@
  */
 package se.uu.ub.cora.diva;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -27,10 +30,23 @@ import se.uu.ub.cora.storage.StorageReadResult;
 
 public class RecordStorageSpy implements RecordStorage {
 
+	public List<String> readRecordTypes = new ArrayList<>();
+	public List<String> readRecordIds = new ArrayList<>();
+	public List<DataGroupDomainSpy> returnedDataGroups = new ArrayList<>();
+	public Map<String, DataGroupDomainSpy> returnOnRead = new HashMap<>();
+
 	@Override
 	public DataGroup read(String type, String id) {
-		// TODO Auto-generated method stub
-		return null;
+		readRecordTypes.add(type);
+		readRecordIds.add(id);
+		if (returnOnRead.containsKey(type + "_" + id)) {
+			DataGroupDomainSpy presetReturnValue = returnOnRead.get(type + "_" + id);
+			returnedDataGroups.add(presetReturnValue);
+			return presetReturnValue;
+		}
+		DataGroupDomainSpy dataGroupToReturn = new DataGroupDomainSpy(type + "_" + id);
+		returnedDataGroups.add(dataGroupToReturn);
+		return dataGroupToReturn;
 	}
 
 	@Override

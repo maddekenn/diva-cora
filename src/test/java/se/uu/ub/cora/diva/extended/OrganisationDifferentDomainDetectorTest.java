@@ -29,6 +29,8 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.DataGroupDomainSpy;
+import se.uu.ub.cora.diva.RecordStorageSpy;
 import se.uu.ub.cora.spider.record.DataException;
 
 public class OrganisationDifferentDomainDetectorTest {
