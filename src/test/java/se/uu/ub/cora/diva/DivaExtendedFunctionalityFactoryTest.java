@@ -155,14 +155,14 @@ public class DivaExtendedFunctionalityFactoryTest {
 	}
 
 	@Test
-	public void factorRootOrganisationUpdateAfter() {
+	public void factorRootOrganisationUpdateBefore() {
 		List<ExtendedFunctionality> functionalities = factory.factor(UPDATE_BEFORE_STORE,
 				"rootOrganisation");
 		assertCorrectFactoredFunctionalities(functionalities);
 	}
 
 	@Test
-	public void factorTopOrganisationUpdateAfter() {
+	public void factorTopOrganisationUpdateBefore() {
 		List<ExtendedFunctionality> functionalities = factory.factor(UPDATE_BEFORE_STORE,
 				"topOrganisation");
 		assertCorrectFactoredFunctionalities(functionalities);

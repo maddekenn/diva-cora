@@ -24,6 +24,7 @@ import static org.testng.Assert.assertNull;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.diva.DataGroupDomainSpy;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 

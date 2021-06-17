@@ -24,8 +24,8 @@ import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.data.DataRecord;
 import se.uu.ub.cora.spider.dependency.SpiderInstanceProvider;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
-import se.uu.ub.cora.spider.record.SpiderRecordCreator;
-import se.uu.ub.cora.spider.record.SpiderRecordReader;
+import se.uu.ub.cora.spider.record.RecordCreator;
+import se.uu.ub.cora.spider.record.RecordReader;
 
 public class PersonDomainPartIndexer implements ExtendedFunctionality {
 
@@ -57,7 +57,7 @@ public class PersonDomainPartIndexer implements ExtendedFunctionality {
 	private DataGroup readPersonDataGroup(String authToken, DataGroup dataGroup) {
 		String recordId = dataGroup.getFirstAtomicValueWithNameInData("recordId");
 
-		SpiderRecordReader spiderRecordReader = SpiderInstanceProvider.getSpiderRecordReader();
+		RecordReader spiderRecordReader = SpiderInstanceProvider.getRecordReader();
 		DataRecord readRecord = spiderRecordReader.readRecord(authToken, "person", recordId);
 		return readRecord.getDataGroup();
 	}
@@ -73,7 +73,7 @@ public class PersonDomainPartIndexer implements ExtendedFunctionality {
 			String indexType) {
 		DataGroup newWorkOrder = createWorkOrderDataGroup(domainPart, indexType);
 
-		SpiderRecordCreator spiderRecordCreator = SpiderInstanceProvider.getSpiderRecordCreator();
+		RecordCreator spiderRecordCreator = SpiderInstanceProvider.getRecordCreator();
 		spiderRecordCreator.createAndStoreRecord(authToken, "workOrder", newWorkOrder);
 	}
 

@@ -24,9 +24,9 @@ import java.util.List;
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataRecord;
-import se.uu.ub.cora.spider.record.SpiderRecordReader;
+import se.uu.ub.cora.spider.record.RecordReader;
 
-public class SpiderRecordReaderSpy implements SpiderRecordReader {
+public class SpiderRecordReaderSpy implements RecordReader {
 	public String authToken;
 	public String type;
 	public String id;
