@@ -51,7 +51,7 @@
 		<solrsearch.version>3.6.0</solrsearch.version>
 		<metacreator.version>4.2-SNAPSHOT</metacreator.version>
 		<httphandler.version>2.2.0</httphandler.version>
-		<sqldatabase.version>3.1.0</sqldatabase.version>
+		<sqldatabase.version>3.2-SNAPSHOT</sqldatabase.version>
 		<servlet-api.version>4.0.1</servlet-api.version>
 	</properties>
 
