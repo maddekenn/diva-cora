@@ -26,7 +26,7 @@
 	</parent>
 
 	<artifactId>diva</artifactId>
-	<version>4.6-SNAPSHOT</version>
+	<version>5.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>DiVA Cora</name>
@@ -41,14 +41,14 @@
 		<spider.version>5.1-SNAPSHOT</spider.version>
 		<therest.version>6.0-SNAPSHOT</therest.version>
 		<beefeater.version>3.4.0</beefeater.version>
-		<bookkeeper.version>5.0.0</bookkeeper.version>
-		<basicdata.version>2.1-SNAPSHOT</basicdata.version>
+		<bookkeeper.version>6.0-SNAPSHOT</bookkeeper.version>
+		<basicdata.version>3.0-SNAPSHOT</basicdata.version>
 		<storage.version>4.0.0</storage.version>
-		<basicstorage.version>4.0.0</basicstorage.version>
+		<basicstorage.version>5.0-SNAPSHOT</basicstorage.version>
 		<gatekeeper.version>3.6.0</gatekeeper.version>
 		<gatekeeperclient.version>3.9.0</gatekeeperclient.version>
 		<divamixedstorage.version>4.7-SNAPSHOT</divamixedstorage.version>
-		<solrsearch.version>3.6.0</solrsearch.version>
+		<solrsearch.version>4.0-SNAPSHOT</solrsearch.version>
 		<metacreator.version>4.2-SNAPSHOT</metacreator.version>
 		<httphandler.version>2.2.0</httphandler.version>
 		<sqldatabase.version>3.2-SNAPSHOT</sqldatabase.version>
