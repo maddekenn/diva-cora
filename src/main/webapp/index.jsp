@@ -16,47 +16,48 @@
   ~     You should have received a copy of the GNU General Public License
   ~     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
   --%>
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<title>Hello Rest of The World!</title>
 <body>
 	<h1>Hello Rest of The World!</h1>
 	When "the rest" starts up, the
-	<b>SystemInitializer</b> class is started through a @WebListener. It
+	<strong>SystemInitializer</strong> class is started through a @WebListener. It
 	will create a new
-	<b>SystemOneDependencyProvider</b> (implementing
+	<strong>SystemOneDependencyProvider</strong> (implementing
 	SpiderDependencyProvider).
-	<b>SystemOneDependencyProvider</b> initializes the needed dependencies
+	<strong>SystemOneDependencyProvider</strong> initializes the needed dependencies
 	for the system:
 	<br> recordStorage (used by spider) currently as
-	<b>RecordStorageInMemory</b>
-	<i>(this is the same class that also provides metadataStorage)</i>
+	<strong>RecordStorageInMemory</strong>
+	<em>(this is the same class that also provides metadataStorage)</em>
 	<br> idGenerator (used by spider) currently as
-	<b>TimeStampIdGenerator</b>
+	<strong>TimeStampIdGenerator</strong>
 	<br> keyCalculator (used by spider) currently as
-	<b>RecordPermissionKeyCalculator</b>
+	<strong>RecordPermissionKeyCalculator</strong>
 	<br> metadataStorage (used by metadataformat) currently as
-	<b>RecordStorageInMemory</b>
-	<i>(this is the same class that also provides recordStorage)</i>
+	<strong>RecordStorageInMemory</strong>
+	<em>(this is the same class that also provides recordStorage)</em>
 	<br> dataValidator (used by metadataformat) currently as
-	<b>DataValidatorImp</b>
+	<strong>DataValidatorImp</strong>
 	<br> authorizator (used by beefeater) currently as
-	<b>AuthorizatorImp</b>
+	<strong>AuthorizatorImp</strong>
 	<br>
 	<br>
-	<b>SystemOneDependencyProvider</b> also adds to storage, the basic
+	<strong>SystemOneDependencyProvider</strong> also adds to storage, the basic
 	metadata that is needed for the system to work. The needed metadata is:
 	<br>Metadata groups including all subgroups and variables for,
-	<b>metadataNew</b>,
-	<b>recordType</b> and
-	<b>RecordTypeNew</b>
+	<strong>metadataNew</strong>,
+	<strong>recordType</strong> and
+	<strong>RecordTypeNew</strong>
 	<br>
 	<br>
-	<b>SystemOneDependencyProvider</b> also adds to storage, the basic
+	<strong>SystemOneDependencyProvider</strong> also adds to storage, the basic
 	recordtypes that is needed for the system to work. The needed
 	recordTypes are:
 	<br>
-	<b>Metadata</b> and
-	<b>RecordType</b>
+	<strong>Metadata</strong> and
+	<strong>RecordType</strong>
 	<br>
 	<h2>Use these tools</h2>
 	Use the firefox addon RESTClient to play with this...
