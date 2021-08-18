@@ -60,7 +60,7 @@
 	
 	
 	<h2>Further documentation</h2>
-	You can find further documentation in the official DiVA-wiki: <a href="https://wiki.epc.ub.uu.se/display/divainfo/Informationsmaterial">https://wiki.epc.ub.uu.se/display/divainfo/Informationsmaterial</a>.
+	You can find further documentation in the official DiVA-wiki: <a href="https://wiki.epc.ub.uu.se/x/P4UhBQ">https://wiki.epc.ub.uu.se/x/P4UhBQ</a>.
 	
 	
 </body>
