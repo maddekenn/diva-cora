@@ -22,11 +22,11 @@
 	<parent>
 		<groupId>se.uu.ub.cora</groupId>
 		<artifactId>cora-parent</artifactId>
-		<version>1.4.1</version>
+		<version>1.4.4</version>
 	</parent>
 
 	<artifactId>diva</artifactId>
-	<version>5.2-SNAPSHOT</version>
+	<version>6.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>DiVA Cora</name>
@@ -39,7 +39,7 @@
 		<coralog4j.version>2.3.0</coralog4j.version>
 		<json.version>2.5.0</json.version>
 		<spider.version>5.2.0</spider.version>
-		<therest.version>6.2-SNAPSHOT</therest.version>
+		<therest.version>7.0.0</therest.version>
 		<beefeater.version>3.5.0</beefeater.version>
 		<bookkeeper.version>6.1.0</bookkeeper.version>
 		<basicdata.version>3.2.0</basicdata.version>
@@ -52,7 +52,7 @@
 		<metacreator.version>4.3.0</metacreator.version>
 		<httphandler.version>2.3.0</httphandler.version>
 		<sqldatabase.version>4.1.0</sqldatabase.version>
-		<servlet-api.version>4.0.1</servlet-api.version>
+		<servlet-api.version>5.0.0</servlet-api.version>
 	</properties>
 
 	<scm>
@@ -178,8 +178,8 @@
 			<version>${sqldatabase.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<version>${servlet-api.version}</version>
 			<scope>provided</scope>
 		</dependency>
