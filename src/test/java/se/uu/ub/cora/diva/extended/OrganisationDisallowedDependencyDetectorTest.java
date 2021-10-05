@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,9 +19,7 @@
 package se.uu.ub.cora.diva.extended;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,19 +29,20 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.DatabaseFacadeSpy;
 import se.uu.ub.cora.spider.record.DataException;
 
 public class OrganisationDisallowedDependencyDetectorTest {
 
 	private String authToken = "someAuthToken";
 	private OrganisationDisallowedDependencyDetector functionality;
-	private DataReaderSpy dataReader;
+	private DatabaseFacadeSpy dbFacadeSpy;
 	private DataGroupSpy dataGroup;
 
 	@BeforeMethod
 	public void setUp() {
-		dataReader = new DataReaderSpy();
-		functionality = new OrganisationDisallowedDependencyDetector(dataReader);
+		dbFacadeSpy = new DatabaseFacadeSpy();
+		functionality = new OrganisationDisallowedDependencyDetector(dbFacadeSpy);
 		createDefultDataGroup();
 	}
 
@@ -56,13 +55,13 @@ public class OrganisationDisallowedDependencyDetectorTest {
 
 	@Test
 	public void testInit() {
-		assertSame(functionality.getDataReader(), dataReader);
+		assertSame(functionality.onlyForTestGetDatabaseFacade(), dbFacadeSpy);
 	}
 
 	@Test
 	public void testWhenNoParentOrPredecessorInDataGroupNoCallForDependecyCheck() {
 		functionality.useExtendedFunctionality(authToken, dataGroup);
-		assertFalse(dataReader.executePreparedStatementWasCalled);
+		dbFacadeSpy.MCR.assertMethodNotCalled("readUsingSqlAndValues");
 	}
 
 	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
@@ -88,7 +87,8 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		} catch (DataException e) {
 			// do nothing
 		}
-		assertFalse(dataReader.executePreparedStatementWasCalled);
+		dbFacadeSpy.MCR.assertMethodNotCalled("readUsingSqlAndValues");
+		// assertFalse(dataReader.executePreparedStatementWasCalled);
 	}
 
 	@Test
@@ -98,14 +98,20 @@ public class OrganisationDisallowedDependencyDetectorTest {
 
 		functionality.useExtendedFunctionality(authToken, dataGroup);
 
-		assertTrue(dataReader.executePreparedStatementWasCalled);
+		dbFacadeSpy.MCR.assertMethodWasCalled("readUsingSqlAndValues");
+
 		String sql = getExpectedSql("?");
 
-		assertEquals(dataReader.sqlSentToReader, sql);
 		List<Object> expectedValues = new ArrayList<>();
 		expectedValues.add(51);
 		expectedValues.add(4567);
-		assertEquals(dataReader.valuesSentToReader, expectedValues);
+
+		dbFacadeSpy.MCR.assertParameter("readUsingSqlAndValues", 0, "sql", sql);
+
+		var values = dbFacadeSpy.MCR.getValueForMethodNameAndCallNumberAndParameterName(
+				"readUsingSqlAndValues", 0, "values");
+
+		assertEquals(values, expectedValues);
 	}
 
 	private List<DataElement> createListAndAddDefaultParent() {
@@ -133,15 +139,22 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 
 		functionality.useExtendedFunctionality(authToken, dataGroup);
-		assertTrue(dataReader.executePreparedStatementWasCalled);
+		// assertTrue(dataReader.executePreparedStatementWasCalled);
 		String sql = getExpectedSql("?, ?");
+		dbFacadeSpy.MCR.assertParameter("readUsingSqlAndValues", 0, "sql", sql);
 
-		assertEquals(dataReader.sqlSentToReader, sql);
+		// assertEquals(dataReader.sqlSentToReader, sql);
 		List<Object> expectedValues = new ArrayList<>();
 		expectedValues.add(51);
 		expectedValues.add(3);
 		expectedValues.add(4567);
-		assertEquals(dataReader.valuesSentToReader, expectedValues);
+
+		var values = dbFacadeSpy.MCR.getValueForMethodNameAndCallNumberAndParameterName(
+				"readUsingSqlAndValues", 0, "values");
+
+		assertEquals(values, expectedValues);
+
+		// assertEquals(dataReader.valuesSentToReader, expectedValues);
 	}
 
 	@Test
@@ -155,15 +168,21 @@ public class OrganisationDisallowedDependencyDetectorTest {
 
 		functionality.useExtendedFunctionality(authToken, dataGroup);
 
-		assertTrue(dataReader.executePreparedStatementWasCalled);
+		// assertTrue(dataReader.executePreparedStatementWasCalled);
 		String sql = getExpectedSql("?, ?");
-		assertEquals(dataReader.sqlSentToReader, sql);
+		dbFacadeSpy.MCR.assertParameter("readUsingSqlAndValues", 0, "sql", sql);
+		// assertEquals(dataReader.sqlSentToReader, sql);
 
 		List<Object> expectedValues = new ArrayList<>();
 		expectedValues.add(51);
 		expectedValues.add(78);
 		expectedValues.add(4567);
-		assertEquals(dataReader.valuesSentToReader, expectedValues);
+
+		var values = dbFacadeSpy.MCR.getValueForMethodNameAndCallNumberAndParameterName(
+				"readUsingSqlAndValues", 0, "values");
+
+		assertEquals(values, expectedValues);
+		// assertEquals(dataReader.valuesSentToReader, expectedValues);
 	}
 
 	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
@@ -173,7 +192,8 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		OrganisationDataCreator.createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
 				dataGroup, "parentOrganisation", "0", "51");
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
-		dataReader.numOfRowsToReturn = 2;
+		// dataReader.numOfRowsToReturn = 2;
+		dbFacadeSpy.readReturnsSomeRows = true;
 		functionality.useExtendedFunctionality(authToken, dataGroup);
 	}
 
@@ -214,7 +234,8 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		} catch (DataException e) {
 			// do nothing
 		}
-		assertFalse(dataReader.executePreparedStatementWasCalled);
+		dbFacadeSpy.MCR.assertMethodNotCalled("readUsingSqlAndValues");
+		// assertFalse(dataReader.executePreparedStatementWasCalled);
 	}
 
 }

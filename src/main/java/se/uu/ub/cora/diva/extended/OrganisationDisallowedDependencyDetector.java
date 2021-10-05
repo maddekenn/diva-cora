@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -20,21 +20,21 @@ package se.uu.ub.cora.diva.extended;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.StringJoiner;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.record.DataException;
-import se.uu.ub.cora.sqldatabase.DataReader;
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
+import se.uu.ub.cora.sqldatabase.Row;
 
 public class OrganisationDisallowedDependencyDetector implements ExtendedFunctionality {
 
-	private DataReader dataReader;
 	private DataGroup dataGroup;
+	private DatabaseFacade dbFacade;
 
-	public OrganisationDisallowedDependencyDetector(DataReader dataReader) {
-		this.dataReader = dataReader;
+	public OrganisationDisallowedDependencyDetector(DatabaseFacade dbFacade) {
+		this.dbFacade = dbFacade;
 	}
 
 	@Override
@@ -44,8 +44,8 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 
 	}
 
-	public DataReader getDataReader() {
-		return dataReader;
+	public DatabaseFacade onlyForTestGetDatabaseFacade() {
+		return dbFacade;
 	}
 
 	private void possiblyThrowErrorIfDisallowedDependencyDetected(DataGroup dataGroup) {
@@ -55,6 +55,7 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 				"earlierOrganisation");
 		throwErrorIfSameParentAndPredecessor(parentIds, predecessorIds);
 		possiblyThrowErrorIfCircularDependencyDetected(parentIds, predecessorIds);
+		// TODO: close dbFacade
 	}
 
 	private List<Integer> getIdsFromOrganisationLinkUsingNameInData(DataGroup dataGroup,
@@ -67,6 +68,7 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 			List<Integer> predecessorIds) {
 		boolean sameIdInBothList = parentIds.stream().anyMatch(predecessorIds::contains);
 		if (sameIdInBothList) {
+			// TODO: close dbFacade
 			throw new DataException("Organisation not updated due to same parent and predecessor");
 		}
 	}
@@ -76,6 +78,7 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 		List<Integer> parentsAndPredecessors = combineParentsAndPredecessors(parentIds,
 				predecessorIds);
 		if (!parentsAndPredecessors.isEmpty()) {
+			// TODO: close dbFacade
 			throwErrorIfLinkToSelf(parentsAndPredecessors);
 			throwErrorIfCircularDependencyDetected(parentsAndPredecessors);
 		}
@@ -148,9 +151,8 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 	}
 
 	private void executeAndThrowErrorIfCircularDependencyExist(String sql, List<Object> values) {
-		List<Map<String, Object>> result = dataReader
-				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
-		if (!result.isEmpty()) {
+		List<Row> rows = dbFacade.readUsingSqlAndValues(sql, values);
+		if (!rows.isEmpty()) {
 			throw new DataException(
 					"Organisation not updated due to circular dependency with parent or predecessor");
 		}

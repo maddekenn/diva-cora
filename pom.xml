@@ -39,20 +39,21 @@
 		<coralog4j.version>2.3.0</coralog4j.version>
 		<json.version>2.5.0</json.version>
 		<spider.version>5.2.0</spider.version>
-		<therest.version>7.0.0</therest.version>
+		<therest.version>7.1-SNAPSHOT</therest.version>
 		<beefeater.version>3.5.0</beefeater.version>
 		<bookkeeper.version>6.1.0</bookkeeper.version>
 		<basicdata.version>3.2.0</basicdata.version>
-		<storage.version>4.2.0</storage.version>
+		<storage.version>4.3-SNAPSHOT</storage.version>
 		<basicstorage.version>5.1.0</basicstorage.version>
 		<gatekeeper.version>3.7.0</gatekeeper.version>
 		<gatekeeperclient.version>3.10.0</gatekeeperclient.version>
-		<divamixedstorage.version>4.8.0</divamixedstorage.version>
+		<divamixedstorage.version>4.9-SNAPSHOT</divamixedstorage.version>
 		<solrsearch.version>4.2.0</solrsearch.version>
 		<metacreator.version>4.3.0</metacreator.version>
 		<httphandler.version>2.3.0</httphandler.version>
-		<sqldatabase.version>4.1.0</sqldatabase.version>
+		<sqldatabase.version>5.0-SNAPSHOT</sqldatabase.version>
 		<servlet-api.version>5.0.0</servlet-api.version>
+		<testutils.version>1.1.1</testutils.version>
 	</properties>
 
 	<scm>
@@ -182,6 +183,12 @@
 			<artifactId>jakarta.servlet-api</artifactId>
 			<version>${servlet-api.version}</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>testutils</artifactId>
+			<version>${testutils.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

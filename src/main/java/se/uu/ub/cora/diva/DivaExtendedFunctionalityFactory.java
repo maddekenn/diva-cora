@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -25,10 +25,6 @@ import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPo
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.naming.InitialContext;
-
-import se.uu.ub.cora.connection.ContextConnectionProviderImp;
-import se.uu.ub.cora.connection.SqlConnectionProvider;
 import se.uu.ub.cora.diva.extended.ClassicOrganisationReloader;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
@@ -41,7 +37,9 @@ import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition;
-import se.uu.ub.cora.sqldatabase.DataReaderImp;
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactoryImp;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFactory {
@@ -52,10 +50,13 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	private List<ExtendedFunctionalityContext> contexts = new ArrayList<>();
 	private SpiderDependencyProvider dependencyProvider;
 	private String url;
+	private SqlDatabaseFactory databaseFactory;
 
 	@Override
 	public void initializeUsingDependencyProvider(SpiderDependencyProvider dependencyProvider) {
 		this.dependencyProvider = dependencyProvider;
+
+		databaseFactory = SqlDatabaseFactoryImp.usingLookupNameFromContext("databaseLookupName");
 		url = dependencyProvider.getInitInfoValueUsingKey("classicListUpdateURL");
 		createListOfContexts();
 	}
@@ -109,22 +110,9 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	}
 
 	private void addDisallowedDependencyDetector(List<ExtendedFunctionality> functionalities) {
-		SqlConnectionProvider connectionProvider = tryToCreateConnectionProvider();
-		DataReaderImp dataReader = DataReaderImp.usingSqlConnectionProvider(connectionProvider);
-		functionalities.add(new OrganisationDisallowedDependencyDetector(dataReader));
-	}
+		DatabaseFacade dbFacade = databaseFactory.factorDatabaseFacade();
 
-	private SqlConnectionProvider tryToCreateConnectionProvider() {
-		try {
-			InitialContext context = new InitialContext();
-			String databaseLookupName = dependencyProvider
-					.getInitInfoValueUsingKey("databaseLookupName");
-			return ContextConnectionProviderImp.usingInitialContextAndName(context,
-					databaseLookupName);
-		} catch (Exception e) {
-			throw new RuntimeException(
-					"Error starting ContextConnectionProviderImp in extended functionality", e);
-		}
+		functionalities.add(new OrganisationDisallowedDependencyDetector(dbFacade));
 	}
 
 	private void addFunctionalityForAfterStore(List<ExtendedFunctionality> functionalities) {
@@ -140,6 +128,14 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	private void addFunctionalityCreateBeforeReturn(List<ExtendedFunctionality> functionalities) {
 		functionalities.add(new PersonDomainPartIndexer());
 
+	}
+
+	public SqlDatabaseFactory onlyForTestGetSqlDatabaseFactory() {
+		return databaseFactory;
+	}
+
+	public void onlyForTestSetSqlDatabaseFactory(SqlDatabaseFactory databaseFactory) {
+		this.databaseFactory = databaseFactory;
 	}
 
 }

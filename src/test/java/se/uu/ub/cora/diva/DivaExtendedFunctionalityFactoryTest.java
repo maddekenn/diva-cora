@@ -30,12 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.naming.InitialContext;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.diva.extended.ClassicOrganisationReloader;
 import se.uu.ub.cora.diva.extended.LoggerFactorySpy;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
@@ -49,36 +46,38 @@ import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.spider.dependency.SpiderInitializationException;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
-import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition;
-import se.uu.ub.cora.sqldatabase.DataReaderImp;
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactoryImp;
 
 public class DivaExtendedFunctionalityFactoryTest {
 
-	private ExtendedFunctionalityFactory factory;
+	private DivaExtendedFunctionalityFactory divaExtendedFunctionality;
 	private Map<String, String> initInfo;
 	private SpiderDependencyProviderSpy spiderDependencyProvider;
 	private RecordStorageProviderSpy recordStorageProvider;
 	private LoggerFactorySpy loggerFactorySpy;
+	private SqlDatabaseFactorySpy databaseFactorySpy;
 
 	@BeforeMethod
 	public void setUp() {
 		loggerFactorySpy = new LoggerFactorySpy();
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
-		factory = new DivaExtendedFunctionalityFactory();
+		divaExtendedFunctionality = new DivaExtendedFunctionalityFactory();
 		initInfo = new HashMap<>();
 		initInfo.put("databaseLookupName", "someDBName");
 		initInfo.put("classicListUpdateURL", "someUpdateUrl");
 		recordStorageProvider = new RecordStorageProviderSpy();
 		spiderDependencyProvider = new SpiderDependencyProviderSpy(initInfo);
 		spiderDependencyProvider.setRecordStorageProvider(recordStorageProvider);
+		databaseFactorySpy = new SqlDatabaseFactorySpy();
 
-		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
+		divaExtendedFunctionality.initializeUsingDependencyProvider(spiderDependencyProvider);
 	}
 
 	@Test
 	public void testInit() {
-		assertEquals(factory.getExtendedFunctionalityContexts().size(), 7);
+		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 7);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_STORE, "subOrganisation",
 				0);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "subOrganisation",
@@ -93,12 +92,26 @@ public class DivaExtendedFunctionalityFactoryTest {
 				5);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(
 				ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN, "workOrder", 6);
+
+		assertLookupNameAndSqlDatabaseFactory();
+	}
+
+	private void assertLookupNameAndSqlDatabaseFactory() {
+		SqlDatabaseFactoryImp sqlDatabaseFactory1 = (SqlDatabaseFactoryImp) divaExtendedFunctionality
+				.onlyForTestGetSqlDatabaseFactory();
+
+		assertEquals(sqlDatabaseFactory1.onlyForTestGetLookupName(), "databaseLookupName");
+
+		SqlDatabaseFactoryImp sqlDatabaseFactory2 = (SqlDatabaseFactoryImp) divaExtendedFunctionality
+				.onlyForTestGetSqlDatabaseFactory();
+
+		assertSame(sqlDatabaseFactory1, sqlDatabaseFactory2);
 	}
 
 	private void assertCorrectContextUsingPositionRecordTypeAndIndex(
 			ExtendedFunctionalityPosition position, String recordType, int index) {
-		ExtendedFunctionalityContext updateBefore = factory.getExtendedFunctionalityContexts()
-				.get(index);
+		ExtendedFunctionalityContext updateBefore = divaExtendedFunctionality
+				.getExtendedFunctionalityContexts().get(index);
 		assertEquals(updateBefore.position, position);
 		assertEquals(updateBefore.recordType, recordType);
 		assertEquals(updateBefore.runAsNumber, 0);
@@ -108,13 +121,15 @@ public class DivaExtendedFunctionalityFactoryTest {
 			+ "some error message from spy")
 	public void testNoClassicListUpdateURL() {
 		initInfo.remove("classicListUpdateURL");
-		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
+		divaExtendedFunctionality.initializeUsingDependencyProvider(spiderDependencyProvider);
 	}
 
 	@Test
 	public void factorSubOrganisationUpdateAfter() {
-		List<ExtendedFunctionality> functionalities = factory.factor(UPDATE_BEFORE_STORE,
-				"subOrganisation");
+		divaExtendedFunctionality.onlyForTestSetSqlDatabaseFactory(databaseFactorySpy);
+
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(UPDATE_BEFORE_STORE, "subOrganisation");
 		assertCorrectFactoredFunctionalities(functionalities);
 	}
 
@@ -124,9 +139,10 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 		OrganisationDisallowedDependencyDetector dependencyDetector = (OrganisationDisallowedDependencyDetector) functionalities
 				.get(1);
-		assertTrue(dependencyDetector.getDataReader() instanceof DataReaderImp);
+		DatabaseFacade factoredDatabaseFacade = dependencyDetector.onlyForTestGetDatabaseFacade();
+		assertTrue(factoredDatabaseFacade instanceof DatabaseFacade);
 
-		assertCorrectDbReader(dependencyDetector);
+		databaseFactorySpy.MCR.assertReturn("factorDatabaseFacade", 0, factoredDatabaseFacade);
 
 		OrganisationDifferentDomainDetector differentDomainDetector = (OrganisationDifferentDomainDetector) functionalities
 				.get(2);
@@ -134,50 +150,32 @@ public class DivaExtendedFunctionalityFactoryTest {
 		assertSame(differentDomainDetector.getRecordStorage(), recordStorageProvider.recordStorage);
 	}
 
-	private void assertCorrectDbReader(
-			OrganisationDisallowedDependencyDetector dependencyDetector) {
-		DataReaderImp dataReader = (DataReaderImp) dependencyDetector.getDataReader();
-		ContextConnectionProviderImp sqlConnectionProvider = (ContextConnectionProviderImp) dataReader
-				.getSqlConnectionProvider();
-		assertTrue(sqlConnectionProvider.getContext() instanceof InitialContext);
-		assertEquals(sqlConnectionProvider.getName(), initInfo.get("databaseLookupName"));
-		assertTrue(spiderDependencyProvider.getInitInfoValueUsingKeyWasCalled);
-	}
-
-	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ""
-			+ "Error starting ContextConnectionProviderImp in extended functionality")
-	public void testNoDbLookupName() {
-		initInfo.remove("databaseLookupName");
-		spiderDependencyProvider = new SpiderDependencyProviderSpy(initInfo);
-
-		factory.initializeUsingDependencyProvider(spiderDependencyProvider);
-		factory.factor(UPDATE_BEFORE_STORE, "subOrganisation");
-	}
-
 	@Test
 	public void factorRootOrganisationUpdateBefore() {
-		List<ExtendedFunctionality> functionalities = factory.factor(UPDATE_BEFORE_STORE,
-				"rootOrganisation");
+		divaExtendedFunctionality.onlyForTestSetSqlDatabaseFactory(databaseFactorySpy);
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(UPDATE_BEFORE_STORE, "rootOrganisation");
 		assertCorrectFactoredFunctionalities(functionalities);
 	}
 
 	@Test
 	public void factorTopOrganisationUpdateBefore() {
-		List<ExtendedFunctionality> functionalities = factory.factor(UPDATE_BEFORE_STORE,
-				"topOrganisation");
+		divaExtendedFunctionality.onlyForTestSetSqlDatabaseFactory(databaseFactorySpy);
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(UPDATE_BEFORE_STORE, "topOrganisation");
 		assertCorrectFactoredFunctionalities(functionalities);
 	}
 
 	@Test
 	public void factorTopOrganisationForPositionNotHandled() {
-		List<ExtendedFunctionality> functionalities = factory
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
 				.factor(UPDATE_AFTER_METADATA_VALIDATION, "topOrganisation");
 		assertEquals(functionalities.size(), 0);
 	}
 
 	@Test
 	public void factorClassicOrganisationUpdaterUpdateAfterStore() {
-		List<ExtendedFunctionality> functionalities = factory
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
 				.factor(ExtendedFunctionalityPosition.UPDATE_AFTER_STORE, null);
 		assertEquals(functionalities.size(), 1);
 		assertTrue(functionalities.get(0) instanceof ClassicOrganisationReloader);
@@ -190,7 +188,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void factorWorkOrderForDomanPartCreateBeforeReturn() {
-		List<ExtendedFunctionality> functionalities = factory
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
 				.factor(ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN, null);
 		assertEquals(functionalities.size(), 1);
 		assertTrue(functionalities.get(0) instanceof PersonDomainPartIndexer);
