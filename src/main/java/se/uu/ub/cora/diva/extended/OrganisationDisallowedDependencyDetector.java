@@ -41,7 +41,7 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
 		this.dataGroup = dataGroup;
 		possiblyThrowErrorIfDisallowedDependencyDetected(dataGroup);
-
+		dbFacade.close();
 	}
 
 	public DatabaseFacade onlyForTestGetDatabaseFacade() {
@@ -55,7 +55,6 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 				"earlierOrganisation");
 		throwErrorIfSameParentAndPredecessor(parentIds, predecessorIds);
 		possiblyThrowErrorIfCircularDependencyDetected(parentIds, predecessorIds);
-		// TODO: close dbFacade
 	}
 
 	private List<Integer> getIdsFromOrganisationLinkUsingNameInData(DataGroup dataGroup,
@@ -68,9 +67,14 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 			List<Integer> predecessorIds) {
 		boolean sameIdInBothList = parentIds.stream().anyMatch(predecessorIds::contains);
 		if (sameIdInBothList) {
-			// TODO: close dbFacade
-			throw new DataException("Organisation not updated due to same parent and predecessor");
+			closeDbFacadeAndThrowErrorWithMessage(
+					"Organisation not updated due to same parent and predecessor");
 		}
+	}
+
+	private void closeDbFacadeAndThrowErrorWithMessage(String message) {
+		dbFacade.close();
+		throw new DataException(message);
 	}
 
 	private void possiblyThrowErrorIfCircularDependencyDetected(List<Integer> parentIds,
@@ -78,7 +82,6 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 		List<Integer> parentsAndPredecessors = combineParentsAndPredecessors(parentIds,
 				predecessorIds);
 		if (!parentsAndPredecessors.isEmpty()) {
-			// TODO: close dbFacade
 			throwErrorIfLinkToSelf(parentsAndPredecessors);
 			throwErrorIfCircularDependencyDetected(parentsAndPredecessors);
 		}
@@ -95,7 +98,7 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 	private void throwErrorIfLinkToSelf(List<Integer> parentsAndPredecessorIds) {
 		int organisationsId = getIdFromDataGroup();
 		if (parentsAndPredecessorIds.contains(organisationsId)) {
-			throw new DataException("Organisation not updated due to link to self");
+			closeDbFacadeAndThrowErrorWithMessage("Organisation not updated due to link to self");
 		}
 	}
 
@@ -153,7 +156,7 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 	private void executeAndThrowErrorIfCircularDependencyExist(String sql, List<Object> values) {
 		List<Row> rows = dbFacade.readUsingSqlAndValues(sql, values);
 		if (!rows.isEmpty()) {
-			throw new DataException(
+			closeDbFacadeAndThrowErrorWithMessage(
 					"Organisation not updated due to circular dependency with parent or predecessor");
 		}
 	}
