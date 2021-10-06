@@ -27,7 +27,6 @@ public class LoggerFactorySpy implements LoggerFactory {
 
 	@Override
 	public Logger factorForClass(Class<? extends Object> javaClass) {
-		String name = javaClass.getSimpleName();
 		logger = new LoggerSpy();
 		return logger;
 	}

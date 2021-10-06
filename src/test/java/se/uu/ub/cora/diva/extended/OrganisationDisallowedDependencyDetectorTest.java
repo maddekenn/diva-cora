@@ -20,6 +20,7 @@ package se.uu.ub.cora.diva.extended;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +63,7 @@ public class OrganisationDisallowedDependencyDetectorTest {
 	public void testWhenNoParentOrPredecessorInDataGroupNoCallForDependecyCheck() {
 		functionality.useExtendedFunctionality(authToken, dataGroup);
 		dbFacadeSpy.MCR.assertMethodNotCalled("readUsingSqlAndValues");
+		dbFacadeSpy.MCR.assertMethodWasCalled("close");
 	}
 
 	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
@@ -84,11 +86,15 @@ public class OrganisationDisallowedDependencyDetectorTest {
 
 		try {
 			functionality.useExtendedFunctionality(authToken, dataGroup);
+			assertErrorWasThrownBeforeThisCall();
 		} catch (DataException e) {
-			// do nothing
+			dbFacadeSpy.MCR.assertMethodNotCalled("readUsingSqlAndValues");
+			dbFacadeSpy.MCR.assertMethodWasCalled("close");
 		}
-		dbFacadeSpy.MCR.assertMethodNotCalled("readUsingSqlAndValues");
-		// assertFalse(dataReader.executePreparedStatementWasCalled);
+	}
+
+	private void assertErrorWasThrownBeforeThisCall() {
+		assertTrue(false);
 	}
 
 	@Test
@@ -139,11 +145,9 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 
 		functionality.useExtendedFunctionality(authToken, dataGroup);
-		// assertTrue(dataReader.executePreparedStatementWasCalled);
 		String sql = getExpectedSql("?, ?");
 		dbFacadeSpy.MCR.assertParameter("readUsingSqlAndValues", 0, "sql", sql);
 
-		// assertEquals(dataReader.sqlSentToReader, sql);
 		List<Object> expectedValues = new ArrayList<>();
 		expectedValues.add(51);
 		expectedValues.add(3);
@@ -153,8 +157,6 @@ public class OrganisationDisallowedDependencyDetectorTest {
 				"readUsingSqlAndValues", 0, "values");
 
 		assertEquals(values, expectedValues);
-
-		// assertEquals(dataReader.valuesSentToReader, expectedValues);
 	}
 
 	@Test
@@ -168,10 +170,8 @@ public class OrganisationDisallowedDependencyDetectorTest {
 
 		functionality.useExtendedFunctionality(authToken, dataGroup);
 
-		// assertTrue(dataReader.executePreparedStatementWasCalled);
 		String sql = getExpectedSql("?, ?");
 		dbFacadeSpy.MCR.assertParameter("readUsingSqlAndValues", 0, "sql", sql);
-		// assertEquals(dataReader.sqlSentToReader, sql);
 
 		List<Object> expectedValues = new ArrayList<>();
 		expectedValues.add(51);
@@ -182,23 +182,27 @@ public class OrganisationDisallowedDependencyDetectorTest {
 				"readUsingSqlAndValues", 0, "values");
 
 		assertEquals(values, expectedValues);
-		// assertEquals(dataReader.valuesSentToReader, expectedValues);
 	}
 
-	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
-			+ "Organisation not updated due to circular dependency with parent or predecessor")
+	@Test
 	public void testWhenParentInDataGroupCircularDependencyExist() {
 		List<DataElement> parents = createListAndAddDefaultParent();
 		OrganisationDataCreator.createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
 				dataGroup, "parentOrganisation", "0", "51");
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
-		// dataReader.numOfRowsToReturn = 2;
 		dbFacadeSpy.readReturnsSomeRows = true;
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		try {
+			functionality.useExtendedFunctionality(authToken, dataGroup);
+			assertErrorWasThrownBeforeThisCall();
+		} catch (Exception e) {
+			assertTrue(e instanceof DataException);
+			assertEquals(e.getMessage(),
+					"Organisation not updated due to circular dependency with parent or predecessor");
+			dbFacadeSpy.MCR.assertMethodWasCalled("close");
+		}
 	}
 
-	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
-			+ "Organisation not updated due to same parent and predecessor")
+	@Test
 	public void testWhenSamePresentInParentAndPredecessor() {
 		List<DataElement> parents = OrganisationDataCreator
 				.createListWithOneParentUsingRepeatIdAndParentId(dataGroup, "0", "5");
@@ -216,7 +220,15 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		predecessors.add(predecessor2);
 		dataGroup.childrenToReturn.put("earlierOrganisation", predecessors);
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		try {
+			functionality.useExtendedFunctionality(authToken, dataGroup);
+			assertErrorWasThrownBeforeThisCall();
+		} catch (Exception e) {
+			assertTrue(e instanceof DataException);
+			assertEquals(e.getMessage(),
+					"Organisation not updated due to same parent and predecessor");
+			dbFacadeSpy.MCR.assertMethodWasCalled("close");
+		}
 	}
 
 	@Test
@@ -231,11 +243,10 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		dataGroup.childrenToReturn.put("earlierOrganisation", predecessors);
 		try {
 			functionality.useExtendedFunctionality(authToken, dataGroup);
+			assertErrorWasThrownBeforeThisCall();
 		} catch (DataException e) {
-			// do nothing
+			dbFacadeSpy.MCR.assertMethodNotCalled("readUsingSqlAndValues");
 		}
-		dbFacadeSpy.MCR.assertMethodNotCalled("readUsingSqlAndValues");
-		// assertFalse(dataReader.executePreparedStatementWasCalled);
 	}
 
 }
