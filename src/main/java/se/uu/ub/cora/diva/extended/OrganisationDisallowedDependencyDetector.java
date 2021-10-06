@@ -67,14 +67,9 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 			List<Integer> predecessorIds) {
 		boolean sameIdInBothList = parentIds.stream().anyMatch(predecessorIds::contains);
 		if (sameIdInBothList) {
-			closeDbFacadeAndThrowErrorWithMessage(
-					"Organisation not updated due to same parent and predecessor");
+			dbFacade.close();
+			throw new DataException("Organisation not updated due to same parent and predecessor");
 		}
-	}
-
-	private void closeDbFacadeAndThrowErrorWithMessage(String message) {
-		dbFacade.close();
-		throw new DataException(message);
 	}
 
 	private void possiblyThrowErrorIfCircularDependencyDetected(List<Integer> parentIds,
@@ -98,7 +93,8 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 	private void throwErrorIfLinkToSelf(List<Integer> parentsAndPredecessorIds) {
 		int organisationsId = getIdFromDataGroup();
 		if (parentsAndPredecessorIds.contains(organisationsId)) {
-			closeDbFacadeAndThrowErrorWithMessage("Organisation not updated due to link to self");
+			dbFacade.close();
+			throw new DataException("Organisation not updated due to link to self");
 		}
 	}
 
@@ -156,7 +152,8 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 	private void executeAndThrowErrorIfCircularDependencyExist(String sql, List<Object> values) {
 		List<Row> rows = dbFacade.readUsingSqlAndValues(sql, values);
 		if (!rows.isEmpty()) {
-			closeDbFacadeAndThrowErrorWithMessage(
+			dbFacade.close();
+			throw new DataException(
 					"Organisation not updated due to circular dependency with parent or predecessor");
 		}
 	}
