@@ -100,7 +100,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 		SqlDatabaseFactoryImp sqlDatabaseFactory1 = (SqlDatabaseFactoryImp) divaExtendedFunctionality
 				.onlyForTestGetSqlDatabaseFactory();
 
-		assertEquals(sqlDatabaseFactory1.onlyForTestGetLookupName(), "databaseLookupName");
+		assertEquals(sqlDatabaseFactory1.onlyForTestGetLookupName(), "someDBName");
 
 		SqlDatabaseFactoryImp sqlDatabaseFactory2 = (SqlDatabaseFactoryImp) divaExtendedFunctionality
 				.onlyForTestGetSqlDatabaseFactory();

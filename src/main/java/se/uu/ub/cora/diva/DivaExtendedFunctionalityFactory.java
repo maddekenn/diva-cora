@@ -55,8 +55,10 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	@Override
 	public void initializeUsingDependencyProvider(SpiderDependencyProvider dependencyProvider) {
 		this.dependencyProvider = dependencyProvider;
+		String databaseLookupNameValue = dependencyProvider
+				.getInitInfoValueUsingKey("databaseLookupName");
 
-		databaseFactory = SqlDatabaseFactoryImp.usingLookupNameFromContext("databaseLookupName");
+		databaseFactory = SqlDatabaseFactoryImp.usingLookupNameFromContext(databaseLookupNameValue);
 		url = dependencyProvider.getInitInfoValueUsingKey("classicListUpdateURL");
 		createListOfContexts();
 	}
