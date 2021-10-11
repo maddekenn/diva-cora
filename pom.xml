@@ -43,7 +43,7 @@
 		<beefeater.version>3.5.0</beefeater.version>
 		<bookkeeper.version>6.1.0</bookkeeper.version>
 		<basicdata.version>3.2.0</basicdata.version>
-		<storage.version>4.3-SNAPSHOT</storage.version>
+		<storage.version>5.0-SNAPSHOT</storage.version>
 		<basicstorage.version>5.1.0</basicstorage.version>
 		<gatekeeper.version>3.7.0</gatekeeper.version>
 		<gatekeeperclient.version>3.10.0</gatekeeperclient.version>
