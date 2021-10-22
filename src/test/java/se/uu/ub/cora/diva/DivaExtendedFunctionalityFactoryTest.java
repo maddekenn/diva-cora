@@ -184,13 +184,4 @@ public class DivaExtendedFunctionalityFactoryTest {
 		assertTrue(httpHandlerFactory instanceof HttpHandlerFactoryImp);
 		assertEquals(functionality.getUrl(), initInfo.get("classicListUpdateURL"));
 	}
-
-	// @Test
-	// public void factorWorkOrderForDomanPartCreateBeforeReturn() {
-	// List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
-	// .factor(ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN, null);
-	// assertEquals(functionalities.size(), 1);
-	// assertTrue(functionalities.get(0) instanceof PersonDomainPartIndexer);
-	// }
-
 }

@@ -127,7 +127,6 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	}
 
 	private void addFunctionalityCreateBeforeReturn(List<ExtendedFunctionality> functionalities) {
-		// functionalities.add(new PersonDomainPartIndexer());
 
 	}
 
