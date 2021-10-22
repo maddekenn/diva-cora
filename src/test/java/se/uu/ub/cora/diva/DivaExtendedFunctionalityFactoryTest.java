@@ -38,7 +38,6 @@ import se.uu.ub.cora.diva.extended.LoggerFactorySpy;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
-import se.uu.ub.cora.diva.extended.PersonDomainPartIndexer;
 import se.uu.ub.cora.diva.extended.SpiderDependencyProviderSpy;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
@@ -186,12 +185,12 @@ public class DivaExtendedFunctionalityFactoryTest {
 		assertEquals(functionality.getUrl(), initInfo.get("classicListUpdateURL"));
 	}
 
-	@Test
-	public void factorWorkOrderForDomanPartCreateBeforeReturn() {
-		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
-				.factor(ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN, null);
-		assertEquals(functionalities.size(), 1);
-		assertTrue(functionalities.get(0) instanceof PersonDomainPartIndexer);
-	}
+	// @Test
+	// public void factorWorkOrderForDomanPartCreateBeforeReturn() {
+	// List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+	// .factor(ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN, null);
+	// assertEquals(functionalities.size(), 1);
+	// assertTrue(functionalities.get(0) instanceof PersonDomainPartIndexer);
+	// }
 
 }

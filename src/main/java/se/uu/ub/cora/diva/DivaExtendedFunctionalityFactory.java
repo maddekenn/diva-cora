@@ -29,7 +29,6 @@ import se.uu.ub.cora.diva.extended.ClassicOrganisationReloader;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
-import se.uu.ub.cora.diva.extended.PersonDomainPartIndexer;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.spider.dependency.SpiderDependencyProvider;
@@ -128,7 +127,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	}
 
 	private void addFunctionalityCreateBeforeReturn(List<ExtendedFunctionality> functionalities) {
-		functionalities.add(new PersonDomainPartIndexer());
+		// functionalities.add(new PersonDomainPartIndexer());
 
 	}
 
