@@ -87,8 +87,6 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			addFunctionalityForBeforeStore(functionalities);
 		} else if (UPDATE_AFTER_STORE == position) {
 			addFunctionalityForAfterStore(functionalities);
-		} else if (CREATE_BEFORE_RETURN == position) {
-			addFunctionalityCreateBeforeReturn(functionalities);
 		}
 
 		return functionalities;
@@ -124,10 +122,6 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	private ClassicOrganisationReloader createClassicReloader() {
 		HttpHandlerFactory factory = new HttpHandlerFactoryImp();
 		return ClassicOrganisationReloader.usingHttpHandlerFactoryAndUrl(factory, url);
-	}
-
-	private void addFunctionalityCreateBeforeReturn(List<ExtendedFunctionality> functionalities) {
-
 	}
 
 	public SqlDatabaseFactory onlyForTestGetSqlDatabaseFactory() {
