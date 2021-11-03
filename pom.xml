@@ -38,7 +38,7 @@
 		<logger.version>2.3.0</logger.version>
 		<coralog4j.version>2.3.0</coralog4j.version>
 		<json.version>3.0-SNAPSHOT</json.version>
-		<spider.version>5.2.0</spider.version>
+		<spider.version>5.3.0</spider.version>
 		<therest.version>7.1-SNAPSHOT</therest.version>
 		<beefeater.version>3.5.0</beefeater.version>
 		<bookkeeper.version>6.1.0</bookkeeper.version>
@@ -48,7 +48,7 @@
 		<gatekeeper.version>3.7.0</gatekeeper.version>
 		<gatekeeperclient.version>3.10.0</gatekeeperclient.version>
 		<divamixedstorage.version>4.9-SNAPSHOT</divamixedstorage.version>
-		<solrsearch.version>4.3-SNAPSHOT</solrsearch.version>
+		<solrsearch.version>4.4-SNAPSHOT</solrsearch.version>
 		<metacreator.version>4.3.0</metacreator.version>
 		<httphandler.version>2.3.0</httphandler.version>
 		<sqldatabase.version>5.0-SNAPSHOT</sqldatabase.version>
