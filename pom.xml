@@ -36,7 +36,7 @@
 
 	<properties>
 		<logger.version>2.4.0</logger.version>
-		<coralog4j.version>2.5.0</coralog4j.version>
+		<coralog4j.version>2.6.0</coralog4j.version>
 		<json.version>3.1.0</json.version>
 		<spider.version>5.4.0</spider.version>
 		<therest.version>7.1.0</therest.version>
