@@ -32,19 +32,25 @@ public class RecordStorageSpy implements RecordStorage {
 
 	public List<String> readRecordTypes = new ArrayList<>();
 	public List<String> readRecordIds = new ArrayList<>();
-	public List<DataGroupDomainSpy> returnedDataGroups = new ArrayList<>();
-	public Map<String, DataGroupDomainSpy> returnOnRead = new HashMap<>();
+	public List<String> updatedRecordTypes = new ArrayList<>();
+	public List<String> updatedRecordIds = new ArrayList<>();
+	public List<DataGroup> dataGroupsSentToUpdate = new ArrayList<>();
+	public List<DataGroup> returnedDataGroups = new ArrayList<>();
+	public Map<String, DataGroupExtendedSpy> returnOnRead = new HashMap<>();
+	public DataGroup collectedTerms;
+	public String dataDivider;
+	public DataGroup linkList;
 
 	@Override
 	public DataGroup read(String type, String id) {
 		readRecordTypes.add(type);
 		readRecordIds.add(id);
 		if (returnOnRead.containsKey(type + "_" + id)) {
-			DataGroupDomainSpy presetReturnValue = returnOnRead.get(type + "_" + id);
+			DataGroupExtendedSpy presetReturnValue = returnOnRead.get(type + "_" + id);
 			returnedDataGroups.add(presetReturnValue);
 			return presetReturnValue;
 		}
-		DataGroupDomainSpy dataGroupToReturn = new DataGroupDomainSpy(type + "_" + id);
+		DataGroupExtendedSpy dataGroupToReturn = new DataGroupExtendedSpy(type + "_" + id);
 		returnedDataGroups.add(dataGroupToReturn);
 		return dataGroupToReturn;
 	}
@@ -71,8 +77,12 @@ public class RecordStorageSpy implements RecordStorage {
 	@Override
 	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		// TODO Auto-generated method stub
-
+		this.collectedTerms = collectedTerms;
+		this.linkList = linkList;
+		this.dataDivider = dataDivider;
+		updatedRecordTypes.add(type);
+		updatedRecordIds.add(id);
+		dataGroupsSentToUpdate.add(record);
 	}
 
 	@Override

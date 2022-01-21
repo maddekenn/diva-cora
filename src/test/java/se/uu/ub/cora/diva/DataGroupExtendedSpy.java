@@ -27,7 +27,7 @@ import se.uu.ub.cora.data.DataAttribute;
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
 
-public class DataGroupDomainSpy implements DataGroup {
+public class DataGroupExtendedSpy implements DataGroup {
 
 	public String nameInData;
 	public List<DataElement> children = new ArrayList<>();
@@ -38,21 +38,21 @@ public class DataGroupDomainSpy implements DataGroup {
 	public List<String> returnContainsTrueNameInDatas = new ArrayList<>();
 	public List<String> requestedAtomicNameInDatas = new ArrayList<>();
 	public List<DataGroup> totalReturnedDataGroups = new ArrayList<>();
+	private String repeatId;
 
-	public DataGroupDomainSpy(String nameInData) {
+	public DataGroupExtendedSpy(String nameInData) {
 		this.nameInData = nameInData;
 	}
 
 	@Override
 	public void setRepeatId(String repeatId) {
-		// TODO Auto-generated method stub
+		this.repeatId = repeatId;
 
 	}
 
 	@Override
 	public String getRepeatId() {
-		// TODO Auto-generated method stub
-		return null;
+		return repeatId;
 	}
 
 	@Override

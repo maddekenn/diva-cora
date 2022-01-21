@@ -24,7 +24,7 @@ import static org.testng.Assert.assertNull;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.diva.DataGroupDomainSpy;
+import se.uu.ub.cora.diva.DataGroupExtendedSpy;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 
@@ -33,7 +33,7 @@ public class ClassicOrganisationReloaderTest {
 	private ExtendedFunctionality classicOrganisationReloader;
 	private HttpHandlerFactorySpy httpHandlerFactory;
 	private String url;
-	private DataGroupDomainSpy dataGroup;
+	private DataGroupExtendedSpy dataGroup;
 	private LoggerFactorySpy loggerFactorySpy;
 	private String otherDomain = "otherDomain";
 
@@ -50,8 +50,8 @@ public class ClassicOrganisationReloaderTest {
 	}
 
 	private void createDefaultDataGroup(String domain) {
-		dataGroup = new DataGroupDomainSpy("organisation");
-		DataGroupDomainSpy recordInfo = new DataGroupDomainSpy("recordInfo");
+		dataGroup = new DataGroupExtendedSpy("organisation");
+		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
 		recordInfo.addChild(new DataAtomicSpy("id", "4567"));
 		recordInfo.addChild(new DataAtomicSpy("domain", domain));
 		dataGroup.addChild(recordInfo);
