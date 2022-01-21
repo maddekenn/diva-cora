@@ -22,6 +22,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
@@ -38,6 +39,7 @@ import se.uu.ub.cora.diva.extended.LoggerFactorySpy;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
+import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
 import se.uu.ub.cora.diva.extended.SpiderDependencyProviderSpy;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
@@ -76,7 +78,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void testInit() {
-		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 7);
+		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 8);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_STORE, "subOrganisation",
 				0);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "subOrganisation",
@@ -91,6 +93,9 @@ public class DivaExtendedFunctionalityFactoryTest {
 				5);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(
 				ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN, "workOrder", 6);
+		assertCorrectContextUsingPositionRecordTypeAndIndex(
+				ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION, "personDomainPart",
+				7);
 
 		assertLookupNameAndSqlDatabaseFactory();
 	}
@@ -183,5 +188,19 @@ public class DivaExtendedFunctionalityFactoryTest {
 		HttpHandlerFactory httpHandlerFactory = functionality.getHttpHandlerFactory();
 		assertTrue(httpHandlerFactory instanceof HttpHandlerFactoryImp);
 		assertEquals(functionality.getUrl(), initInfo.get("classicListUpdateURL"));
+	}
+
+	@Test
+	public void factorPersonDomainPartUpdateAfterValidation() {
+		divaExtendedFunctionality.onlyForTestSetSqlDatabaseFactory(databaseFactorySpy);
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(CREATE_AFTER_METADATA_VALIDATION, "personDomainPart");
+		assertEquals(functionalities.size(), 1);
+		PersonDomainPartValidator validatorFunctionality = (PersonDomainPartValidator) functionalities
+				.get(0);
+		DatabaseFacade databaseFacade = validatorFunctionality.getDbFacade();
+		assertTrue(databaseFacade instanceof DatabaseFacade);
+
+		databaseFactorySpy.MCR.assertReturn("factorDatabaseFacade", 0, databaseFacade);
 	}
 }

@@ -25,11 +25,13 @@ import java.util.List;
 import se.uu.ub.cora.diva.extended.RowSpy;
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
 
 public class DatabaseFacadeSpy implements DatabaseFacade {
 	public MethodCallRecorder MCR = new MethodCallRecorder();
 	public boolean readReturnsSomeRows = false;
+	public boolean throwDataException = false;
 
 	@Override
 	public List<Row> readUsingSqlAndValues(String sql, List<Object> values) {
@@ -51,7 +53,9 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 	@Override
 	public Row readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values) {
 		MCR.addCall("sql", sql, "values", values);
-
+		if (throwDataException) {
+			throw SqlDatabaseException.withMessage("Error from spy reading one row.");
+		}
 		return null;
 	}
 

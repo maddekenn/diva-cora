@@ -18,6 +18,7 @@
  */
 package se.uu.ub.cora.diva;
 
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
@@ -29,6 +30,7 @@ import se.uu.ub.cora.diva.extended.ClassicOrganisationReloader;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
+import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.spider.dependency.SpiderDependencyProvider;
@@ -67,6 +69,8 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		createContext(TOP_ORGANISATION);
 		createContext(ROOT_ORGANISATION);
 		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_RETURN, "workOrder", 0));
+		contexts.add(new ExtendedFunctionalityContext(CREATE_AFTER_METADATA_VALIDATION,
+				"personDomainPart", 0));
 	}
 
 	private void createContext(String recordType) {
@@ -87,6 +91,8 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			addFunctionalityForBeforeStore(functionalities);
 		} else if (UPDATE_AFTER_STORE == position) {
 			addFunctionalityForAfterStore(functionalities);
+		} else if (CREATE_AFTER_METADATA_VALIDATION == position) {
+			addFunctionalityForCreateAfterMetadataValidation(functionalities);
 		}
 
 		return functionalities;
@@ -122,6 +128,12 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	private ClassicOrganisationReloader createClassicReloader() {
 		HttpHandlerFactory factory = new HttpHandlerFactoryImp();
 		return ClassicOrganisationReloader.usingHttpHandlerFactoryAndUrl(factory, url);
+	}
+
+	private void addFunctionalityForCreateAfterMetadataValidation(
+			List<ExtendedFunctionality> functionalities) {
+		DatabaseFacade databaseFacade = databaseFactory.factorDatabaseFacade();
+		functionalities.add(new PersonDomainPartValidator(databaseFacade));
 	}
 
 	public SqlDatabaseFactory onlyForTestGetSqlDatabaseFactory() {
