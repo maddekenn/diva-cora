@@ -37,6 +37,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	private RecordStorageSpy recordStorage;
 	private DataGroupFactorySpy dataGroupFactory;
 	private DataGroupTermCollectorSpy termCollector;
+	private DataRecordLinkCollectorSpy linkCollector;
 
 	@BeforeMethod
 	public void setUp() {
@@ -46,7 +47,9 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 		setUpDataToReturnFromStorageSpy();
 
 		termCollector = new DataGroupTermCollectorSpy();
-		personUpdater = new PersonUpdaterAfterDomainPartCreate(recordStorage, termCollector);
+		linkCollector = new DataRecordLinkCollectorSpy();
+		personUpdater = new PersonUpdaterAfterDomainPartCreate(recordStorage, termCollector,
+				linkCollector);
 	}
 
 	private void setUpDataToReturnFromStorageSpy() {
@@ -91,6 +94,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	public void testInit() {
 		assertSame(personUpdater.getRecordStorage(), recordStorage);
 		assertSame(personUpdater.getTermCollector(), termCollector);
+		assertSame(personUpdater.getLinkCollector(), linkCollector);
 	}
 
 	@Test
@@ -105,6 +109,8 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 		DataGroup dataGroup = recordStorage.dataGroupsSentToUpdate.get(0);
 		assertEquals(recordStorage.updatedRecordIds.get(0), "personId:235");
 		assertEquals(recordStorage.updatedRecordTypes.get(0), "person");
+		assertSame(dataGroup, recordStorage.returnedDataGroups.get(0));
+		assertEquals(recordStorage.dataDivider, "testDiva");
 
 		assertNewDomainPartLinkAddedCorrectly(dataGroup);
 	}
@@ -140,19 +146,30 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	}
 
 	@Test
-	public void testUseExtendedFunctionalityCheckParametersSentToUpdate() {
+	public void testUseExtendedFunctionalityCheckCollectedTermsAndLinks() {
 		DataGroupSpy personDomainPart = createDataGroup("personId:235:domainPartId");
 
 		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
 
-		assertEquals(recordStorage.dataDivider, "testDiva");
-
 		assertEquals(recordStorage.readRecordTypes.get(1), "recordType");
 		assertEquals(recordStorage.readRecordIds.get(1), "person");
 
+		assertCorrectlyCollectedTerms();
+		assertCorrectCollectedLinks();
+	}
+
+	private void assertCorrectlyCollectedTerms() {
 		assertEquals(termCollector.metadataGroupId, "metadataIdForPersonType");
 		assertSame(termCollector.dataGroup, recordStorage.returnedDataGroups.get(0));
 		assertSame(recordStorage.collectedTerms, termCollector.returnedCollectedTerms);
+	}
+
+	private void assertCorrectCollectedLinks() {
+		assertEquals(linkCollector.metadataId, "metadataIdForPersonType");
+		assertEquals(linkCollector.dataGroup, recordStorage.returnedDataGroups.get(0));
+		assertEquals(linkCollector.fromRecordType, "person");
+		assertEquals(linkCollector.fromRecordId, "personId:235");
+		assertSame(recordStorage.linkList, linkCollector.collectedLinks);
 	}
 
 	// kolla typ, id och datagrupp inskickad till update

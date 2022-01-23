@@ -20,6 +20,7 @@ package se.uu.ub.cora.diva.extended;
 
 import java.util.List;
 
+import se.uu.ub.cora.bookkeeper.linkcollector.DataRecordLinkCollector;
 import se.uu.ub.cora.bookkeeper.termcollector.DataGroupTermCollector;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
@@ -32,39 +33,30 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 	private static final String PERSON_DOMAIN_PART = "personDomainPart";
 	private RecordStorage recordStorage;
 	private DataGroupTermCollector termCollector;
+	private DataRecordLinkCollector linkCollector;
 
 	public PersonUpdaterAfterDomainPartCreate(RecordStorage recordStorage,
-			DataGroupTermCollector termCollector) {
+			DataGroupTermCollector termCollector, DataRecordLinkCollector linkCollector) {
 		this.recordStorage = recordStorage;
 		this.termCollector = termCollector;
+		this.linkCollector = linkCollector;
 	}
 
 	@Override
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
 		String recordId = extractRecordId(dataGroup);
-
 		String personIdPartOfId = recordId.substring(0, recordId.lastIndexOf(":"));
 		DataGroup readPerson = recordStorage.read(PERSON, personIdPartOfId);
-
 		createAndAddPersonDomainPartToPerson(recordId, readPerson);
-		setNewRepeatIdForRepeatedDataGroupsToEnsureUnique(
-				readPerson.getAllGroupsWithNameInData(PERSON_DOMAIN_PART));
 		String dataDivider = extractDataDivider(readPerson);
 
-		DataGroup readRecordType = recordStorage.read("recordType", PERSON);
-		DataGroup metadataIdLink = readRecordType.getFirstGroupWithNameInData("metadataId");
-		String metadataId = metadataIdLink.getFirstAtomicValueWithNameInData("linkedRecordId");
+		String metadataId = getMetadataId();
+		DataGroup collectedTerms = collectTerms(readPerson, metadataId);
+		DataGroup collectedLinks = linkCollector.collectLinks(metadataId, readPerson, PERSON,
+				personIdPartOfId);
 
-		DataGroup collectedTerms = termCollector.collectTerms(metadataId, readPerson);
-
-		recordStorage.update(PERSON, personIdPartOfId, readPerson, collectedTerms, null,
+		recordStorage.update(PERSON, personIdPartOfId, readPerson, collectedTerms, collectedLinks,
 				dataDivider);
-	}
-
-	private String extractDataDivider(DataGroup readPerson) {
-		DataGroup recordInfo = readPerson.getFirstGroupWithNameInData("recordInfo");
-		DataGroup dataDividerGroup = recordInfo.getFirstGroupWithNameInData("dataDivider");
-		return dataDividerGroup.getFirstAtomicValueWithNameInData("linkedRecordId");
 	}
 
 	private String extractRecordId(DataGroup dataGroup) {
@@ -77,6 +69,8 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 				.getDataGroupAsLinkUsingNameInDataTypeAndId(PERSON_DOMAIN_PART, PERSON_DOMAIN_PART,
 						recordId);
 		readPerson.addChild(personDomainPartLink);
+		setNewRepeatIdForRepeatedDataGroupsToEnsureUnique(
+				readPerson.getAllGroupsWithNameInData(PERSON_DOMAIN_PART));
 	}
 
 	private void setNewRepeatIdForRepeatedDataGroupsToEnsureUnique(List<DataGroup> dataGroups) {
@@ -87,12 +81,33 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 		}
 	}
 
+	private String extractDataDivider(DataGroup readPerson) {
+		DataGroup recordInfo = readPerson.getFirstGroupWithNameInData("recordInfo");
+		DataGroup dataDividerGroup = recordInfo.getFirstGroupWithNameInData("dataDivider");
+		return dataDividerGroup.getFirstAtomicValueWithNameInData("linkedRecordId");
+	}
+
+	private DataGroup collectTerms(DataGroup readPerson, String metadataId) {
+		return termCollector.collectTerms(metadataId, readPerson);
+	}
+
+	private String getMetadataId() {
+		DataGroup readRecordType = recordStorage.read("recordType", PERSON);
+		DataGroup metadataIdLink = readRecordType.getFirstGroupWithNameInData("metadataId");
+		String metadataId = metadataIdLink.getFirstAtomicValueWithNameInData("linkedRecordId");
+		return metadataId;
+	}
+
 	public RecordStorage getRecordStorage() {
 		return recordStorage;
 	}
 
 	public DataGroupTermCollector getTermCollector() {
 		return termCollector;
+	}
+
+	public DataRecordLinkCollector getLinkCollector() {
+		return linkCollector;
 	}
 
 }
