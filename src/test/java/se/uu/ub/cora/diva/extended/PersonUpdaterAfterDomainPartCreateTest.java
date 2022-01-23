@@ -36,27 +36,49 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	private PersonUpdaterAfterDomainPartCreate personUpdater;
 	private RecordStorageSpy recordStorage;
 	private DataGroupFactorySpy dataGroupFactory;
+	private DataGroupTermCollectorSpy termCollector;
 
 	@BeforeMethod
 	public void setUp() {
 		dataGroupFactory = new DataGroupFactorySpy();
 		DataGroupProvider.setDataGroupFactory(dataGroupFactory);
 		recordStorage = new RecordStorageSpy();
+		setUpDataToReturnFromStorageSpy();
+
+		termCollector = new DataGroupTermCollectorSpy();
+		personUpdater = new PersonUpdaterAfterDomainPartCreate(recordStorage, termCollector);
+	}
+
+	private void setUpDataToReturnFromStorageSpy() {
 		setUpPersonToReturnFromStorageSpy();
-		personUpdater = new PersonUpdaterAfterDomainPartCreate(recordStorage);
+		DataGroupExtendedSpy personRecordType = new DataGroupExtendedSpy("recordType");
+		DataGroupExtendedSpy metadataId = new DataGroupExtendedSpy("metadataId");
+		metadataId.addChild(new DataAtomicSpy("linkedRecordId", "metadataIdForPersonType"));
+		personRecordType.addChild(metadataId);
+		recordStorage.returnOnRead.put("recordType_person", personRecordType);
 	}
 
 	private void setUpPersonToReturnFromStorageSpy() {
 		DataGroupExtendedSpy person = new DataGroupExtendedSpy("person");
-		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
-		DataGroupExtendedSpy dataDivider = new DataGroupExtendedSpy("dataDivider");
-		dataDivider.addChild(new DataAtomicSpy("linkedRecordType", "system"));
-		dataDivider.addChild(new DataAtomicSpy("linkedRecordId", "testDiva"));
-		recordInfo.addChild(dataDivider);
+		DataGroupExtendedSpy recordInfo = createRecordInfo();
 		person.addChild(recordInfo);
 		createAndAddPersonDomainPart(person, "1");
 		createAndAddPersonDomainPart(person, "3");
 		recordStorage.returnOnRead.put("person_personId:235", person);
+	}
+
+	private DataGroupExtendedSpy createRecordInfo() {
+		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
+		DataGroupExtendedSpy dataDivider = createDataDivider();
+		recordInfo.addChild(dataDivider);
+		return recordInfo;
+	}
+
+	private DataGroupExtendedSpy createDataDivider() {
+		DataGroupExtendedSpy dataDivider = new DataGroupExtendedSpy("dataDivider");
+		dataDivider.addChild(new DataAtomicSpy("linkedRecordType", "system"));
+		dataDivider.addChild(new DataAtomicSpy("linkedRecordId", "testDiva"));
+		return dataDivider;
 	}
 
 	private void createAndAddPersonDomainPart(DataGroupExtendedSpy person, String repeatId) {
@@ -68,6 +90,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	@Test
 	public void testInit() {
 		assertSame(personUpdater.getRecordStorage(), recordStorage);
+		assertSame(personUpdater.getTermCollector(), termCollector);
 	}
 
 	@Test
@@ -77,12 +100,27 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
 
 		assertCorrectPersonReadFromStorage();
-		assertNewLinkCorrectlyCreated();
+		assertNewDomainPartLinkCorrectlyCreated();
 
 		DataGroup dataGroup = recordStorage.dataGroupsSentToUpdate.get(0);
 		assertEquals(recordStorage.updatedRecordIds.get(0), "personId:235");
 		assertEquals(recordStorage.updatedRecordTypes.get(0), "person");
 
+		assertNewDomainPartLinkAddedCorrectly(dataGroup);
+	}
+
+	private void assertCorrectPersonReadFromStorage() {
+		assertEquals(recordStorage.readRecordTypes.get(0), "person");
+		assertEquals(recordStorage.readRecordIds.get(0), "personId:235");
+	}
+
+	private void assertNewDomainPartLinkCorrectlyCreated() {
+		assertEquals(dataGroupFactory.usedNameInDatas.get(0), "personDomainPart");
+		assertEquals(dataGroupFactory.usedRecordTypes.get(0), "personDomainPart");
+		assertEquals(dataGroupFactory.usedRecordIds.get(0), "personId:235:domainPartId");
+	}
+
+	private void assertNewDomainPartLinkAddedCorrectly(DataGroup dataGroup) {
 		List<DataGroup> personDomainParts = dataGroup
 				.getAllGroupsWithNameInData("personDomainPart");
 		assertEquals(personDomainParts.size(), 3);
@@ -91,17 +129,6 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 		assertEquals(personDomainParts.get(0).getRepeatId(), "0");
 		assertEquals(personDomainParts.get(1).getRepeatId(), "1");
 		assertEquals(personDomainParts.get(2).getRepeatId(), "2");
-	}
-
-	private void assertNewLinkCorrectlyCreated() {
-		assertEquals(dataGroupFactory.usedNameInDatas.get(0), "personDomainPart");
-		assertEquals(dataGroupFactory.usedRecordTypes.get(0), "personDomainPart");
-		assertEquals(dataGroupFactory.usedRecordIds.get(0), "personId:235:domainPartId");
-	}
-
-	private void assertCorrectPersonReadFromStorage() {
-		assertEquals(recordStorage.readRecordTypes.get(0), "person");
-		assertEquals(recordStorage.readRecordIds.get(0), "personId:235");
 	}
 
 	private DataGroupSpy createDataGroup(String domainPartId) {
@@ -119,6 +146,15 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
 
 		assertEquals(recordStorage.dataDivider, "testDiva");
+
+		assertEquals(recordStorage.readRecordTypes.get(1), "recordType");
+		assertEquals(recordStorage.readRecordIds.get(1), "person");
+
+		assertEquals(termCollector.metadataGroupId, "metadataIdForPersonType");
+		assertSame(termCollector.dataGroup, recordStorage.returnedDataGroups.get(0));
+		assertSame(recordStorage.collectedTerms, termCollector.returnedCollectedTerms);
 	}
+
+	// kolla typ, id och datagrupp inskickad till update
 
 }
