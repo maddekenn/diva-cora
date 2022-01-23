@@ -29,6 +29,7 @@ import se.uu.ub.cora.storage.RecordStorage;
 
 public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality {
 
+	private static final String RECORD_INFO = "recordInfo";
 	private static final String PERSON = "person";
 	private static final String PERSON_DOMAIN_PART = "personDomainPart";
 	private RecordStorage recordStorage;
@@ -48,6 +49,9 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 		String personIdPartOfId = recordId.substring(0, recordId.lastIndexOf(":"));
 		DataGroup readPerson = recordStorage.read(PERSON, personIdPartOfId);
 		createAndAddPersonDomainPartToPerson(recordId, readPerson);
+
+		addUpdatedInfoToPerson(dataGroup, readPerson);
+
 		String dataDivider = extractDataDivider(readPerson);
 
 		String metadataId = getMetadataId();
@@ -60,7 +64,7 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 	}
 
 	private String extractRecordId(DataGroup dataGroup) {
-		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData(RECORD_INFO);
 		return recordInfo.getFirstAtomicValueWithNameInData("id");
 	}
 
@@ -81,8 +85,20 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 		}
 	}
 
+	private void addUpdatedInfoToPerson(DataGroup dataGroup, DataGroup readPerson) {
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData(RECORD_INFO);
+		DataGroup domainPartUpdated = recordInfo.getFirstGroupWithNameInData("updated");
+
+		DataGroup personRecordInfo = readPerson.getFirstGroupWithNameInData(RECORD_INFO);
+		// TODO: är det ett problem att faktiskt sätta samma datagrupp? Borde istället
+		// informationen kopieras?
+		personRecordInfo.addChild(domainPartUpdated);
+		setNewRepeatIdForRepeatedDataGroupsToEnsureUnique(
+				personRecordInfo.getAllGroupsWithNameInData("updated"));
+	}
+
 	private String extractDataDivider(DataGroup readPerson) {
-		DataGroup recordInfo = readPerson.getFirstGroupWithNameInData("recordInfo");
+		DataGroup recordInfo = readPerson.getFirstGroupWithNameInData(RECORD_INFO);
 		DataGroup dataDividerGroup = recordInfo.getFirstGroupWithNameInData("dataDivider");
 		return dataDividerGroup.getFirstAtomicValueWithNameInData("linkedRecordId");
 	}
@@ -94,8 +110,7 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 	private String getMetadataId() {
 		DataGroup readRecordType = recordStorage.read("recordType", PERSON);
 		DataGroup metadataIdLink = readRecordType.getFirstGroupWithNameInData("metadataId");
-		String metadataId = metadataIdLink.getFirstAtomicValueWithNameInData("linkedRecordId");
-		return metadataId;
+		return metadataIdLink.getFirstAtomicValueWithNameInData("linkedRecordId");
 	}
 
 	public RecordStorage getRecordStorage() {

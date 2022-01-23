@@ -64,10 +64,18 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	private void setUpPersonToReturnFromStorageSpy() {
 		DataGroupExtendedSpy person = new DataGroupExtendedSpy("person");
 		DataGroupExtendedSpy recordInfo = createRecordInfo();
+		createAndAddUpdated(recordInfo, "1");
+		createAndAddUpdated(recordInfo, "4");
 		person.addChild(recordInfo);
 		createAndAddPersonDomainPart(person, "1");
 		createAndAddPersonDomainPart(person, "3");
 		recordStorage.returnOnRead.put("person_personId:235", person);
+	}
+
+	private void createAndAddUpdated(DataGroupExtendedSpy recordInfo, String repeatId) {
+		DataGroupExtendedSpy updated = new DataGroupExtendedSpy("updated");
+		updated.setRepeatId(repeatId);
+		recordInfo.addChild(updated);
 	}
 
 	private DataGroupExtendedSpy createRecordInfo() {
@@ -99,7 +107,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 
 	@Test
 	public void testUseExtendedFunctionality() {
-		DataGroupSpy personDomainPart = createDataGroup("personId:235:domainPartId");
+		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:domainPartId");
 
 		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
 
@@ -137,17 +145,41 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 		assertEquals(personDomainParts.get(2).getRepeatId(), "2");
 	}
 
-	private DataGroupSpy createDataGroup(String domainPartId) {
-		DataGroupSpy domainPart = new DataGroupSpy("personDomainPart");
-		DataGroupSpy recordInfo = new DataGroupSpy("recordInfo");
+	private DataGroupExtendedSpy createDataGroup(String domainPartId) {
+		DataGroupExtendedSpy domainPart = new DataGroupExtendedSpy("personDomainPart");
+		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
 		recordInfo.addChild(new DataAtomicSpy("id", domainPartId));
 		domainPart.addChild(recordInfo);
+		createAndAddUpdated(recordInfo, "2");
+
 		return domainPart;
 	}
 
 	@Test
+	public void testUpdatedCopiedFromDomainPartToPerson() {
+		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:domainPartId");
+
+		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
+
+		DataGroup personSentToUpdate = recordStorage.dataGroupsSentToUpdate.get(0);
+		DataGroup recordInfo = personSentToUpdate.getFirstGroupWithNameInData("recordInfo");
+		List<DataGroup> updatedList = recordInfo.getAllGroupsWithNameInData("updated");
+		assertEquals(updatedList.size(), 3);
+		DataGroup domainPartRecordInfo = personDomainPart.getFirstGroupWithNameInData("recordInfo");
+		assertSame(updatedList.get(2), domainPartRecordInfo.getFirstGroupWithNameInData("updated"));
+
+		assertNewRepeatIdsAreSetToEnsureUnique(updatedList);
+	}
+
+	private void assertNewRepeatIdsAreSetToEnsureUnique(List<DataGroup> updatedList) {
+		for (int i = 0; i < updatedList.size(); i++) {
+			assertEquals(updatedList.get(i).getRepeatId(), String.valueOf(i));
+		}
+	}
+
+	@Test
 	public void testUseExtendedFunctionalityCheckCollectedTermsAndLinks() {
-		DataGroupSpy personDomainPart = createDataGroup("personId:235:domainPartId");
+		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:domainPartId");
 
 		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
 
@@ -171,7 +203,5 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 		assertEquals(linkCollector.fromRecordId, "personId:235");
 		assertSame(recordStorage.linkList, linkCollector.collectedLinks);
 	}
-
-	// kolla typ, id och datagrupp inskickad till update
 
 }
