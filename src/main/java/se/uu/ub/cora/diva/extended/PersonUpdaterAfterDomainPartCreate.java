@@ -47,13 +47,12 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
 		String recordId = extractRecordId(dataGroup);
 		String personIdPartOfId = recordId.substring(0, recordId.lastIndexOf(":"));
+
 		DataGroup readPerson = recordStorage.read(PERSON, personIdPartOfId);
 		createAndAddPersonDomainPartToPerson(recordId, readPerson);
-
 		addUpdatedInfoToPerson(dataGroup, readPerson);
 
 		String dataDivider = extractDataDivider(readPerson);
-
 		String metadataId = getMetadataId();
 		DataGroup collectedTerms = collectTerms(readPerson, metadataId);
 		DataGroup collectedLinks = linkCollector.collectLinks(metadataId, readPerson, PERSON,

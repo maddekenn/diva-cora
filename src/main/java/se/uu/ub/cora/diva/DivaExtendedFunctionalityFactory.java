@@ -26,11 +26,14 @@ import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPo
 import java.util.ArrayList;
 import java.util.List;
 
+import se.uu.ub.cora.bookkeeper.linkcollector.DataRecordLinkCollector;
+import se.uu.ub.cora.bookkeeper.termcollector.DataGroupTermCollector;
 import se.uu.ub.cora.diva.extended.ClassicOrganisationReloader;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
+import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartCreate;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.spider.dependency.SpiderDependencyProvider;
@@ -71,6 +74,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_RETURN, "workOrder", 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_AFTER_METADATA_VALIDATION,
 				"personDomainPart", 0));
+		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_RETURN, "personDomainPart", 0));
 	}
 
 	private void createContext(String recordType) {
@@ -93,6 +97,8 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			addFunctionalityForAfterStore(functionalities);
 		} else if (CREATE_AFTER_METADATA_VALIDATION == position) {
 			addFunctionalityForCreateAfterMetadataValidation(functionalities);
+		} else if (CREATE_BEFORE_RETURN == position) {
+			addFunctionalityForCreateBeforeReturn(functionalities);
 		}
 
 		return functionalities;
@@ -134,6 +140,15 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			List<ExtendedFunctionality> functionalities) {
 		DatabaseFacade databaseFacade = databaseFactory.factorDatabaseFacade();
 		functionalities.add(new PersonDomainPartValidator(databaseFacade));
+	}
+
+	private void addFunctionalityForCreateBeforeReturn(
+			List<ExtendedFunctionality> functionalities) {
+		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
+		DataGroupTermCollector termCollector = dependencyProvider.getDataGroupTermCollector();
+		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
+		functionalities.add(new PersonUpdaterAfterDomainPartCreate(recordStorage, termCollector,
+				linkCollector));
 	}
 
 	public SqlDatabaseFactory onlyForTestGetSqlDatabaseFactory() {

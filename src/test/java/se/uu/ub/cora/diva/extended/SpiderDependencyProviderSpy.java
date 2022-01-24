@@ -45,6 +45,8 @@ public class SpiderDependencyProviderSpy implements SpiderDependencyProvider {
 	public boolean getInitInfoValueUsingKeyWasCalled = false;
 	public Map<String, String> initInfo = new HashMap<>();
 	private RecordStorageProviderSpy recordStorageProvider;
+	public DataGroupTermCollector termCollector = new DataGroupTermCollectorSpy();
+	public DataRecordLinkCollector linkCollector = new DataRecordLinkCollectorSpy();
 
 	public SpiderDependencyProviderSpy(Map<String, String> initInfo) {
 		this.initInfo = initInfo;
@@ -108,14 +110,12 @@ public class SpiderDependencyProviderSpy implements SpiderDependencyProvider {
 
 	@Override
 	public DataRecordLinkCollector getDataRecordLinkCollector() {
-		// TODO Auto-generated method stub
-		return null;
+		return linkCollector;
 	}
 
 	@Override
 	public DataGroupTermCollector getDataGroupTermCollector() {
-		// TODO Auto-generated method stub
-		return null;
+		return termCollector;
 	}
 
 	@Override
