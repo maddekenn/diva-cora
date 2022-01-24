@@ -18,47 +18,51 @@
  */
 package se.uu.ub.cora.diva.extended;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-
-import java.util.List;
-import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.diva.DatabaseFacadeSpy;
+import se.uu.ub.cora.data.DataAtomicProvider;
+import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.DataGroupExtendedSpy;
+import se.uu.ub.cora.diva.RecordStorageSpy;
 import se.uu.ub.cora.spider.record.DataException;
 
 public class PersonDomainPartValidatorTest {
 
-	private DatabaseFacadeSpy databaseFacade;
 	private PersonDomainPartValidator validator;
 	private String authToken = "someAuthToken";
+	private RecordStorageSpy recordStorage;
+	private DataAtomicFactorySpy dataAtomicFactorySpy;
 
 	@BeforeMethod
 	public void setUp() {
-		databaseFacade = new DatabaseFacadeSpy();
-		validator = new PersonDomainPartValidator(databaseFacade);
+		dataAtomicFactorySpy = new DataAtomicFactorySpy();
+		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactorySpy);
+		recordStorage = new RecordStorageSpy();
+		validator = new PersonDomainPartValidator(recordStorage);
 	}
 
 	@Test
 	public void testInit() {
-		assertSame(validator.getDbFacade(), databaseFacade);
+		assertSame(validator.getRecordStorage(), recordStorage);
 	}
 
 	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
 			+ "No person exists with record id personId:123. PersonDomainPart was not created. "
-			+ "Error from spy reading one row.")
+			+ "Error from record storage spy")
 	public void testExtendedFunctionalityNoPersonPresent() {
-		databaseFacade.throwDataException = true;
-		DataGroupSpy domainPart = createDataGroup("personId:123:domainPartIdPart");
+		recordStorage.throwRecordNotFoundException = true;
+		DataGroupExtendedSpy domainPart = createDataGroup("personId:123:someDomain");
 		validator.useExtendedFunctionality(authToken, domainPart);
 	}
 
-	private DataGroupSpy createDataGroup(String domainPartId) {
-		DataGroupSpy domainPart = new DataGroupSpy("personDomainPart");
-		DataGroupSpy recordInfo = new DataGroupSpy("recordInfo");
+	private DataGroupExtendedSpy createDataGroup(String domainPartId) {
+		DataGroupExtendedSpy domainPart = new DataGroupExtendedSpy("personDomainPart");
+		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
 		recordInfo.addChild(new DataAtomicSpy("id", domainPartId));
 		domainPart.addChild(recordInfo);
 		return domainPart;
@@ -66,14 +70,57 @@ public class PersonDomainPartValidatorTest {
 
 	@Test
 	public void testExtendedFunctionalityPersonExists() {
-		DataGroupSpy domainPart = createDataGroup("personId:123:domainPartIdPart");
+		createAndSetPersonUsingPublicValue("true");
+		DataGroupExtendedSpy domainPart = createDataGroup("personId:123:someDomain");
 		validator.useExtendedFunctionality(authToken, domainPart);
 
-		databaseFacade.MCR.assertParameter("readOneRowOrFailUsingSqlAndValues", 0, "sql",
-				"select * from record_person where id = ?");
-		Map<String, Object> parameters = databaseFacade.MCR
-				.getParametersForMethodAndCallNumber("readOneRowOrFailUsingSqlAndValues", 0);
-		List<Object> valuesSentIn = (List<Object>) parameters.get("values");
-		assertTrue(valuesSentIn.contains("personId:123"));
+		assertEquals(recordStorage.readRecordTypes.get(0), "person");
+		assertEquals(recordStorage.readRecordIds.get(0), "personId:123");
 	}
+
+	@Test
+	public void testPublicFalseIsCopiedFromPersonToDomainPart() {
+		String publicValue = "false";
+		createAndSetPersonUsingPublicValue(publicValue);
+		DataGroupExtendedSpy domainPart = createDataGroup("personId:123:someDomain");
+		assertNoPublicInDomainPartBefore(domainPart);
+
+		validator.useExtendedFunctionality(authToken, domainPart);
+
+		assertPublicValueCopiedFromPersonToDomainPart(publicValue, domainPart);
+	}
+
+	private void assertNoPublicInDomainPartBefore(DataGroupExtendedSpy domainPart) {
+		DataGroup recordInfo = domainPart.getFirstGroupWithNameInData("recordInfo");
+		assertFalse(recordInfo.containsChildWithNameInData("public"));
+	}
+
+	private void createAndSetPersonUsingPublicValue(String publicValue) {
+		DataGroupExtendedSpy person = new DataGroupExtendedSpy("person");
+		DataGroupExtendedSpy personRecordInfo = new DataGroupExtendedSpy("recordInfo");
+		personRecordInfo.addChild(new DataAtomicSpy("public", publicValue));
+		person.addChild(personRecordInfo);
+		recordStorage.returnOnRead.put("person_personId:123", person);
+	}
+
+	private void assertPublicValueCopiedFromPersonToDomainPart(String publicValue,
+			DataGroupExtendedSpy domainPart) {
+		assertEquals(dataAtomicFactorySpy.usedNameInDatas.get(0), "public");
+		assertEquals(dataAtomicFactorySpy.usedValues.get(0), publicValue);
+
+		assertSame(domainPart.getFirstGroupWithNameInData("recordInfo").getFirstChildWithNameInData(
+				"public"), dataAtomicFactorySpy.factoredDataAtomics.get(0));
+	}
+
+	@Test
+	public void testPublicTrueIsCopiedFromPersonToDomainPart() {
+		createAndSetPersonUsingPublicValue("true");
+		DataGroupExtendedSpy domainPart = createDataGroup("personId:123:someDomain");
+		assertNoPublicInDomainPartBefore(domainPart);
+
+		validator.useExtendedFunctionality(authToken, domainPart);
+
+		assertPublicValueCopiedFromPersonToDomainPart("true", domainPart);
+	}
+
 }

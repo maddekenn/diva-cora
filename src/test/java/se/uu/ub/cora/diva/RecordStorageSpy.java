@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
@@ -40,11 +41,15 @@ public class RecordStorageSpy implements RecordStorage {
 	public DataGroup collectedTerms;
 	public String dataDivider;
 	public DataGroup linkList;
+	public boolean throwRecordNotFoundException = false;
 
 	@Override
 	public DataGroup read(String type, String id) {
 		readRecordTypes.add(type);
 		readRecordIds.add(id);
+		if (throwRecordNotFoundException) {
+			throw new RecordNotFoundException("Error from record storage spy");
+		}
 		if (returnOnRead.containsKey(type + "_" + id)) {
 			DataGroupExtendedSpy presetReturnValue = returnOnRead.get(type + "_" + id);
 			returnedDataGroups.add(presetReturnValue);

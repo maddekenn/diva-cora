@@ -18,55 +18,62 @@
  */
 package se.uu.ub.cora.diva.extended;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import se.uu.ub.cora.data.DataAtomic;
+import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.record.DataException;
-import se.uu.ub.cora.sqldatabase.DatabaseFacade;
-import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.storage.RecordNotFoundException;
+import se.uu.ub.cora.storage.RecordStorage;
 
 public class PersonDomainPartValidator implements ExtendedFunctionality {
 
-	private DatabaseFacade databaseFacade;
+	private static final String RECORD_INFO = "recordInfo";
+	private RecordStorage recordStorage;
 
-	public PersonDomainPartValidator(DatabaseFacade databaseFacade) {
-		this.databaseFacade = databaseFacade;
+	public PersonDomainPartValidator(RecordStorage recordStorage) {
+		this.recordStorage = recordStorage;
 	}
 
 	@Override
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
 		String personIdPartOfId = getPersonIdPartOfPersonDomainPart(dataGroup);
-		List<Object> values = addIdAsValue(personIdPartOfId);
-		tryToReadPerson(personIdPartOfId, values);
+		DataGroup readPerson = tryToReadPersonThrowErrorIfNotExists(personIdPartOfId);
+		updateDomainPartWithPublicValueFromPerson(dataGroup, readPerson);
 	}
 
-	private void tryToReadPerson(String personIdPartOfId, List<Object> values) {
-		try {
-			databaseFacade.readOneRowOrFailUsingSqlAndValues(
-					"select * from record_person where id = ?", values);
+	private String getPersonIdPartOfPersonDomainPart(DataGroup dataGroup) {
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData(RECORD_INFO);
+		String recordId = recordInfo.getFirstAtomicValueWithNameInData("id");
+		return recordId.substring(0, recordId.lastIndexOf(":"));
+	}
 
-		} catch (SqlDatabaseException exception) {
+	private DataGroup tryToReadPersonThrowErrorIfNotExists(String personIdPartOfId) {
+		try {
+			return recordStorage.read("person", personIdPartOfId);
+
+		} catch (RecordNotFoundException exception) {
 			throw new DataException("No person exists with record id " + personIdPartOfId
 					+ ". PersonDomainPart was not created. " + exception.getMessage());
 		}
 	}
 
-	private String getPersonIdPartOfPersonDomainPart(DataGroup dataGroup) {
-		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
-		String recordId = recordInfo.getFirstAtomicValueWithNameInData("id");
-		return recordId.substring(0, recordId.lastIndexOf(":"));
+	private void updateDomainPartWithPublicValueFromPerson(DataGroup dataGroup,
+			DataGroup readPerson) {
+		String publicValue = getPublicValueFromPerson(readPerson);
+		DataAtomic publicDataAtomic = DataAtomicProvider
+				.getDataAtomicUsingNameInDataAndValue("public", publicValue);
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData(RECORD_INFO);
+		recordInfo.addChild(publicDataAtomic);
 	}
 
-	private List<Object> addIdAsValue(String personIdPartOfId) {
-		List<Object> values = new ArrayList<>();
-		values.add(personIdPartOfId);
-		return values;
+	private String getPublicValueFromPerson(DataGroup readPerson) {
+		DataGroup recordInfo = readPerson.getFirstGroupWithNameInData(RECORD_INFO);
+		return recordInfo.getFirstAtomicValueWithNameInData("public");
 	}
 
-	public DatabaseFacade getDbFacade() {
-		return databaseFacade;
+	public RecordStorage getRecordStorage() {
+		return recordStorage;
 	}
 
 }
