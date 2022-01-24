@@ -126,8 +126,14 @@ public class DataGroupExtendedSpy implements DataGroup {
 
 	@Override
 	public List<DataAtomic> getAllDataAtomicsWithNameInData(String childNameInData) {
-		// TODO Auto-generated method stub
-		return null;
+		List<DataAtomic> currentListToReturn = new ArrayList<>();
+		for (DataElement dataElement : children) {
+			if (childNameInData.equals(dataElement.getNameInData())
+					&& dataElement instanceof DataAtomic) {
+				currentListToReturn.add((DataAtomic) dataElement);
+			}
+		}
+		return currentListToReturn;
 	}
 
 	@Override

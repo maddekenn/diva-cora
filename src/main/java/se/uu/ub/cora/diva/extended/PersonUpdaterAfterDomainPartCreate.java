@@ -22,6 +22,8 @@ import java.util.List;
 
 import se.uu.ub.cora.bookkeeper.linkcollector.DataRecordLinkCollector;
 import se.uu.ub.cora.bookkeeper.termcollector.DataGroupTermCollector;
+import se.uu.ub.cora.data.DataAtomic;
+import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
@@ -50,7 +52,8 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 
 		DataGroup readPerson = recordStorage.read(PERSON, personIdPartOfId);
 		createAndAddPersonDomainPartToPerson(recordId, readPerson);
-		addUpdatedInfoToPerson(dataGroup, readPerson);
+
+		addInfoFromDomainPartToPerson(dataGroup, readPerson, recordId);
 
 		String dataDivider = extractDataDivider(readPerson);
 		String metadataId = getMetadataId();
@@ -72,11 +75,11 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 				.getDataGroupAsLinkUsingNameInDataTypeAndId(PERSON_DOMAIN_PART, PERSON_DOMAIN_PART,
 						recordId);
 		readPerson.addChild(personDomainPartLink);
-		setNewRepeatIdForRepeatedDataGroupsToEnsureUnique(
+		setNewRepeatIdForRepeatedDataElementsToEnsureUnique(
 				readPerson.getAllGroupsWithNameInData(PERSON_DOMAIN_PART));
 	}
 
-	private void setNewRepeatIdForRepeatedDataGroupsToEnsureUnique(List<DataGroup> dataGroups) {
+	private void setNewRepeatIdForRepeatedDataElementsToEnsureUnique(List<DataGroup> dataGroups) {
 		int counter = 0;
 		for (DataGroup repeatedDataGroup : dataGroups) {
 			repeatedDataGroup.setRepeatId(String.valueOf(counter));
@@ -84,16 +87,52 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 		}
 	}
 
-	private void addUpdatedInfoToPerson(DataGroup dataGroup, DataGroup readPerson) {
-		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData(RECORD_INFO);
-		DataGroup domainPartUpdated = recordInfo.getFirstGroupWithNameInData("updated");
+	private void addInfoFromDomainPartToPerson(DataGroup dataGroup, DataGroup readPerson,
+			String recordId) {
+		DataGroup domainPartUpdated = extractUpdated(dataGroup);
 
 		DataGroup personRecordInfo = readPerson.getFirstGroupWithNameInData(RECORD_INFO);
-		// TODO: är det ett problem att faktiskt sätta samma datagrupp? Borde istället
-		// informationen kopieras?
 		personRecordInfo.addChild(domainPartUpdated);
-		setNewRepeatIdForRepeatedDataGroupsToEnsureUnique(
+		setNewRepeatIdForRepeatedDataElementsToEnsureUnique(
 				personRecordInfo.getAllGroupsWithNameInData("updated"));
+
+		possiblyAddDomainToPerson(recordId, personRecordInfo);
+	}
+
+	private DataGroup extractUpdated(DataGroup dataGroup) {
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData(RECORD_INFO);
+		return recordInfo.getFirstGroupWithNameInData("updated");
+	}
+
+	private void possiblyAddDomainToPerson(String recordId, DataGroup personRecordInfo) {
+		String domainPartOfId = recordId.substring(recordId.lastIndexOf(":") + 1);
+		boolean domainAlreadyExist = domainAlreadyExists(personRecordInfo, domainPartOfId);
+		if (!domainAlreadyExist) {
+			createAndAddDomainInPerson(personRecordInfo, domainPartOfId);
+			int counter = 0;
+			for (DataAtomic repeatedDataGroup : personRecordInfo
+					.getAllDataAtomicsWithNameInData("domain")) {
+				repeatedDataGroup.setRepeatId(String.valueOf(counter));
+				counter++;
+			}
+		}
+	}
+
+	private boolean domainAlreadyExists(DataGroup personRecordInfo, String domainPartOfId) {
+		List<DataAtomic> existingDomains = personRecordInfo
+				.getAllDataAtomicsWithNameInData("domain");
+		for (DataAtomic existingDomain : existingDomains) {
+			if (existingDomain.getValue().equals(domainPartOfId)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void createAndAddDomainInPerson(DataGroup personRecordInfo, String domainPartOfId) {
+		DataAtomic domain = DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("domain",
+				domainPartOfId);
+		personRecordInfo.addChild(domain);
 	}
 
 	private String extractDataDivider(DataGroup readPerson) {

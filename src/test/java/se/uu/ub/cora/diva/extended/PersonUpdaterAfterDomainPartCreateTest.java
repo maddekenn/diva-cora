@@ -26,6 +26,8 @@ import java.util.List;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.data.DataAtomic;
+import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.diva.DataGroupExtendedSpy;
@@ -38,9 +40,12 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	private DataGroupFactorySpy dataGroupFactory;
 	private DataGroupTermCollectorSpy termCollector;
 	private DataRecordLinkCollectorSpy linkCollector;
+	private DataAtomicFactorySpy dataAtomicFactorySpy;
 
 	@BeforeMethod
 	public void setUp() {
+		dataAtomicFactorySpy = new DataAtomicFactorySpy();
+		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactorySpy);
 		dataGroupFactory = new DataGroupFactorySpy();
 		DataGroupProvider.setDataGroupFactory(dataGroupFactory);
 		recordStorage = new RecordStorageSpy();
@@ -66,6 +71,8 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 		DataGroupExtendedSpy recordInfo = createRecordInfo();
 		createAndAddUpdated(recordInfo, "1");
 		createAndAddUpdated(recordInfo, "4");
+		recordInfo.addChild(new DataAtomicSpy("domain", "uu", "1"));
+		recordInfo.addChild(new DataAtomicSpy("domain", "kth", "3"));
 		person.addChild(recordInfo);
 		createAndAddPersonDomainPart(person, "1");
 		createAndAddPersonDomainPart(person, "3");
@@ -107,7 +114,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 
 	@Test
 	public void testUseExtendedFunctionality() {
-		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:domainPartId");
+		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:someDomain");
 
 		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
 
@@ -131,7 +138,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	private void assertNewDomainPartLinkCorrectlyCreated() {
 		assertEquals(dataGroupFactory.usedNameInDatas.get(0), "personDomainPart");
 		assertEquals(dataGroupFactory.usedRecordTypes.get(0), "personDomainPart");
-		assertEquals(dataGroupFactory.usedRecordIds.get(0), "personId:235:domainPartId");
+		assertEquals(dataGroupFactory.usedRecordIds.get(0), "personId:235:someDomain");
 	}
 
 	private void assertNewDomainPartLinkAddedCorrectly(DataGroup dataGroup) {
@@ -156,8 +163,45 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	}
 
 	@Test
+	public void testNewDomainAddedToListOfDomainsInPerson() {
+		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:someDomain");
+
+		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
+
+		assertEquals(dataAtomicFactorySpy.usedNameInDatas.get(0), "domain");
+		assertEquals(dataAtomicFactorySpy.usedValues.get(0), "someDomain");
+
+		DataGroup updatedPerson = recordStorage.dataGroupsSentToUpdate.get(0);
+		DataGroup recordInfo = updatedPerson.getFirstGroupWithNameInData("recordInfo");
+		List<DataAtomic> domains = recordInfo.getAllDataAtomicsWithNameInData("domain");
+		assertSame(domains.get(2), dataAtomicFactorySpy.factoredDataAtomic);
+		assertEquals(domains.size(), 3);
+
+		assertNewRepeatIdsWereSet(domains);
+	}
+
+	private void assertNewRepeatIdsWereSet(List<DataAtomic> domains) {
+		for (int i = 0; i < domains.size(); i++) {
+			assertEquals(domains.get(i).getRepeatId(), String.valueOf(i));
+		}
+	}
+
+	@Test
+	public void testAlreadyExistingDomainNotAddedToPerson() {
+		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:kth");
+
+		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
+		DataGroup updatedPerson = recordStorage.dataGroupsSentToUpdate.get(0);
+		DataGroup recordInfo = updatedPerson.getFirstGroupWithNameInData("recordInfo");
+		List<DataAtomic> domains = recordInfo.getAllDataAtomicsWithNameInData("domain");
+		assertEquals(domains.size(), 2);
+		assertEquals(dataAtomicFactorySpy.factoredDataAtomics.size(), 0);
+
+	}
+
+	@Test
 	public void testUpdatedCopiedFromDomainPartToPerson() {
-		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:domainPartId");
+		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:someDomain");
 
 		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
 
@@ -179,7 +223,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 
 	@Test
 	public void testUseExtendedFunctionalityCheckCollectedTermsAndLinks() {
-		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:domainPartId");
+		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:someDomain");
 
 		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
 
