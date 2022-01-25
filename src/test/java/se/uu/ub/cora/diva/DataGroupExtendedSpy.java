@@ -181,7 +181,12 @@ public class DataGroupExtendedSpy implements DataGroup {
 
 	@Override
 	public boolean removeFirstChildWithNameInData(String childNameInData) {
-		// TODO Auto-generated method stub
+		for (DataElement dataElement : children) {
+			if (childNameInData.equals(dataElement.getNameInData())) {
+				children.remove(dataElement);
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -200,7 +205,13 @@ public class DataGroupExtendedSpy implements DataGroup {
 
 	@Override
 	public DataAtomic getFirstDataAtomicWithNameInData(String childNameInData) {
-		// TODO Auto-generated method stub
+		for (DataElement dataElement : children) {
+			if (childNameInData.equals(dataElement.getNameInData())) {
+				if (dataElement instanceof DataAtomic) {
+					return ((DataAtomic) dataElement);
+				}
+			}
+		}
 		return null;
 	}
 

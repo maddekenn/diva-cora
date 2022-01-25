@@ -25,6 +25,7 @@ import static org.testng.Assert.assertSame;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.DataGroupExtendedSpy;
@@ -56,22 +57,40 @@ public class PersonDomainPartValidatorTest {
 			+ "Error from record storage spy")
 	public void testExtendedFunctionalityNoPersonPresent() {
 		recordStorage.throwRecordNotFoundException = true;
-		DataGroupExtendedSpy domainPart = createDataGroup("personId:123:someDomain");
+		DataGroupExtendedSpy domainPart = createDataGroup("someDomain", "personId:123");
 		validator.useExtendedFunctionality(authToken, domainPart);
 	}
 
-	private DataGroupExtendedSpy createDataGroup(String domainPartId) {
+	private DataGroupExtendedSpy createDataGroup(String domain, String personId) {
 		DataGroupExtendedSpy domainPart = new DataGroupExtendedSpy("personDomainPart");
 		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
-		recordInfo.addChild(new DataAtomicSpy("id", domainPartId));
+		recordInfo.addChild(new DataAtomicSpy("domain", domain));
 		domainPart.addChild(recordInfo);
+		DataGroupExtendedSpy personLink = new DataGroupExtendedSpy("personLink");
+		personLink.addChild(new DataAtomicSpy("linkedRecordId", personId));
+		domainPart.addChild(personLink);
 		return domainPart;
+	}
+
+	@Test
+	public void testExtendedFunctionalityPersonDomainPartCompleted() {
+		createAndSetPersonUsingPublicValue("true");
+		DataGroupExtendedSpy domainPart = createDataGroup("someDomain", "personId:123");
+		validator.useExtendedFunctionality(authToken, domainPart);
+
+		DataAtomicSpy factoredRecordId = dataAtomicFactorySpy.factoredDataAtomics.get(0);
+		DataGroup recordInfo = domainPart.getFirstGroupWithNameInData("recordInfo");
+		DataAtomic addedRecordId = recordInfo.getFirstDataAtomicWithNameInData("id");
+		assertSame(addedRecordId, factoredRecordId);
+		assertEquals(addedRecordId.getValue(), "personId:123:someDomain");
+
+		assertFalse(domainPart.containsChildWithNameInData("personLink"));
 	}
 
 	@Test
 	public void testExtendedFunctionalityPersonExists() {
 		createAndSetPersonUsingPublicValue("true");
-		DataGroupExtendedSpy domainPart = createDataGroup("personId:123:someDomain");
+		DataGroupExtendedSpy domainPart = createDataGroup("someDomain", "personId:123");
 		validator.useExtendedFunctionality(authToken, domainPart);
 
 		assertEquals(recordStorage.readRecordTypes.get(0), "person");
@@ -82,7 +101,7 @@ public class PersonDomainPartValidatorTest {
 	public void testPublicFalseIsCopiedFromPersonToDomainPart() {
 		String publicValue = "false";
 		createAndSetPersonUsingPublicValue(publicValue);
-		DataGroupExtendedSpy domainPart = createDataGroup("personId:123:someDomain");
+		DataGroupExtendedSpy domainPart = createDataGroup("someDomain", "personId:123");
 		assertNoPublicInDomainPartBefore(domainPart);
 
 		validator.useExtendedFunctionality(authToken, domainPart);
@@ -105,17 +124,17 @@ public class PersonDomainPartValidatorTest {
 
 	private void assertPublicValueCopiedFromPersonToDomainPart(String publicValue,
 			DataGroupExtendedSpy domainPart) {
-		assertEquals(dataAtomicFactorySpy.usedNameInDatas.get(0), "public");
-		assertEquals(dataAtomicFactorySpy.usedValues.get(0), publicValue);
+		assertEquals(dataAtomicFactorySpy.usedNameInDatas.get(1), "public");
+		assertEquals(dataAtomicFactorySpy.usedValues.get(1), publicValue);
 
 		assertSame(domainPart.getFirstGroupWithNameInData("recordInfo").getFirstChildWithNameInData(
-				"public"), dataAtomicFactorySpy.factoredDataAtomics.get(0));
+				"public"), dataAtomicFactorySpy.factoredDataAtomics.get(1));
 	}
 
 	@Test
 	public void testPublicTrueIsCopiedFromPersonToDomainPart() {
 		createAndSetPersonUsingPublicValue("true");
-		DataGroupExtendedSpy domainPart = createDataGroup("personId:123:someDomain");
+		DataGroupExtendedSpy domainPart = createDataGroup("someDomain", "personId:123");
 		assertNoPublicInDomainPartBefore(domainPart);
 
 		validator.useExtendedFunctionality(authToken, domainPart);

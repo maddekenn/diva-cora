@@ -37,15 +37,37 @@ public class PersonDomainPartValidator implements ExtendedFunctionality {
 
 	@Override
 	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
-		String personIdPartOfId = getPersonIdPartOfPersonDomainPart(dataGroup);
-		DataGroup readPerson = tryToReadPersonThrowErrorIfNotExists(personIdPartOfId);
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData(RECORD_INFO);
+		String personId = getPersonId(dataGroup);
+
+		DataGroup readPerson = tryToReadPersonThrowErrorIfNotExists(personId);
+
+		addIdAndRemoveTemporaryPersonLink(dataGroup, recordInfo, personId);
 		updateDomainPartWithPublicValueFromPerson(dataGroup, readPerson);
 	}
 
-	private String getPersonIdPartOfPersonDomainPart(DataGroup dataGroup) {
-		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData(RECORD_INFO);
-		String recordId = recordInfo.getFirstAtomicValueWithNameInData("id");
-		return recordId.substring(0, recordId.lastIndexOf(":"));
+	private String getPersonId(DataGroup dataGroup) {
+		DataGroup personLink = dataGroup.getFirstGroupWithNameInData("personLink");
+		return personLink.getFirstAtomicValueWithNameInData("linkedRecordId");
+	}
+
+	private void addIdAndRemoveTemporaryPersonLink(DataGroup dataGroup, DataGroup recordInfo,
+			String personId) {
+		String domainPartId = getIdForDomainPart(recordInfo, personId);
+
+		addIdToDomainPart(recordInfo, domainPartId);
+		dataGroup.removeFirstChildWithNameInData("personLink");
+	}
+
+	private String getIdForDomainPart(DataGroup recordInfo, String personId) {
+		String domain = recordInfo.getFirstAtomicValueWithNameInData("domain");
+		return personId + ":" + domain;
+	}
+
+	private void addIdToDomainPart(DataGroup recordInfo, String domainPartId) {
+		DataAtomic recordId = DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("id",
+				domainPartId);
+		recordInfo.addChild(recordId);
 	}
 
 	private DataGroup tryToReadPersonThrowErrorIfNotExists(String personIdPartOfId) {
