@@ -138,8 +138,8 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 
 	private void addFunctionalityForCreateAfterMetadataValidation(
 			List<ExtendedFunctionality> functionalities) {
-		DatabaseFacade databaseFacade = databaseFactory.factorDatabaseFacade();
-		functionalities.add(new PersonDomainPartValidator(databaseFacade));
+		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
+		functionalities.add(new PersonDomainPartValidator(recordStorage));
 	}
 
 	private void addFunctionalityForCreateBeforeReturn(

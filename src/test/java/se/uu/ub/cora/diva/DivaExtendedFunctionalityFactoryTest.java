@@ -195,16 +195,13 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void factorPersonDomainPartUpdateAfterValidation() {
-		divaExtendedFunctionality.onlyForTestSetSqlDatabaseFactory(databaseFactorySpy);
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
 				.factor(CREATE_AFTER_METADATA_VALIDATION, "personDomainPart");
 		assertEquals(functionalities.size(), 1);
 		PersonDomainPartValidator validatorFunctionality = (PersonDomainPartValidator) functionalities
 				.get(0);
-		DatabaseFacade databaseFacade = validatorFunctionality.getDbFacade();
-		assertTrue(databaseFacade instanceof DatabaseFacade);
+		assertSame(validatorFunctionality.getRecordStorage(), recordStorageProvider.recordStorage);
 
-		databaseFactorySpy.MCR.assertReturn("factorDatabaseFacade", 0, databaseFacade);
 	}
 
 	@Test
