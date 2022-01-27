@@ -80,7 +80,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void testInit() {
-		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 9);
+		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 8);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_STORE, "subOrganisation",
 				0);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "subOrganisation",
@@ -93,12 +93,11 @@ public class DivaExtendedFunctionalityFactoryTest {
 				4);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "rootOrganisation",
 				5);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(CREATE_BEFORE_RETURN, "workOrder", 6);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(
 				ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION, "personDomainPart",
-				7);
+				6);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(CREATE_BEFORE_RETURN,
-				"personDomainPart", 8);
+				"personDomainPart", 7);
 
 		assertLookupNameAndSqlDatabaseFactory();
 	}

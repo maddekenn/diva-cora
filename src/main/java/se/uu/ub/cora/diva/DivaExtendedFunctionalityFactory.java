@@ -71,7 +71,6 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		createContext(SUB_ORGANISATION);
 		createContext(TOP_ORGANISATION);
 		createContext(ROOT_ORGANISATION);
-		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_RETURN, "workOrder", 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_AFTER_METADATA_VALIDATION,
 				"personDomainPart", 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_RETURN, "personDomainPart", 0));
