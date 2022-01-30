@@ -18,22 +18,26 @@
  */
 package se.uu.ub.cora.diva.extended;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import se.uu.ub.cora.bookkeeper.termcollector.DataGroupTermCollector;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.DataGroupExtendedSpy;
 
 public class DataGroupTermCollectorSpy implements DataGroupTermCollector {
 
-	public String metadataGroupId;
-	public DataGroup dataGroup;
-	public DataGroupExtendedSpy returnedCollectedTerms;
+	public List<String> metadataGroupIds = new ArrayList<>();
+	public List<DataGroup> dataGroups = new ArrayList<>();
+	public List<DataGroupExtendedSpy> returnedCollectedTerms = new ArrayList<>();
 
 	@Override
 	public DataGroup collectTerms(String metadataGroupId, DataGroup dataGroup) {
-		this.metadataGroupId = metadataGroupId;
-		this.dataGroup = dataGroup;
-		returnedCollectedTerms = new DataGroupExtendedSpy("collectedTerms");
-		return returnedCollectedTerms;
+		metadataGroupIds.add(metadataGroupId);
+		dataGroups.add(dataGroup);
+		DataGroupExtendedSpy collectedTerms = new DataGroupExtendedSpy("collectedTerms");
+		returnedCollectedTerms.add(collectedTerms);
+		return collectedTerms;
 	}
 
 	@Override

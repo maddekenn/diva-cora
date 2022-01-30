@@ -18,26 +18,30 @@
  */
 package se.uu.ub.cora.diva.extended;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import se.uu.ub.cora.bookkeeper.linkcollector.DataRecordLinkCollector;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.DataGroupExtendedSpy;
 
 public class DataRecordLinkCollectorSpy implements DataRecordLinkCollector {
 
-	public String metadataId;
-	public DataGroup dataGroup;
-	public String fromRecordType;
-	public String fromRecordId;
-	public DataGroupExtendedSpy collectedLinks;
+	public List<String> metadataIds = new ArrayList<>();
+	public List<DataGroup> dataGroups = new ArrayList<>();
+	public List<String> fromRecordTypes = new ArrayList<>();
+	public List<String> fromRecordIds = new ArrayList<>();
+	public List<DataGroupExtendedSpy> returnedCollectedLinks = new ArrayList<>();
 
 	@Override
 	public DataGroup collectLinks(String metadataId, DataGroup dataGroup, String fromRecordType,
 			String fromRecordId) {
-		this.metadataId = metadataId;
-		this.dataGroup = dataGroup;
-		this.fromRecordType = fromRecordType;
-		this.fromRecordId = fromRecordId;
-		collectedLinks = new DataGroupExtendedSpy("collectedLinks");
+		metadataIds.add(metadataId);
+		dataGroups.add(dataGroup);
+		fromRecordTypes.add(fromRecordType);
+		fromRecordIds.add(fromRecordId);
+		DataGroupExtendedSpy collectedLinks = new DataGroupExtendedSpy("collectedLinks");
+		returnedCollectedLinks.add(collectedLinks);
 		return collectedLinks;
 	}
 

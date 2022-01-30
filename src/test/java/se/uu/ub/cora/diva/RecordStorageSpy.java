@@ -38,9 +38,9 @@ public class RecordStorageSpy implements RecordStorage {
 	public List<DataGroup> dataGroupsSentToUpdate = new ArrayList<>();
 	public List<DataGroup> returnedDataGroups = new ArrayList<>();
 	public Map<String, DataGroupExtendedSpy> returnOnRead = new HashMap<>();
-	public DataGroup collectedTerms;
-	public String dataDivider;
-	public DataGroup linkList;
+	public List<DataGroup> collectedTermsList = new ArrayList<>();
+	public List<String> dataDividers = new ArrayList<>();
+	public List<DataGroup> linkLists = new ArrayList<>();
 	public boolean throwRecordNotFoundException = false;
 
 	@Override
@@ -82,9 +82,9 @@ public class RecordStorageSpy implements RecordStorage {
 	@Override
 	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		this.collectedTerms = collectedTerms;
-		this.linkList = linkList;
-		this.dataDivider = dataDivider;
+		collectedTermsList.add(collectedTerms);
+		linkLists.add(linkList);
+		dataDividers.add(dataDivider);
 		updatedRecordTypes.add(type);
 		updatedRecordIds.add(id);
 		dataGroupsSentToUpdate.add(record);

@@ -125,7 +125,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 		assertEquals(recordStorage.updatedRecordIds.get(0), "personId:235");
 		assertEquals(recordStorage.updatedRecordTypes.get(0), "person");
 		assertSame(dataGroup, recordStorage.returnedDataGroups.get(0));
-		assertEquals(recordStorage.dataDivider, "testDiva");
+		assertEquals(recordStorage.dataDividers.get(0), "testDiva");
 
 		assertNewDomainPartLinkAddedCorrectly(dataGroup);
 	}
@@ -235,17 +235,18 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	}
 
 	private void assertCorrectlyCollectedTerms() {
-		assertEquals(termCollector.metadataGroupId, "metadataIdForPersonType");
-		assertSame(termCollector.dataGroup, recordStorage.returnedDataGroups.get(0));
-		assertSame(recordStorage.collectedTerms, termCollector.returnedCollectedTerms);
+		assertEquals(termCollector.metadataGroupIds.get(0), "metadataIdForPersonType");
+		assertSame(termCollector.dataGroups.get(0), recordStorage.returnedDataGroups.get(0));
+		assertSame(recordStorage.collectedTermsList.get(0),
+				termCollector.returnedCollectedTerms.get(0));
 	}
 
 	private void assertCorrectCollectedLinks() {
-		assertEquals(linkCollector.metadataId, "metadataIdForPersonType");
-		assertEquals(linkCollector.dataGroup, recordStorage.returnedDataGroups.get(0));
-		assertEquals(linkCollector.fromRecordType, "person");
-		assertEquals(linkCollector.fromRecordId, "personId:235");
-		assertSame(recordStorage.linkList, linkCollector.collectedLinks);
+		assertEquals(linkCollector.metadataIds.get(0), "metadataIdForPersonType");
+		assertEquals(linkCollector.dataGroups.get(0), recordStorage.returnedDataGroups.get(0));
+		assertEquals(linkCollector.fromRecordTypes.get(0), "person");
+		assertEquals(linkCollector.fromRecordIds.get(0), "personId:235");
+		assertSame(recordStorage.linkLists.get(0), linkCollector.returnedCollectedLinks.get(0));
 	}
 
 }
