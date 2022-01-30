@@ -21,10 +21,13 @@ package se.uu.ub.cora.diva.extended;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 
+import java.util.List;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataAtomicProvider;
+import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.diva.DataGroupExtendedSpy;
 import se.uu.ub.cora.diva.RecordStorageSpy;
@@ -113,6 +116,8 @@ public class PersonDomainPartFromPersonUpdaterTest {
 	private void createPersonDataGroup() {
 		person = new DataGroupExtendedSpy("person");
 		DataGroupExtendedSpy recordInfo = createRecordInfoWothPublicValue("no");
+		createAndAddUpdated(recordInfo, "11");
+		createAndAddUpdated(recordInfo, "12");
 		person.addChild(recordInfo);
 	}
 
@@ -172,7 +177,6 @@ public class PersonDomainPartFromPersonUpdaterTest {
 		functionality.useExtendedFunctionality("someAuthToken", person);
 
 		assertEquals(recordStorage.readRecordTypes.size(), 4);
-
 		assertEquals(recordStorage.dataGroupsSentToUpdate.size(), 2);
 
 		assertCorrectParametersSentToUpdate(0, "liu", "testSystem");
@@ -182,6 +186,38 @@ public class PersonDomainPartFromPersonUpdaterTest {
 		assertCorrectParametersSentToUpdate(1, "kth", "testDiva");
 		assertSame(recordStorage.dataGroupsSentToUpdate.get(1),
 				recordStorage.returnedDataGroups.get(3));
+	}
+
+	@Test
+	public void testUpdateDomainPartsTwoDifferentOneSameValuePublicCheckChangedValues() {
+		addThreeDomainParts();
+
+		functionality.useExtendedFunctionality("someAuthToken", person);
+
+		assertPublicValueWasChanged(0);
+		assertUpdatedWasAddedCorrectly(recordStorage.dataGroupsSentToUpdate.get(0));
+
+		assertPublicValueWasChanged(1);
+		assertUpdatedWasAddedCorrectly(recordStorage.dataGroupsSentToUpdate.get(1));
+	}
+
+	private void assertUpdatedWasAddedCorrectly(DataGroup updatedDomainPart) {
+		DataGroup recordInfo = updatedDomainPart.getFirstGroupWithNameInData("recordInfo");
+		List<DataGroup> updatedGroups = recordInfo.getAllGroupsWithNameInData("updated");
+		for (var i = 0; i < updatedGroups.size(); i++) {
+			assertEquals(updatedGroups.get(i).getRepeatId(), String.valueOf(i));
+		}
+
+		DataGroup recordInfoPerson = person.getFirstGroupWithNameInData("recordInfo");
+		List<DataGroup> personUpdated = recordInfoPerson.getAllGroupsWithNameInData("updated");
+		assertSame(updatedGroups.get(updatedGroups.size() - 1),
+				personUpdated.get(personUpdated.size() - 1));
+	}
+
+	private void assertPublicValueWasChanged(int index) {
+		DataGroup updatedDomainPart = recordStorage.dataGroupsSentToUpdate.get(index);
+		DataGroup recordInfo = updatedDomainPart.getFirstGroupWithNameInData("recordInfo");
+		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("public"), "no");
 	}
 
 	private void addThreeDomainParts() {
@@ -205,6 +241,7 @@ public class PersonDomainPartFromPersonUpdaterTest {
 		assertEquals(termCollector.metadataGroupIds.get(index), "metadataIdForPersonDomainPart");
 		assertSame(termCollector.dataGroups.get(index),
 				recordStorage.returnedDataGroups.get(readDataGroupIndex));
+
 		assertSame(recordStorage.collectedTermsList.get(index),
 				termCollector.returnedCollectedTerms.get(index));
 	}
@@ -213,9 +250,11 @@ public class PersonDomainPartFromPersonUpdaterTest {
 		assertEquals(linkCollector.metadataIds.get(index), "metadataIdForPersonDomainPart");
 		assertEquals(linkCollector.dataGroups.get(index),
 				recordStorage.returnedDataGroups.get(readDataGroupIndex));
+
 		assertEquals(linkCollector.fromRecordTypes.get(index), "personDomainPart");
 		assertEquals(linkCollector.fromRecordIds.get(index),
 				"personDomainPart_authority-person:106:" + domain);
+
 		assertSame(recordStorage.linkLists.get(index),
 				linkCollector.returnedCollectedLinks.get(index));
 	}
