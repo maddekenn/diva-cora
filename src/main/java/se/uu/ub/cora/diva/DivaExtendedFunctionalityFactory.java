@@ -32,6 +32,7 @@ import se.uu.ub.cora.diva.extended.ClassicOrganisationReloader;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
+import se.uu.ub.cora.diva.extended.PersonDomainPartFromPersonUpdater;
 import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartCreate;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
@@ -71,6 +72,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		createContext(SUB_ORGANISATION);
 		createContext(TOP_ORGANISATION);
 		createContext(ROOT_ORGANISATION);
+		contexts.add(new ExtendedFunctionalityContext(UPDATE_AFTER_STORE, "person", 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_AFTER_METADATA_VALIDATION,
 				"personDomainPart", 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_RETURN, "personDomainPart", 0));
@@ -90,10 +92,14 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	public List<ExtendedFunctionality> factor(ExtendedFunctionalityPosition position,
 			String recordType) {
 		List<ExtendedFunctionality> functionalities = new ArrayList<>();
-		if (UPDATE_BEFORE_STORE == position) {
+		if (UPDATE_BEFORE_STORE == position && isOrganisation(recordType)) {
 			addFunctionalityForBeforeStore(functionalities);
 		} else if (UPDATE_AFTER_STORE == position) {
-			addFunctionalityForAfterStore(functionalities);
+			if (isOrganisation(recordType)) {
+				addFunctionalityForOrganisationsAfterStore(functionalities);
+			} else if ("person".equals(recordType)) {
+				addFunctionalityForPersonAfterStore(functionalities);
+			}
 		} else if (CREATE_AFTER_METADATA_VALIDATION == position) {
 			addFunctionalityForCreateAfterMetadataValidation(functionalities);
 		} else if (CREATE_BEFORE_RETURN == position) {
@@ -102,6 +108,19 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 
 		return functionalities;
 
+	}
+
+	private boolean isOrganisation(String recordType) {
+		return SUB_ORGANISATION.equals(recordType) || ROOT_ORGANISATION.equals(recordType)
+				|| TOP_ORGANISATION.equals(recordType);
+	}
+
+	private void addFunctionalityForPersonAfterStore(List<ExtendedFunctionality> functionalities) {
+		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
+		DataGroupTermCollector termCollector = dependencyProvider.getDataGroupTermCollector();
+		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
+		functionalities.add(
+				new PersonDomainPartFromPersonUpdater(recordStorage, termCollector, linkCollector));
 	}
 
 	private void addFunctionalityForBeforeStore(List<ExtendedFunctionality> functionalities) {
@@ -125,7 +144,8 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		functionalities.add(new OrganisationDisallowedDependencyDetector(dbFacade));
 	}
 
-	private void addFunctionalityForAfterStore(List<ExtendedFunctionality> functionalities) {
+	private void addFunctionalityForOrganisationsAfterStore(
+			List<ExtendedFunctionality> functionalities) {
 		ClassicOrganisationReloader classicOrganisationReloader = createClassicReloader();
 		functionalities.add(classicOrganisationReloader);
 	}
