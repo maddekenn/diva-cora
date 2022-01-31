@@ -21,6 +21,7 @@ package se.uu.ub.cora.diva;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 
 import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataAttribute;
@@ -85,8 +86,7 @@ public class DataGroupExtendedSpy implements DataGroup {
 
 	@Override
 	public List<DataElement> getChildren() {
-		// TODO Auto-generated method stub
-		return null;
+		return children;
 	}
 
 	@Override
@@ -193,7 +193,16 @@ public class DataGroupExtendedSpy implements DataGroup {
 	@Override
 	public boolean removeAllChildrenWithNameInData(String childNameInData) {
 		removeAllGroupsUsedNameInDatas.add(childNameInData);
-		return false;
+		return getChildren().removeIf(filterByNameInData(childNameInData));
+		// return false;
+	}
+
+	private Predicate<DataElement> filterByNameInData(String childNameInData) {
+		return dataElement -> dataElementsNameInDataIs(dataElement, childNameInData);
+	}
+
+	private boolean dataElementsNameInDataIs(DataElement dataElement, String childNameInData) {
+		return dataElement.getNameInData().equals(childNameInData);
 	}
 
 	@Override
