@@ -20,6 +20,7 @@ package se.uu.ub.cora.diva;
 
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_BEFORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
 
@@ -35,6 +36,7 @@ import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.extended.PersonDomainPartFromPersonUpdater;
 import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartCreate;
+import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartDelete;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.spider.dependency.SpiderDependencyProvider;
@@ -49,6 +51,7 @@ import se.uu.ub.cora.storage.RecordStorage;
 
 public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFactory {
 
+	private static final String PERSON_DOMAIN_PART = "personDomainPart";
 	private static final String TOP_ORGANISATION = "topOrganisation";
 	private static final String ROOT_ORGANISATION = "rootOrganisation";
 	private static final String SUB_ORGANISATION = "subOrganisation";
@@ -74,8 +77,9 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		createContext(ROOT_ORGANISATION);
 		contexts.add(new ExtendedFunctionalityContext(UPDATE_AFTER_STORE, "person", 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_AFTER_METADATA_VALIDATION,
-				"personDomainPart", 0));
-		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_RETURN, "personDomainPart", 0));
+				PERSON_DOMAIN_PART, 0));
+		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_RETURN, PERSON_DOMAIN_PART, 0));
+		contexts.add(new ExtendedFunctionalityContext(DELETE_BEFORE, PERSON_DOMAIN_PART, 0));
 	}
 
 	private void createContext(String recordType) {
@@ -92,22 +96,36 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	public List<ExtendedFunctionality> factor(ExtendedFunctionalityPosition position,
 			String recordType) {
 		List<ExtendedFunctionality> functionalities = new ArrayList<>();
-		if (UPDATE_BEFORE_STORE == position && isOrganisation(recordType)) {
-			addFunctionalityForBeforeStore(functionalities);
-		} else if (UPDATE_AFTER_STORE == position) {
-			if (isOrganisation(recordType)) {
-				addFunctionalityForOrganisationsAfterStore(functionalities);
-			} else if ("person".equals(recordType)) {
-				addFunctionalityForPersonAfterStore(functionalities);
-			}
-		} else if (CREATE_AFTER_METADATA_VALIDATION == position) {
-			addFunctionalityForCreateAfterMetadataValidation(functionalities);
-		} else if (CREATE_BEFORE_RETURN == position) {
-			addFunctionalityForCreateBeforeReturn(functionalities);
+		if (isOrganisation(recordType)) {
+			checkPositionForOrganisation(position, functionalities);
+		} else if (PERSON_DOMAIN_PART.equals(recordType)) {
+			checkPositionForDomainPart(position, functionalities);
+		} else if ("person".equals(recordType) && UPDATE_AFTER_STORE == position) {
+			addFunctionalityForPersonAfterStore(functionalities);
 		}
 
 		return functionalities;
 
+	}
+
+	private void checkPositionForOrganisation(ExtendedFunctionalityPosition position,
+			List<ExtendedFunctionality> functionalities) {
+		if (UPDATE_BEFORE_STORE == position) {
+			addFunctionalityForBeforeStore(functionalities);
+		} else if (UPDATE_AFTER_STORE == position) {
+			addFunctionalityForOrganisationsAfterStore(functionalities);
+		}
+	}
+
+	private void checkPositionForDomainPart(ExtendedFunctionalityPosition position,
+			List<ExtendedFunctionality> functionalities) {
+		if (CREATE_AFTER_METADATA_VALIDATION == position) {
+			addFunctionalityForCreateAfterMetadataValidation(functionalities);
+		} else if (CREATE_BEFORE_RETURN == position) {
+			addFunctionalityForCreateBeforeReturn(functionalities);
+		} else if (DELETE_BEFORE == position) {
+			addFunctionalityForDeleteBefore(functionalities);
+		}
 	}
 
 	private boolean isOrganisation(String recordType) {
@@ -167,6 +185,14 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		DataGroupTermCollector termCollector = dependencyProvider.getDataGroupTermCollector();
 		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
 		functionalities.add(new PersonUpdaterAfterDomainPartCreate(recordStorage, termCollector,
+				linkCollector));
+	}
+
+	private void addFunctionalityForDeleteBefore(List<ExtendedFunctionality> functionalities) {
+		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
+		DataGroupTermCollector termCollector = dependencyProvider.getDataGroupTermCollector();
+		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
+		functionalities.add(new PersonUpdaterAfterDomainPartDelete(recordStorage, termCollector,
 				linkCollector));
 	}
 

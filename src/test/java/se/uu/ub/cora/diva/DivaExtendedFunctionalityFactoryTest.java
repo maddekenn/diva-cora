@@ -24,6 +24,7 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_BEFORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
@@ -43,6 +44,7 @@ import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.extended.PersonDomainPartFromPersonUpdater;
 import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartCreate;
+import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartDelete;
 import se.uu.ub.cora.diva.extended.SpiderDependencyProviderSpy;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
@@ -81,7 +83,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void testInit() {
-		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 9);
+		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 10);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_STORE, "subOrganisation",
 				0);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "subOrganisation",
@@ -100,6 +102,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 				7);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(CREATE_BEFORE_RETURN,
 				"personDomainPart", 8);
+		assertCorrectContextUsingPositionRecordTypeAndIndex(DELETE_BEFORE, "personDomainPart", 9);
 
 		assertLookupNameAndSqlDatabaseFactory();
 	}
@@ -244,7 +247,13 @@ public class DivaExtendedFunctionalityFactoryTest {
 		PersonDomainPartValidator validatorFunctionality = (PersonDomainPartValidator) functionalities
 				.get(0);
 		assertSame(validatorFunctionality.getRecordStorage(), recordStorageProvider.recordStorage);
+	}
 
+	@Test
+	public void factorCreateAfterValidationOtherType() {
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(CREATE_AFTER_METADATA_VALIDATION, "otherType");
+		assertEquals(functionalities.size(), 0);
 	}
 
 	@Test
@@ -262,4 +271,43 @@ public class DivaExtendedFunctionalityFactoryTest {
 		assertSame(personUpdater.getTermCollector(), spiderDependencyProvider.termCollector);
 		assertSame(personUpdater.getLinkCollector(), spiderDependencyProvider.linkCollector);
 	}
+
+	@Test
+	public void factorCreateBeforeReturnOtherType() {
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(CREATE_BEFORE_RETURN, "otherType");
+		assertEquals(functionalities.size(), 0);
+	}
+
+	@Test
+	public void factorBeforeDeleteOtherType() {
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(DELETE_BEFORE, "otherType");
+		assertEquals(functionalities.size(), 0);
+	}
+
+	@Test
+	public void factorPersonDomainPartUpdateAfterDomainPartDelete() {
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(DELETE_BEFORE, "personDomainPart");
+		assertEquals(functionalities.size(), 1);
+		PersonUpdaterAfterDomainPartDelete functionality = (PersonUpdaterAfterDomainPartDelete) functionalities
+				.get(0);
+		assertSame(functionality.getRecordStorage(), recordStorageProvider.recordStorage);
+	}
+
+	@Test
+	public void factorPersonDomainPartNotImplementedPosition() {
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(UPDATE_BEFORE_STORE, "personDomainPart");
+		assertEquals(functionalities.size(), 0);
+	}
+
+	@Test
+	public void factorPersonNotImplementedPosition() {
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(UPDATE_BEFORE_STORE, "person");
+		assertEquals(functionalities.size(), 0);
+	}
+
 }
