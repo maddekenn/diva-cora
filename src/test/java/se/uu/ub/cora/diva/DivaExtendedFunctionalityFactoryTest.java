@@ -76,6 +76,16 @@ public class DivaExtendedFunctionalityFactoryTest {
 		loggerFactorySpy = new LoggerFactorySpy();
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 		divaExtendedFunctionality = new DivaExtendedFunctionalityFactory();
+		setUpInitInfo();
+		recordStorageProvider = new RecordStorageProviderSpy();
+		spiderDependencyProvider = new SpiderDependencyProviderSpy(initInfo);
+		spiderDependencyProvider.setRecordStorageProvider(recordStorageProvider);
+		databaseFactorySpy = new SqlDatabaseFactorySpy();
+
+		divaExtendedFunctionality.initializeUsingDependencyProvider(spiderDependencyProvider);
+	}
+
+	private void setUpInitInfo() {
 		initInfo = new HashMap<>();
 		initInfo.put("databaseLookupName", "someDBName");
 		initInfo.put("classicListUpdateURL", "someUpdateUrl");
@@ -83,12 +93,6 @@ public class DivaExtendedFunctionalityFactoryTest {
 		initInfo.put("fedoraUsername", "someUsername");
 		initInfo.put("fedoraPassword", "somePassword");
 		initInfo.put("authorityIndexUrl", "classicAuthorityIndexUrl");
-		recordStorageProvider = new RecordStorageProviderSpy();
-		spiderDependencyProvider = new SpiderDependencyProviderSpy(initInfo);
-		spiderDependencyProvider.setRecordStorageProvider(recordStorageProvider);
-		databaseFactorySpy = new SqlDatabaseFactorySpy();
-
-		divaExtendedFunctionality.initializeUsingDependencyProvider(spiderDependencyProvider);
 	}
 
 	@Test

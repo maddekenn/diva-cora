@@ -113,9 +113,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		} else if ("person".equals(recordType) && UPDATE_AFTER_STORE == position) {
 			addFunctionalityForPersonAfterStore(functionalities);
 		}
-
 		return functionalities;
-
 	}
 
 	private void checkPositionForOrganisation(ExtendedFunctionalityPosition position,
@@ -169,15 +167,14 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
 
 		RepeatableRelatedLinkCollector repeatableLinkCollector = createRepeatableLinkCollector(
-				recordStorage, classicDbStorage);
+				recordStorage);
 		FedoraConnectionInfo fedoraConnectionInfo = createFedoraConnectionInfo();
 		return new ClassicFedoraUpdaterFactoryImp(httpHandlerFactory, repeatableLinkCollector,
 				fedoraConnectionInfo);
-
 	}
 
 	private RepeatableRelatedLinkCollector createRepeatableLinkCollector(
-			RecordStorage recordStorage, RecordStorage classicDbStorage) {
+			RecordStorage recordStorage) {
 		RelatedLinkCollectorFactory linkCollectorFactory = new RelatedLinkCollectorFactoryImp(
 				recordStorage);
 		return new RepeatableRelatedLinkCollectorImp(linkCollectorFactory);
@@ -221,7 +218,6 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 
 	private void addDisallowedDependencyDetector(List<ExtendedFunctionality> functionalities) {
 		DatabaseFacade dbFacade = databaseFactory.factorDatabaseFacade();
-
 		functionalities.add(new OrganisationDisallowedDependencyDetector(dbFacade));
 	}
 
