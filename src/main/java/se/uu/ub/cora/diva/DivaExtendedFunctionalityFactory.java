@@ -30,6 +30,7 @@ import java.util.List;
 import se.uu.ub.cora.bookkeeper.linkcollector.DataRecordLinkCollector;
 import se.uu.ub.cora.bookkeeper.termcollector.DataGroupTermCollector;
 import se.uu.ub.cora.diva.extended.ClassicOrganisationReloader;
+import se.uu.ub.cora.diva.extended.ClassicPersonSynchronizer;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
@@ -37,9 +38,18 @@ import se.uu.ub.cora.diva.extended.PersonDomainPartFromPersonUpdater;
 import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartCreate;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartDelete;
+import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
+import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.classic.RelatedLinkCollectorFactory;
+import se.uu.ub.cora.diva.mixedstorage.classic.RelatedLinkCollectorFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableRelatedLinkCollector;
+import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableRelatedLinkCollectorImp;
+import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraConnectionInfo;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.spider.dependency.SpiderDependencyProvider;
+import se.uu.ub.cora.spider.dependency.SpiderInitializationException;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory;
@@ -125,6 +135,9 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			addFunctionalityForCreateBeforeReturn(functionalities);
 		} else if (DELETE_BEFORE == position) {
 			addFunctionalityForDeleteBefore(functionalities);
+		} else if (UPDATE_AFTER_STORE == position) {
+			RecordStorage recordStorage = dependencyProvider.getRecordStorage();
+			addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
 		}
 	}
 
@@ -139,6 +152,56 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
 		functionalities.add(
 				new PersonDomainPartFromPersonUpdater(recordStorage, termCollector, linkCollector));
+		addClassicSynchronizer(functionalities, recordStorage, "person");
+	}
+
+	private void addClassicSynchronizer(List<ExtendedFunctionality> functionalities,
+			RecordStorage recordStorage, String recordType) {
+		ClassicFedoraUpdaterFactoryImp fedoraUpdaterFactory = createClassicFedoraUpdaterFactory(
+				recordStorage, recordStorage);
+		ClassicIndexerFactory classicIndexerFactory = createClassicIndexerFactory();
+		functionalities.add(new ClassicPersonSynchronizer(fedoraUpdaterFactory,
+				classicIndexerFactory, recordType));
+	}
+
+	private ClassicFedoraUpdaterFactoryImp createClassicFedoraUpdaterFactory(
+			RecordStorage recordStorage, RecordStorage classicDbStorage) {
+		HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
+
+		RepeatableRelatedLinkCollector repeatableLinkCollector = createRepeatableLinkCollector(
+				recordStorage, classicDbStorage);
+		FedoraConnectionInfo fedoraConnectionInfo = createFedoraConnectionInfo();
+		return new ClassicFedoraUpdaterFactoryImp(httpHandlerFactory, repeatableLinkCollector,
+				fedoraConnectionInfo);
+
+	}
+
+	private RepeatableRelatedLinkCollector createRepeatableLinkCollector(
+			RecordStorage recordStorage, RecordStorage classicDbStorage) {
+		RelatedLinkCollectorFactory linkCollectorFactory = new RelatedLinkCollectorFactoryImp(
+				recordStorage);
+		return new RepeatableRelatedLinkCollectorImp(linkCollectorFactory);
+	}
+
+	private FedoraConnectionInfo createFedoraConnectionInfo() {
+		String fedoraURL = dependencyProvider.getInitInfoValueUsingKey("fedoraURL");
+		String fedoraUsername = dependencyProvider.getInitInfoValueUsingKey("fedoraUsername");
+		String fedoraPassword = dependencyProvider.getInitInfoValueUsingKey("fedoraPassword");
+		return new FedoraConnectionInfo(fedoraURL, fedoraUsername, fedoraPassword);
+	}
+
+	private ClassicIndexerFactory createClassicIndexerFactory() {
+		String classicAuthorityIndexUrl = getAuthorityIndexUrlOrEmptyIfMissing();
+		return new ClassicIndexerFactoryImp(classicAuthorityIndexUrl);
+	}
+
+	private String getAuthorityIndexUrlOrEmptyIfMissing() {
+		try {
+			return dependencyProvider.getInitInfoValueUsingKey("authorityIndexUrl");
+		} catch (SpiderInitializationException e) {
+			// do nothing
+		}
+		return "";
 	}
 
 	private void addFunctionalityForBeforeStore(List<ExtendedFunctionality> functionalities) {

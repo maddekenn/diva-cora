@@ -50,7 +50,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 		DataGroupProvider.setDataGroupFactory(dataGroupFactory);
 
 		recordStorage = new RecordStorageSpy();
-		TestDataForPerson.setUpDefaultPersonToReturnFromStorageSpy(recordStorage);
+		TestDataForPerson.setUpDefaultPersonToReturnFromStorageSpy(recordStorage, "testDiva");
 		TestDataForPerson.setUpPersonRecordTypeToReturnFromSpy(recordStorage);
 
 		termCollector = new DataGroupTermCollectorSpy();

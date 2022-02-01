@@ -37,6 +37,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.extended.ClassicOrganisationReloader;
+import se.uu.ub.cora.diva.extended.ClassicPersonSynchronizer;
 import se.uu.ub.cora.diva.extended.LoggerFactorySpy;
 import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
@@ -46,6 +47,11 @@ import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartCreate;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartDelete;
 import se.uu.ub.cora.diva.extended.SpiderDependencyProviderSpy;
+import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.classic.RelatedLinkCollectorFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableRelatedLinkCollectorImp;
+import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraConnectionInfo;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.logger.LoggerProvider;
@@ -73,6 +79,10 @@ public class DivaExtendedFunctionalityFactoryTest {
 		initInfo = new HashMap<>();
 		initInfo.put("databaseLookupName", "someDBName");
 		initInfo.put("classicListUpdateURL", "someUpdateUrl");
+		initInfo.put("fedoraURL", "someFedoraUrl");
+		initInfo.put("fedoraUsername", "someUsername");
+		initInfo.put("fedoraPassword", "somePassword");
+		initInfo.put("authorityIndexUrl", "classicAuthorityIndexUrl");
 		recordStorageProvider = new RecordStorageProviderSpy();
 		spiderDependencyProvider = new SpiderDependencyProviderSpy(initInfo);
 		spiderDependencyProvider.setRecordStorageProvider(recordStorageProvider);
@@ -222,14 +232,68 @@ public class DivaExtendedFunctionalityFactoryTest {
 	}
 
 	@Test
-	public void factorPersonDomainPartFromPersonUpdaterAfterStore() {
+	public void factorForPersonUpdateAfterStoreNoAuthorityIndexUrl() {
+		initInfo.remove("authorityIndexUrl");
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
 				.factor(UPDATE_AFTER_STORE, "person");
-		assertEquals(functionalities.size(), 1);
+		ClassicPersonSynchronizer classicSynchronizer = (ClassicPersonSynchronizer) functionalities
+				.get(1);
+		ClassicIndexerFactoryImp classicIndexer = (ClassicIndexerFactoryImp) classicSynchronizer
+				.getClassicIndexer();
+		assertEquals(classicIndexer.getBaseUrl(), "");
+	}
+
+	@Test
+	public void factorForPersonUpdateAfterStore() {
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(UPDATE_AFTER_STORE, "person");
+		assertEquals(functionalities.size(), 2);
 		PersonDomainPartFromPersonUpdater functionality = (PersonDomainPartFromPersonUpdater) functionalities
 				.get(0);
 		assertSame(functionality.getRecordStorage(), recordStorageProvider.recordStorage);
 
+		ClassicPersonSynchronizer classicSynchronizer = (ClassicPersonSynchronizer) functionalities
+				.get(1);
+		assertCorrectlyCreatedClassicSynchronizer(classicSynchronizer, "person");
+	}
+
+	private void assertCorrectlyCreatedClassicSynchronizer(
+			ClassicPersonSynchronizer classicSynchronizer, String recordType) {
+
+		assertCorrectFedoraUpdaterFactory(classicSynchronizer);
+		ClassicIndexerFactoryImp classicIndexer = (ClassicIndexerFactoryImp) classicSynchronizer
+				.getClassicIndexer();
+		assertEquals(classicIndexer.getBaseUrl(), "classicAuthorityIndexUrl");
+		assertEquals(classicSynchronizer.getRecordType(), recordType);
+	}
+
+	private void assertCorrectFedoraUpdaterFactory(
+			ClassicPersonSynchronizer extendedFunctionality) {
+		ClassicFedoraUpdaterFactoryImp classicFedoraUpdaterFactory = (ClassicFedoraUpdaterFactoryImp) extendedFunctionality
+				.getClassicFedoraUpdaterFactory();
+		assertTrue(classicFedoraUpdaterFactory
+				.getHttpHandlerFactory() instanceof HttpHandlerFactoryImp);
+		assertCorrectFedoraConnectionInfo(classicFedoraUpdaterFactory);
+		assertCorrectRelatedLinkCollector(classicFedoraUpdaterFactory);
+	}
+
+	private void assertCorrectFedoraConnectionInfo(
+			ClassicFedoraUpdaterFactoryImp classicFedoraUpdaterFactory) {
+		FedoraConnectionInfo fedoraConnectionInfo = classicFedoraUpdaterFactory
+				.getFedoraConnectionInfo();
+		assertEquals(fedoraConnectionInfo.fedoraUrl, "someFedoraUrl");
+		assertEquals(fedoraConnectionInfo.fedoraUsername, "someUsername");
+		assertEquals(fedoraConnectionInfo.fedoraPassword, "somePassword");
+	}
+
+	private void assertCorrectRelatedLinkCollector(
+			ClassicFedoraUpdaterFactoryImp classicFedoraUpdaterFactory) {
+		RepeatableRelatedLinkCollectorImp repeatableRelatedLinkCollector = (RepeatableRelatedLinkCollectorImp) classicFedoraUpdaterFactory
+				.getRepeatableRelatedLinkCollector();
+		RelatedLinkCollectorFactoryImp relatedLinkCollectorFactory = (RelatedLinkCollectorFactoryImp) repeatableRelatedLinkCollector
+				.getRelatedLinkCollectorFactory();
+		assertSame(relatedLinkCollectorFactory.getRecordStorage(),
+				recordStorageProvider.recordStorage);
 	}
 
 	@Test
@@ -237,6 +301,17 @@ public class DivaExtendedFunctionalityFactoryTest {
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
 				.factor(UPDATE_AFTER_STORE, "otherType");
 		assertEquals(functionalities.size(), 0);
+	}
+
+	@Test
+	public void factorForPersonDomainPartUpdateAfterStore() {
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(UPDATE_AFTER_STORE, "personDomainPart");
+		assertEquals(functionalities.size(), 1);
+
+		ClassicPersonSynchronizer classicSynchronizer = (ClassicPersonSynchronizer) functionalities
+				.get(0);
+		assertCorrectlyCreatedClassicSynchronizer(classicSynchronizer, "personDomainPart");
 	}
 
 	@Test

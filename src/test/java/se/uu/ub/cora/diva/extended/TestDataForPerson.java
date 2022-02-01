@@ -31,9 +31,10 @@ public class TestDataForPerson {
 		recordStorage.returnOnRead.put("recordType_person", personRecordType);
 	}
 
-	public static void setUpDefaultPersonToReturnFromStorageSpy(RecordStorageSpy recordStorage) {
+	public static void setUpDefaultPersonToReturnFromStorageSpy(RecordStorageSpy recordStorage,
+			String dataDivider) {
 		DataGroupExtendedSpy person = new DataGroupExtendedSpy("person");
-		DataGroupExtendedSpy recordInfo = TestDataForPerson.createRecordInfo("testDiva");
+		DataGroupExtendedSpy recordInfo = TestDataForPerson.createRecordInfo(dataDivider);
 		TestDataForPerson.createAndAddUpdated(recordInfo, "1");
 		TestDataForPerson.createAndAddUpdated(recordInfo, "4");
 		recordInfo.addChild(new DataAtomicSpy("domain", "uu", "1"));
@@ -50,16 +51,16 @@ public class TestDataForPerson {
 		recordInfo.addChild(updated);
 	}
 
-	public static DataGroupExtendedSpy createDataDivider() {
-		DataGroupExtendedSpy dataDivider = new DataGroupExtendedSpy("dataDivider");
-		dataDivider.addChild(new DataAtomicSpy("linkedRecordType", "system"));
-		dataDivider.addChild(new DataAtomicSpy("linkedRecordId", "testDiva"));
-		return dataDivider;
+	public static DataGroupExtendedSpy createDataDivider(String dataDivider) {
+		DataGroupExtendedSpy dataDividerGroup = new DataGroupExtendedSpy("dataDivider");
+		dataDividerGroup.addChild(new DataAtomicSpy("linkedRecordType", "system"));
+		dataDividerGroup.addChild(new DataAtomicSpy("linkedRecordId", dataDivider));
+		return dataDividerGroup;
 	}
 
 	public static DataGroupExtendedSpy createRecordInfo(String dataDivider) {
 		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
-		DataGroupExtendedSpy dataDividerGroup = createDataDivider();
+		DataGroupExtendedSpy dataDividerGroup = createDataDivider(dataDivider);
 		recordInfo.addChild(dataDividerGroup);
 		return recordInfo;
 	}
@@ -72,7 +73,7 @@ public class TestDataForPerson {
 		person.addChild(domainPart);
 	}
 
-	public static DataGroupExtendedSpy createDataGroup(String domainPartId, String repeatId) {
+	public static DataGroupExtendedSpy createDomainPartDataGroupWithUpdated(String domainPartId, String repeatId) {
 		DataGroupExtendedSpy domainPart = new DataGroupExtendedSpy("personDomainPart");
 		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
 		recordInfo.addChild(new DataAtomicSpy("id", domainPartId));

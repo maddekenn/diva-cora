@@ -37,7 +37,7 @@ public class PersonUpdaterAfterDomainPartDeleteTest {
 	@BeforeMethod
 	public void setUp() {
 		recordStorage = new RecordStorageSpy();
-		TestDataForPerson.setUpDefaultPersonToReturnFromStorageSpy(recordStorage);
+		TestDataForPerson.setUpDefaultPersonToReturnFromStorageSpy(recordStorage, "testDiva");
 		TestDataForPerson.setUpPersonRecordTypeToReturnFromSpy(recordStorage);
 		termCollector = new DataGroupTermCollectorSpy();
 		linkCollector = new DataRecordLinkCollectorSpy();
@@ -54,7 +54,7 @@ public class PersonUpdaterAfterDomainPartDeleteTest {
 
 	@Test
 	public void testUseExtendedFunctionality() {
-		DataGroup domainPart = TestDataForPerson.createDataGroup("personId:235:uu", "2");
+		DataGroup domainPart = TestDataForPerson.createDomainPartDataGroupWithUpdated("personId:235:uu", "2");
 		personUpdater.useExtendedFunctionality("someAuthToken", domainPart);
 
 		assertEquals(recordStorage.readRecordTypes.get(0), "person");
@@ -72,7 +72,7 @@ public class PersonUpdaterAfterDomainPartDeleteTest {
 	@Test
 	public void testUseExtendedFunctionalityCheckCollectedTermsAndLinks() {
 		DataGroupExtendedSpy personDomainPart = TestDataForPerson
-				.createDataGroup("personId:235:kth", "2");
+				.createDomainPartDataGroupWithUpdated("personId:235:kth", "2");
 
 		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
 
