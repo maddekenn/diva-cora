@@ -32,6 +32,7 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.diva.DataGroupExtendedSpy;
 import se.uu.ub.cora.diva.RecordStorageSpy;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 
 public class PersonUpdaterAfterDomainPartCreateTest {
 
@@ -70,7 +71,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	public void testUseExtendedFunctionality() {
 		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:someDomain");
 
-		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
+		personUpdater.useExtendedFunctionality(createDefaultData(personDomainPart));
 
 		assertCorrectPersonReadFromStorage();
 		assertNewDomainPartLinkCorrectlyCreated();
@@ -82,6 +83,13 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 		assertEquals(recordStorage.dataDividers.get(0), "testDiva");
 
 		assertNewDomainPartLinkAddedCorrectly(dataGroup);
+	}
+
+	private ExtendedFunctionalityData createDefaultData(DataGroup dataGroup) {
+		ExtendedFunctionalityData data = new ExtendedFunctionalityData();
+		data.authToken = "someAuthToken";
+		data.dataGroup = dataGroup;
+		return data;
 	}
 
 	private void assertCorrectPersonReadFromStorage() {
@@ -120,7 +128,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	public void testNewDomainAddedToListOfDomainsInPerson() {
 		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:someDomain");
 
-		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
+		personUpdater.useExtendedFunctionality(createDefaultData(personDomainPart));
 
 		assertEquals(dataAtomicFactorySpy.usedNameInDatas.get(0), "domain");
 		assertEquals(dataAtomicFactorySpy.usedValues.get(0), "someDomain");
@@ -144,7 +152,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	public void testAlreadyExistingDomainNotAddedToPerson() {
 		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:kth");
 
-		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
+		personUpdater.useExtendedFunctionality(createDefaultData(personDomainPart));
 		DataGroup updatedPerson = recordStorage.dataGroupsSentToUpdate.get(0);
 		DataGroup recordInfo = updatedPerson.getFirstGroupWithNameInData("recordInfo");
 		List<DataAtomic> domains = recordInfo.getAllDataAtomicsWithNameInData("domain");
@@ -157,7 +165,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	public void testUpdatedCopiedFromDomainPartToPerson() {
 		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:someDomain");
 
-		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
+		personUpdater.useExtendedFunctionality(createDefaultData(personDomainPart));
 
 		DataGroup personSentToUpdate = recordStorage.dataGroupsSentToUpdate.get(0);
 		DataGroup recordInfo = personSentToUpdate.getFirstGroupWithNameInData("recordInfo");
@@ -179,7 +187,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 	public void testUseExtendedFunctionalityCheckCollectedTermsAndLinks() {
 		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:someDomain");
 
-		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
+		personUpdater.useExtendedFunctionality(createDefaultData(personDomainPart));
 
 		assertEquals(recordStorage.readRecordTypes.get(1), "recordType");
 		assertEquals(recordStorage.readRecordIds.get(1), "person");

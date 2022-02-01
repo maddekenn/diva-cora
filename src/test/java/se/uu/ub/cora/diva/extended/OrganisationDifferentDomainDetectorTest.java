@@ -31,6 +31,7 @@ import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.DataGroupExtendedSpy;
 import se.uu.ub.cora.diva.RecordStorageSpy;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.spider.record.DataException;
 
 public class OrganisationDifferentDomainDetectorTest {
@@ -62,12 +63,19 @@ public class OrganisationDifferentDomainDetectorTest {
 
 	@Test
 	public void testNoParentNoPredecessor() {
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 		DataGroupExtendedSpy recordInfo = (DataGroupExtendedSpy) dataGroup.totalReturnedDataGroups
 				.get(0);
 		assertEquals(recordInfo.requestedAtomicNameInDatas.get(0), "domain");
 		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(0), "parentOrganisation");
 		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(1), "earlierOrganisation");
+	}
+
+	private ExtendedFunctionalityData createDefaultData(DataGroup dataGroup) {
+		ExtendedFunctionalityData data = new ExtendedFunctionalityData();
+		data.authToken = "someAuthToken";
+		data.dataGroup = dataGroup;
+		return data;
 	}
 
 	@Test
@@ -77,7 +85,7 @@ public class OrganisationDifferentDomainDetectorTest {
 
 		addOrganisationToReturnFromStorage("organisation_parent0", "someDomain");
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 		DataGroupExtendedSpy returnedParent = (DataGroupExtendedSpy) dataGroup.totalReturnedDataGroups
 				.get(1);
 		DataGroupExtendedSpy organisationLink = (DataGroupExtendedSpy) returnedParent.totalReturnedDataGroups
@@ -148,7 +156,7 @@ public class OrganisationDifferentDomainDetectorTest {
 		dataGroup.addChildren(parents);
 		addOrganisationToReturnFromStorage("organisation_parent0", "someOtherDomain");
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 	}
 
 	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
@@ -159,7 +167,7 @@ public class OrganisationDifferentDomainDetectorTest {
 		addOrganisationToReturnFromStorage("organisation_parent1", "someOtherDomain");
 		dataGroup.addChildren(parents);
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 	}
 
 	@Test
@@ -169,7 +177,7 @@ public class OrganisationDifferentDomainDetectorTest {
 
 		addOrganisationToReturnFromStorage("organisation_predecessor0", "someDomain");
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 		DataGroupExtendedSpy returnedPredecessor = (DataGroupExtendedSpy) dataGroup.totalReturnedDataGroups
 				.get(1);
 		DataGroupExtendedSpy organisationLink = (DataGroupExtendedSpy) returnedPredecessor.totalReturnedDataGroups
@@ -186,7 +194,7 @@ public class OrganisationDifferentDomainDetectorTest {
 		dataGroup.addChildren(predecessors);
 		addOrganisationToReturnFromStorage("organisation_predecessor0", "someOtherDomain");
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 	}
 
 	@Test
@@ -199,7 +207,7 @@ public class OrganisationDifferentDomainDetectorTest {
 		addOrganisationToReturnFromStorage("organisation_parent0", "someDomain");
 		addOrganisationToReturnFromStorage("organisation_predecessor0", "someDomain");
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 		assertEquals(dataGroup.totalReturnedDataGroups.size(), 3);
 		DataGroupExtendedSpy returnedParent = (DataGroupExtendedSpy) dataGroup.totalReturnedDataGroups
 				.get(1);

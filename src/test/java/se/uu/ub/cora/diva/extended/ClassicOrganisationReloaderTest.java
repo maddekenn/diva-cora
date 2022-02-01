@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.diva.DataGroupExtendedSpy;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 
 public class ClassicOrganisationReloaderTest {
 
@@ -61,8 +62,8 @@ public class ClassicOrganisationReloaderTest {
 	public void testNoCallWhenEmptyUrl() {
 		classicOrganisationReloader = ClassicOrganisationReloader
 				.usingHttpHandlerFactoryAndUrl(httpHandlerFactory, "");
-
-		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+		ExtendedFunctionalityData data = createDefaultData();
+		classicOrganisationReloader.useExtendedFunctionality(data);
 
 		assertNull(httpHandlerFactory.factoredHttpHandlerSpy);
 
@@ -73,9 +74,17 @@ public class ClassicOrganisationReloaderTest {
 				"Empty URL, no call made to list update in classic.");
 	}
 
+	private ExtendedFunctionalityData createDefaultData() {
+		ExtendedFunctionalityData data = new ExtendedFunctionalityData();
+		data.authToken = "authToken";
+		data.dataGroup = dataGroup;
+		return data;
+	}
+
 	@Test
 	public void testServletHasBeenCalled() {
-		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+		ExtendedFunctionalityData data = createDefaultData();
+		classicOrganisationReloader.useExtendedFunctionality(data);
 
 		assertHandlerFactoryReceivesCorrectURL("someDomain");
 		HttpHandlerSpy httpHandlerSpy = httpHandlerFactory.factoredHttpHandlerSpy;
@@ -85,8 +94,8 @@ public class ClassicOrganisationReloaderTest {
 	@Test
 	public void testServletWithOtherDomain() {
 		createDefaultDataGroup(otherDomain);
-
-		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+		ExtendedFunctionalityData data = createDefaultData();
+		classicOrganisationReloader.useExtendedFunctionality(data);
 		assertHandlerFactoryReceivesCorrectURL(otherDomain);
 	}
 
@@ -97,7 +106,8 @@ public class ClassicOrganisationReloaderTest {
 
 	@Test
 	public void testResponseCode200() {
-		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+		ExtendedFunctionalityData data = createDefaultData();
+		classicOrganisationReloader.useExtendedFunctionality(data);
 		LoggerSpy logger = loggerFactorySpy.logger;
 		assertEquals(logger.errorMessages.size(), 0);
 		assertEquals(logger.infoMessages.size(), 1);
@@ -108,7 +118,8 @@ public class ClassicOrganisationReloaderTest {
 	@Test
 	public void testResponseCode200OtherDomain() {
 		createDefaultDataGroup(otherDomain);
-		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+		ExtendedFunctionalityData data = createDefaultData();
+		classicOrganisationReloader.useExtendedFunctionality(data);
 		LoggerSpy logger = loggerFactorySpy.logger;
 		assertEquals(logger.errorMessages.size(), 0);
 		assertEquals(logger.infoMessages.size(), 1);
@@ -119,7 +130,8 @@ public class ClassicOrganisationReloaderTest {
 	@Test
 	public void testResponseCode400() {
 		httpHandlerFactory.responseCode = 400;
-		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+		ExtendedFunctionalityData data = createDefaultData();
+		classicOrganisationReloader.useExtendedFunctionality(data);
 		LoggerSpy logger = loggerFactorySpy.logger;
 		assertEquals(logger.errorMessages.size(), 1);
 		assertEquals(logger.errorMessages.get(0),
@@ -135,8 +147,8 @@ public class ClassicOrganisationReloaderTest {
 	public void testResponseCode500() {
 		createDefaultDataGroup(otherDomain);
 		httpHandlerFactory.responseCode = 500;
-
-		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+		ExtendedFunctionalityData data = createDefaultData();
+		classicOrganisationReloader.useExtendedFunctionality(data);
 		LoggerSpy logger = loggerFactorySpy.logger;
 		assertEquals(logger.errorMessages.size(), 1);
 		assertEquals(logger.errorMessages.get(0),
@@ -147,7 +159,8 @@ public class ClassicOrganisationReloaderTest {
 	public void testUnexpectedResponseCode() {
 		httpHandlerFactory.responseCode = 418;
 
-		classicOrganisationReloader.useExtendedFunctionality("authToken", dataGroup);
+		ExtendedFunctionalityData data = createDefaultData();
+		classicOrganisationReloader.useExtendedFunctionality(data);
 		LoggerSpy logger = loggerFactorySpy.logger;
 		assertEquals(logger.errorMessages.size(), 1);
 		assertEquals(logger.errorMessages.get(0),

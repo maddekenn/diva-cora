@@ -61,6 +61,7 @@ import se.uu.ub.cora.storage.RecordStorage;
 
 public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFactory {
 
+	private static final String PERSON = "person";
 	private static final String PERSON_DOMAIN_PART = "personDomainPart";
 	private static final String TOP_ORGANISATION = "topOrganisation";
 	private static final String ROOT_ORGANISATION = "rootOrganisation";
@@ -85,7 +86,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		createContext(SUB_ORGANISATION);
 		createContext(TOP_ORGANISATION);
 		createContext(ROOT_ORGANISATION);
-		contexts.add(new ExtendedFunctionalityContext(UPDATE_AFTER_STORE, "person", 0));
+		contexts.add(new ExtendedFunctionalityContext(UPDATE_AFTER_STORE, PERSON, 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_AFTER_METADATA_VALIDATION,
 				PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_RETURN, PERSON_DOMAIN_PART, 0));
@@ -110,7 +111,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			checkPositionForOrganisation(position, functionalities);
 		} else if (PERSON_DOMAIN_PART.equals(recordType)) {
 			checkPositionForDomainPart(position, functionalities);
-		} else if ("person".equals(recordType) && UPDATE_AFTER_STORE == position) {
+		} else if (PERSON.equals(recordType) && UPDATE_AFTER_STORE == position) {
 			addFunctionalityForPersonAfterStore(functionalities);
 		}
 		return functionalities;
@@ -150,20 +151,20 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
 		functionalities.add(
 				new PersonDomainPartFromPersonUpdater(recordStorage, termCollector, linkCollector));
-		addClassicSynchronizer(functionalities, recordStorage, "person");
+		addClassicSynchronizer(functionalities, recordStorage, PERSON);
 	}
 
 	private void addClassicSynchronizer(List<ExtendedFunctionality> functionalities,
 			RecordStorage recordStorage, String recordType) {
 		ClassicFedoraUpdaterFactoryImp fedoraUpdaterFactory = createClassicFedoraUpdaterFactory(
-				recordStorage, recordStorage);
+				recordStorage);
 		ClassicIndexerFactory classicIndexerFactory = createClassicIndexerFactory();
 		functionalities.add(new ClassicPersonSynchronizer(fedoraUpdaterFactory,
 				classicIndexerFactory, recordType));
 	}
 
 	private ClassicFedoraUpdaterFactoryImp createClassicFedoraUpdaterFactory(
-			RecordStorage recordStorage, RecordStorage classicDbStorage) {
+			RecordStorage recordStorage) {
 		HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
 
 		RepeatableRelatedLinkCollector repeatableLinkCollector = createRepeatableLinkCollector(

@@ -24,6 +24,7 @@ import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 
 public class ClassicOrganisationReloader implements ExtendedFunctionality {
 
@@ -45,11 +46,11 @@ public class ClassicOrganisationReloader implements ExtendedFunctionality {
 	}
 
 	@Override
-	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
+	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
 		if (urlIsEmpty()) {
 			log.logInfoUsingMessage("Empty URL, no call made to list update in classic.");
 		} else {
-			callListUpdateInClassic(dataGroup);
+			callListUpdateInClassic(data.dataGroup);
 		}
 	}
 

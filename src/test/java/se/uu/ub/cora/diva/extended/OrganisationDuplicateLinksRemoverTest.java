@@ -29,6 +29,7 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 
 public class OrganisationDuplicateLinksRemoverTest {
 
@@ -53,10 +54,17 @@ public class OrganisationDuplicateLinksRemoverTest {
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 
 		OrganisationDuplicateLinksRemover extendedFunctionality = new OrganisationDuplicateLinksRemover();
-		extendedFunctionality.useExtendedFunctionality("someToken", dataGroup);
+		extendedFunctionality.useExtendedFunctionality(createDefaultData(dataGroup));
 
 		assertEquals(dataGroup.addedChildren.size(), 0);
 		assertEquals(dataGroup.removeAllGroupsUsedNameInDatas.size(), 0);
+	}
+
+	private ExtendedFunctionalityData createDefaultData(DataGroup dataGroup) {
+		ExtendedFunctionalityData data = new ExtendedFunctionalityData();
+		data.authToken = "someToken";
+		data.dataGroup = dataGroup;
+		return data;
 	}
 
 	@Test
@@ -77,7 +85,7 @@ public class OrganisationDuplicateLinksRemoverTest {
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 
 		OrganisationDuplicateLinksRemover extendedFunctionality = new OrganisationDuplicateLinksRemover();
-		extendedFunctionality.useExtendedFunctionality("someToken", dataGroup);
+		extendedFunctionality.useExtendedFunctionality(createDefaultData(dataGroup));
 
 		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(0), "parentOrganisation");
 		assertEquals(dataGroup.removeAllGroupsUsedNameInDatas.get(0), "parentOrganisation");
@@ -113,7 +121,7 @@ public class OrganisationDuplicateLinksRemoverTest {
 		dataGroup.childrenToReturn.put("earlierOrganisation", predecessors);
 
 		OrganisationDuplicateLinksRemover extendedFunctionality = new OrganisationDuplicateLinksRemover();
-		extendedFunctionality.useExtendedFunctionality("someToken", dataGroup);
+		extendedFunctionality.useExtendedFunctionality(createDefaultData(dataGroup));
 
 		assertEquals(dataGroup.addedChildren.size(), 0);
 		assertEquals(dataGroup.removeAllGroupsUsedNameInDatas.size(), 0);
@@ -137,7 +145,7 @@ public class OrganisationDuplicateLinksRemoverTest {
 		dataGroup.childrenToReturn.put("earlierOrganisation", parents);
 
 		OrganisationDuplicateLinksRemover extendedFunctionality = new OrganisationDuplicateLinksRemover();
-		extendedFunctionality.useExtendedFunctionality("someToken", dataGroup);
+		extendedFunctionality.useExtendedFunctionality(createDefaultData(dataGroup));
 
 		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(0), "earlierOrganisation");
 		assertEquals(dataGroup.removeAllGroupsUsedNameInDatas.get(0), "earlierOrganisation");

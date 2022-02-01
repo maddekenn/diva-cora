@@ -30,6 +30,7 @@ import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.DataGroupExtendedSpy;
 import se.uu.ub.cora.diva.RecordStorageSpy;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.spider.record.DataException;
 
 public class PersonDomainPartValidatorTest {
@@ -58,7 +59,7 @@ public class PersonDomainPartValidatorTest {
 	public void testExtendedFunctionalityNoPersonPresent() {
 		recordStorage.throwRecordNotFoundException = true;
 		DataGroupExtendedSpy domainPart = createDataGroup("someDomain", "personId:123");
-		validator.useExtendedFunctionality(authToken, domainPart);
+		validator.useExtendedFunctionality(createDefaultData(domainPart));
 	}
 
 	private DataGroupExtendedSpy createDataGroup(String domain, String personId) {
@@ -72,11 +73,18 @@ public class PersonDomainPartValidatorTest {
 		return domainPart;
 	}
 
+	private ExtendedFunctionalityData createDefaultData(DataGroup dataGroup) {
+		ExtendedFunctionalityData data = new ExtendedFunctionalityData();
+		data.authToken = authToken;
+		data.dataGroup = dataGroup;
+		return data;
+	}
+
 	@Test
 	public void testExtendedFunctionalityPersonDomainPartCompleted() {
 		createAndSetPersonUsingPublicValue("true");
 		DataGroupExtendedSpy domainPart = createDataGroup("someDomain", "personId:123");
-		validator.useExtendedFunctionality(authToken, domainPart);
+		validator.useExtendedFunctionality(createDefaultData(domainPart));
 
 		DataAtomicSpy factoredRecordId = dataAtomicFactorySpy.factoredDataAtomics.get(0);
 		DataGroup recordInfo = domainPart.getFirstGroupWithNameInData("recordInfo");
@@ -91,7 +99,7 @@ public class PersonDomainPartValidatorTest {
 	public void testExtendedFunctionalityPersonExists() {
 		createAndSetPersonUsingPublicValue("true");
 		DataGroupExtendedSpy domainPart = createDataGroup("someDomain", "personId:123");
-		validator.useExtendedFunctionality(authToken, domainPart);
+		validator.useExtendedFunctionality(createDefaultData(domainPart));
 
 		assertEquals(recordStorage.readRecordTypes.get(0), "person");
 		assertEquals(recordStorage.readRecordIds.get(0), "personId:123");
@@ -104,7 +112,7 @@ public class PersonDomainPartValidatorTest {
 		DataGroupExtendedSpy domainPart = createDataGroup("someDomain", "personId:123");
 		assertNoPublicInDomainPartBefore(domainPart);
 
-		validator.useExtendedFunctionality(authToken, domainPart);
+		validator.useExtendedFunctionality(createDefaultData(domainPart));
 
 		assertPublicValueCopiedFromPersonToDomainPart(publicValue, domainPart);
 	}
@@ -137,7 +145,7 @@ public class PersonDomainPartValidatorTest {
 		DataGroupExtendedSpy domainPart = createDataGroup("someDomain", "personId:123");
 		assertNoPublicInDomainPartBefore(domainPart);
 
-		validator.useExtendedFunctionality(authToken, domainPart);
+		validator.useExtendedFunctionality(createDefaultData(domainPart));
 
 		assertPublicValueCopiedFromPersonToDomainPart("true", domainPart);
 	}

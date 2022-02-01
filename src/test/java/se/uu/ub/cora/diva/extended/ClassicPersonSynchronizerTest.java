@@ -24,7 +24,9 @@ import static org.testng.Assert.assertSame;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.DataGroupExtendedSpy;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 
 public class ClassicPersonSynchronizerTest {
 
@@ -37,8 +39,8 @@ public class ClassicPersonSynchronizerTest {
 		classicFedoraUpdaterFactory = new ClassicFedoraUpdaterFactorySpy();
 		classicIndexerFactory = new ClassicIndexerFactorySpy();
 		String recordType = "person";
-		functionality = new ClassicPersonSynchronizer(classicFedoraUpdaterFactory, classicIndexerFactory,
-				recordType);
+		functionality = new ClassicPersonSynchronizer(classicFedoraUpdaterFactory,
+				classicIndexerFactory, recordType);
 
 	}
 
@@ -52,10 +54,17 @@ public class ClassicPersonSynchronizerTest {
 	public void testUseExtendedFunctionalityForPerson() {
 		DataGroupExtendedSpy person = createPerson();
 
-		functionality.useExtendedFunctionality("someAuthToken", person);
+		functionality.useExtendedFunctionality(createDefaultData(person));
 
 		assertCorrectCallToUpdater(person);
 		assertCorrectCallToIndexer();
+	}
+
+	private ExtendedFunctionalityData createDefaultData(DataGroup person) {
+		ExtendedFunctionalityData data = new ExtendedFunctionalityData();
+		data.authToken = "authToken";
+		data.dataGroup = person;
+		return data;
 	}
 
 	private void assertCorrectCallToUpdater(DataGroupExtendedSpy person) {
@@ -85,9 +94,9 @@ public class ClassicPersonSynchronizerTest {
 		DataGroupExtendedSpy personDomainPart = createPersonDomainPart();
 
 		String recordType = "personDomainPart";
-		functionality = new ClassicPersonSynchronizer(classicFedoraUpdaterFactory, classicIndexerFactory,
-				recordType);
-		functionality.useExtendedFunctionality("someAuthToken", personDomainPart);
+		functionality = new ClassicPersonSynchronizer(classicFedoraUpdaterFactory,
+				classicIndexerFactory, recordType);
+		functionality.useExtendedFunctionality(createDefaultData(personDomainPart));
 
 		assertCorrectCallToUpdater(personDomainPart);
 		assertCorrectCallToIndexer();

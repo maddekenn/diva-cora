@@ -31,6 +31,7 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.diva.DataGroupExtendedSpy;
 import se.uu.ub.cora.diva.RecordStorageSpy;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 
 public class PersonDomainPartFromPersonUpdaterTest {
 
@@ -129,16 +130,22 @@ public class PersonDomainPartFromPersonUpdaterTest {
 
 	@Test
 	public void testPersonDomainPartRecordTypeIsRead() {
-		functionality.useExtendedFunctionality("someAuthToken", person);
+		functionality.useExtendedFunctionality(createDefaultData(person));
 		assertEquals(recordStorage.readRecordTypes.size(), 1);
 		assertEquals(recordStorage.readRecordTypes.get(0), "recordType");
 		assertEquals(recordStorage.readRecordIds.get(0), "personDomainPart");
+	}
 
+	private ExtendedFunctionalityData createDefaultData(DataGroup dataGroup) {
+		ExtendedFunctionalityData data = new ExtendedFunctionalityData();
+		data.authToken = "someAuthToken";
+		data.dataGroup = dataGroup;
+		return data;
 	}
 
 	@Test
 	public void testPersonDomainPartUpdateNoDomainParts() {
-		functionality.useExtendedFunctionality("someAuthToken", person);
+		functionality.useExtendedFunctionality(createDefaultData(person));
 		assertEquals(recordStorage.readRecordTypes.size(), 1);
 	}
 
@@ -147,7 +154,7 @@ public class PersonDomainPartFromPersonUpdaterTest {
 		createAndAddPersonDomainPartToPerson("1", "authority-person:106:test");
 		createAndAddPersonDomainPartToPerson("3", "authority-person:106:uu");
 
-		functionality.useExtendedFunctionality("someAuthToken", person);
+		functionality.useExtendedFunctionality(createDefaultData(person));
 
 		assertEquals(recordStorage.readRecordTypes.size(), 3);
 		assertCorrectReadPersonDomainParts();
@@ -174,7 +181,7 @@ public class PersonDomainPartFromPersonUpdaterTest {
 	public void testPersonDomainPartUpdateDomainPartsTwoDifferentOneSameValuePublic() {
 		addThreeDomainParts();
 
-		functionality.useExtendedFunctionality("someAuthToken", person);
+		functionality.useExtendedFunctionality(createDefaultData(person));
 
 		assertEquals(recordStorage.readRecordTypes.size(), 4);
 		assertEquals(recordStorage.dataGroupsSentToUpdate.size(), 2);
@@ -192,7 +199,7 @@ public class PersonDomainPartFromPersonUpdaterTest {
 	public void testUpdateDomainPartsTwoDifferentOneSameValuePublicCheckChangedValues() {
 		addThreeDomainParts();
 
-		functionality.useExtendedFunctionality("someAuthToken", person);
+		functionality.useExtendedFunctionality(createDefaultData(person));
 
 		assertPublicValueWasChanged(0);
 		assertUpdatedWasAddedCorrectly(recordStorage.dataGroupsSentToUpdate.get(0));
@@ -230,7 +237,7 @@ public class PersonDomainPartFromPersonUpdaterTest {
 	public void testUpdatePersonDomainPartCollectedTermsUsedCorrectly() {
 		addThreeDomainParts();
 
-		functionality.useExtendedFunctionality("someAuthToken", person);
+		functionality.useExtendedFunctionality(createDefaultData(person));
 		assertCorrectlyCollectedTerms(0, 1);
 		assertCorrectlyCollectedTerms(1, 3);
 		assertCorrectCollectedLinks(0, 1, "liu");

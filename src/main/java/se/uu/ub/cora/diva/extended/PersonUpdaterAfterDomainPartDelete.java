@@ -24,6 +24,7 @@ import se.uu.ub.cora.bookkeeper.linkcollector.DataRecordLinkCollector;
 import se.uu.ub.cora.bookkeeper.termcollector.DataGroupTermCollector;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class PersonUpdaterAfterDomainPartDelete implements ExtendedFunctionality {
@@ -43,8 +44,8 @@ public class PersonUpdaterAfterDomainPartDelete implements ExtendedFunctionality
 	}
 
 	@Override
-	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
-		String recordId = extractRecordId(dataGroup);
+	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
+		String recordId = extractRecordId(data.dataGroup);
 		String personIdPartOfId = recordId.substring(0, recordId.lastIndexOf(":"));
 
 		DataGroup person = recordStorage.read(PERSON, personIdPartOfId);

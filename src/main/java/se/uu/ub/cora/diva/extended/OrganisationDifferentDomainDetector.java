@@ -23,6 +23,7 @@ import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.spider.record.DataException;
 import se.uu.ub.cora.storage.RecordStorage;
 
@@ -35,7 +36,8 @@ public class OrganisationDifferentDomainDetector implements ExtendedFunctionalit
 	}
 
 	@Override
-	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
+	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
+		DataGroup dataGroup = data.dataGroup;
 		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
 		String domain = recordInfo.getFirstAtomicValueWithNameInData("domain");
 		List<DataGroup> combinedList = getListOfParentsAndPredecessors(dataGroup);

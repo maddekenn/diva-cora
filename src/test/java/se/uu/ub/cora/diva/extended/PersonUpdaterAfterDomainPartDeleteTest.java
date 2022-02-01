@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.DataGroupExtendedSpy;
 import se.uu.ub.cora.diva.RecordStorageSpy;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 
 public class PersonUpdaterAfterDomainPartDeleteTest {
 	private DataGroupTermCollectorSpy termCollector;
@@ -54,8 +55,9 @@ public class PersonUpdaterAfterDomainPartDeleteTest {
 
 	@Test
 	public void testUseExtendedFunctionality() {
-		DataGroup domainPart = TestDataForPerson.createDomainPartDataGroupWithUpdated("personId:235:uu", "2");
-		personUpdater.useExtendedFunctionality("someAuthToken", domainPart);
+		DataGroup domainPart = TestDataForPerson
+				.createDomainPartDataGroupWithUpdated("personId:235:uu", "2");
+		personUpdater.useExtendedFunctionality(createDefaultData(domainPart));
 
 		assertEquals(recordStorage.readRecordTypes.get(0), "person");
 		assertEquals(recordStorage.readRecordIds.get(0), "personId:235");
@@ -69,12 +71,19 @@ public class PersonUpdaterAfterDomainPartDeleteTest {
 		assertEquals(recordStorage.dataDividers.get(0), "testDiva");
 	}
 
+	private ExtendedFunctionalityData createDefaultData(DataGroup dataGroup) {
+		ExtendedFunctionalityData data = new ExtendedFunctionalityData();
+		data.authToken = "someAuthToken";
+		data.dataGroup = dataGroup;
+		return data;
+	}
+
 	@Test
 	public void testUseExtendedFunctionalityCheckCollectedTermsAndLinks() {
 		DataGroupExtendedSpy personDomainPart = TestDataForPerson
 				.createDomainPartDataGroupWithUpdated("personId:235:kth", "2");
 
-		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
+		personUpdater.useExtendedFunctionality(createDefaultData(personDomainPart));
 
 		assertEquals(recordStorage.readRecordTypes.get(1), "recordType");
 		assertEquals(recordStorage.readRecordIds.get(1), "person");

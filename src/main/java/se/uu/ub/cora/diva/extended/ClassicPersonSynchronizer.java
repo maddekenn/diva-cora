@@ -24,6 +24,7 @@ import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
 import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdater;
 import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 
 public class ClassicPersonSynchronizer implements ExtendedFunctionality {
 
@@ -40,9 +41,9 @@ public class ClassicPersonSynchronizer implements ExtendedFunctionality {
 	}
 
 	@Override
-	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
-		String recordId = extractRecordId(dataGroup);
-		updateInClassic(dataGroup, recordId);
+	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
+		String recordId = extractRecordId(data.dataGroup);
+		updateInClassic(data.dataGroup, recordId);
 		indexInClassic(recordId);
 	}
 

@@ -24,6 +24,7 @@ import java.util.StringJoiner;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.spider.record.DataException;
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.Row;
@@ -38,8 +39,8 @@ public class OrganisationDisallowedDependencyDetector implements ExtendedFunctio
 	}
 
 	@Override
-	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
-		this.dataGroup = dataGroup;
+	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
+		this.dataGroup = data.dataGroup;
 		possiblyThrowErrorIfDisallowedDependencyDetected(dataGroup);
 		dbFacade.close();
 	}

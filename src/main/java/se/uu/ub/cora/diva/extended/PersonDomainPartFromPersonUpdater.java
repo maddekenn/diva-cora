@@ -25,6 +25,7 @@ import se.uu.ub.cora.bookkeeper.termcollector.DataGroupTermCollector;
 import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class PersonDomainPartFromPersonUpdater implements ExtendedFunctionality {
@@ -45,8 +46,9 @@ public class PersonDomainPartFromPersonUpdater implements ExtendedFunctionality 
 	}
 
 	@Override
-	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
+	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
 		String metadataId = getMetadataId();
+		DataGroup dataGroup = data.dataGroup;
 		List<DataGroup> personDomainParts = dataGroup
 				.getAllGroupsWithNameInData(PERSON_DOMAIN_PART);
 
