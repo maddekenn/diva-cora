@@ -37,61 +37,12 @@ public class PersonUpdaterAfterDomainPartDeleteTest {
 	@BeforeMethod
 	public void setUp() {
 		recordStorage = new RecordStorageSpy();
-		setUpPersonToReturnFromStorageSpy();
-		setUpPersonRecordTypeToReturnFromSpy();
+		TestDataForPerson.setUpDefaultPersonToReturnFromStorageSpy(recordStorage);
+		TestDataForPerson.setUpPersonRecordTypeToReturnFromSpy(recordStorage);
 		termCollector = new DataGroupTermCollectorSpy();
 		linkCollector = new DataRecordLinkCollectorSpy();
 		personUpdater = new PersonUpdaterAfterDomainPartDelete(recordStorage, termCollector,
 				linkCollector);
-	}
-
-	private void setUpPersonRecordTypeToReturnFromSpy() {
-		DataGroupExtendedSpy personRecordType = new DataGroupExtendedSpy("recordType");
-		DataGroupExtendedSpy metadataId = new DataGroupExtendedSpy("metadataId");
-		metadataId.addChild(new DataAtomicSpy("linkedRecordId", "metadataIdForPersonType"));
-		personRecordType.addChild(metadataId);
-		recordStorage.returnOnRead.put("recordType_person", personRecordType);
-	}
-
-	private void setUpPersonToReturnFromStorageSpy() {
-		DataGroupExtendedSpy person = new DataGroupExtendedSpy("person");
-		DataGroupExtendedSpy recordInfo = createRecordInfo();
-		createAndAddUpdated(recordInfo, "1");
-		createAndAddUpdated(recordInfo, "4");
-		recordInfo.addChild(new DataAtomicSpy("domain", "uu", "1"));
-		recordInfo.addChild(new DataAtomicSpy("domain", "kth", "3"));
-		person.addChild(recordInfo);
-		createAndAddPersonDomainPart(person, "personId:235:uu", "1");
-		createAndAddPersonDomainPart(person, "personId:235:kth", "3");
-		recordStorage.returnOnRead.put("person_personId:235", person);
-	}
-
-	private void createAndAddUpdated(DataGroupExtendedSpy recordInfo, String repeatId) {
-		DataGroupExtendedSpy updated = new DataGroupExtendedSpy("updated");
-		updated.setRepeatId(repeatId);
-		recordInfo.addChild(updated);
-	}
-
-	private DataGroupExtendedSpy createDataDivider() {
-		DataGroupExtendedSpy dataDivider = new DataGroupExtendedSpy("dataDivider");
-		dataDivider.addChild(new DataAtomicSpy("linkedRecordType", "system"));
-		dataDivider.addChild(new DataAtomicSpy("linkedRecordId", "testDiva"));
-		return dataDivider;
-	}
-
-	private DataGroupExtendedSpy createRecordInfo() {
-		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
-		DataGroupExtendedSpy dataDivider = createDataDivider();
-		recordInfo.addChild(dataDivider);
-		return recordInfo;
-	}
-
-	private void createAndAddPersonDomainPart(DataGroupExtendedSpy person, String linkedRecordId,
-			String repeatId) {
-		DataGroupExtendedSpy domainPart = new DataGroupExtendedSpy("personDomainPart");
-		domainPart.addChild(new DataAtomicSpy("linkedRecordId", linkedRecordId));
-		domainPart.setRepeatId(repeatId);
-		person.addChild(domainPart);
 	}
 
 	@Test
@@ -103,7 +54,7 @@ public class PersonUpdaterAfterDomainPartDeleteTest {
 
 	@Test
 	public void testUseExtendedFunctionality() {
-		DataGroup domainPart = createDataGroup("personId:235:uu");
+		DataGroup domainPart = TestDataForPerson.createDataGroup("personId:235:uu", "2");
 		personUpdater.useExtendedFunctionality("someAuthToken", domainPart);
 
 		assertEquals(recordStorage.readRecordTypes.get(0), "person");
@@ -118,19 +69,10 @@ public class PersonUpdaterAfterDomainPartDeleteTest {
 		assertEquals(recordStorage.dataDividers.get(0), "testDiva");
 	}
 
-	private DataGroupExtendedSpy createDataGroup(String domainPartId) {
-		DataGroupExtendedSpy domainPart = new DataGroupExtendedSpy("personDomainPart");
-		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
-		recordInfo.addChild(new DataAtomicSpy("id", domainPartId));
-		domainPart.addChild(recordInfo);
-		createAndAddUpdated(recordInfo, "2");
-
-		return domainPart;
-	}
-
 	@Test
 	public void testUseExtendedFunctionalityCheckCollectedTermsAndLinks() {
-		DataGroupExtendedSpy personDomainPart = createDataGroup("personId:235:kth");
+		DataGroupExtendedSpy personDomainPart = TestDataForPerson
+				.createDataGroup("personId:235:kth", "2");
 
 		personUpdater.useExtendedFunctionality("someAuthToken", personDomainPart);
 

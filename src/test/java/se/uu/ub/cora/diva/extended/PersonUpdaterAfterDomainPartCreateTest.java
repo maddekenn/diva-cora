@@ -48,61 +48,15 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactorySpy);
 		dataGroupFactory = new DataGroupFactorySpy();
 		DataGroupProvider.setDataGroupFactory(dataGroupFactory);
+
 		recordStorage = new RecordStorageSpy();
-		setUpDataToReturnFromStorageSpy();
+		TestDataForPerson.setUpDefaultPersonToReturnFromStorageSpy(recordStorage);
+		TestDataForPerson.setUpPersonRecordTypeToReturnFromSpy(recordStorage);
 
 		termCollector = new DataGroupTermCollectorSpy();
 		linkCollector = new DataRecordLinkCollectorSpy();
 		personUpdater = new PersonUpdaterAfterDomainPartCreate(recordStorage, termCollector,
 				linkCollector);
-	}
-
-	private void setUpDataToReturnFromStorageSpy() {
-		setUpPersonToReturnFromStorageSpy();
-		DataGroupExtendedSpy personRecordType = new DataGroupExtendedSpy("recordType");
-		DataGroupExtendedSpy metadataId = new DataGroupExtendedSpy("metadataId");
-		metadataId.addChild(new DataAtomicSpy("linkedRecordId", "metadataIdForPersonType"));
-		personRecordType.addChild(metadataId);
-		recordStorage.returnOnRead.put("recordType_person", personRecordType);
-	}
-
-	private void setUpPersonToReturnFromStorageSpy() {
-		DataGroupExtendedSpy person = new DataGroupExtendedSpy("person");
-		DataGroupExtendedSpy recordInfo = createRecordInfo();
-		createAndAddUpdated(recordInfo, "1");
-		createAndAddUpdated(recordInfo, "4");
-		recordInfo.addChild(new DataAtomicSpy("domain", "uu", "1"));
-		recordInfo.addChild(new DataAtomicSpy("domain", "kth", "3"));
-		person.addChild(recordInfo);
-		createAndAddPersonDomainPart(person, "1");
-		createAndAddPersonDomainPart(person, "3");
-		recordStorage.returnOnRead.put("person_personId:235", person);
-	}
-
-	private void createAndAddUpdated(DataGroupExtendedSpy recordInfo, String repeatId) {
-		DataGroupExtendedSpy updated = new DataGroupExtendedSpy("updated");
-		updated.setRepeatId(repeatId);
-		recordInfo.addChild(updated);
-	}
-
-	private DataGroupExtendedSpy createRecordInfo() {
-		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
-		DataGroupExtendedSpy dataDivider = createDataDivider();
-		recordInfo.addChild(dataDivider);
-		return recordInfo;
-	}
-
-	private DataGroupExtendedSpy createDataDivider() {
-		DataGroupExtendedSpy dataDivider = new DataGroupExtendedSpy("dataDivider");
-		dataDivider.addChild(new DataAtomicSpy("linkedRecordType", "system"));
-		dataDivider.addChild(new DataAtomicSpy("linkedRecordId", "testDiva"));
-		return dataDivider;
-	}
-
-	private void createAndAddPersonDomainPart(DataGroupExtendedSpy person, String repeatId) {
-		DataGroupExtendedSpy domainPart = new DataGroupExtendedSpy("personDomainPart");
-		domainPart.setRepeatId(repeatId);
-		person.addChild(domainPart);
 	}
 
 	@Test
@@ -157,7 +111,7 @@ public class PersonUpdaterAfterDomainPartCreateTest {
 		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
 		recordInfo.addChild(new DataAtomicSpy("id", domainPartId));
 		domainPart.addChild(recordInfo);
-		createAndAddUpdated(recordInfo, "2");
+		TestDataForPerson.createAndAddUpdated(recordInfo, "2");
 
 		return domainPart;
 	}
