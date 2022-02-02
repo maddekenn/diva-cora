@@ -23,10 +23,12 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_BEFORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
 
 import java.util.HashMap;
@@ -44,6 +46,7 @@ import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.extended.PersonDomainPartFromPersonUpdater;
 import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
+import se.uu.ub.cora.diva.extended.PersonDomainPartPersonSynchronizer;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartCreate;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartDelete;
 import se.uu.ub.cora.diva.extended.SpiderDependencyProviderSpy;
@@ -97,7 +100,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void testInit() {
-		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 10);
+		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 12);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_STORE, "subOrganisation",
 				0);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "subOrganisation",
@@ -117,6 +120,10 @@ public class DivaExtendedFunctionalityFactoryTest {
 		assertCorrectContextUsingPositionRecordTypeAndIndex(CREATE_BEFORE_RETURN,
 				"personDomainPart", 8);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(DELETE_BEFORE, "personDomainPart", 9);
+		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_METADATA_VALIDATION,
+				"personDomainPart", 10);
+		assertCorrectContextUsingPositionRecordTypeAndIndex(CREATE_BEFORE_METADATA_VALIDATION,
+				"personDomainPart", 11);
 
 		assertLookupNameAndSqlDatabaseFactory();
 	}
@@ -323,7 +330,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
 				.factor(CREATE_AFTER_METADATA_VALIDATION, "personDomainPart");
 		assertEquals(functionalities.size(), 1);
-		PersonDomainPartValidator validatorFunctionality = (PersonDomainPartValidator) functionalities
+		PersonDomainPartPersonSynchronizer validatorFunctionality = (PersonDomainPartPersonSynchronizer) functionalities
 				.get(0);
 		assertSame(validatorFunctionality.getRecordStorage(), recordStorageProvider.recordStorage);
 	}
@@ -387,6 +394,22 @@ public class DivaExtendedFunctionalityFactoryTest {
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
 				.factor(UPDATE_BEFORE_STORE, "person");
 		assertEquals(functionalities.size(), 0);
+	}
+
+	@Test
+	public void factorPersonDomainPartUpdateBeforeValidation() {
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(UPDATE_BEFORE_METADATA_VALIDATION, "personDomainPart");
+		assertEquals(functionalities.size(), 1);
+		assertTrue(functionalities.get(0) instanceof PersonDomainPartValidator);
+	}
+
+	@Test
+	public void factorPersonDomainPartCreateBeforeValidation() {
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(CREATE_BEFORE_METADATA_VALIDATION, "personDomainPart");
+		assertEquals(functionalities.size(), 1);
+		assertTrue(functionalities.get(0) instanceof PersonDomainPartValidator);
 	}
 
 }

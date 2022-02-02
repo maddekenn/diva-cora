@@ -73,12 +73,22 @@ public class TestDataForPerson {
 		person.addChild(domainPart);
 	}
 
-	public static DataGroupExtendedSpy createDomainPartDataGroupWithUpdated(String domainPartId, String repeatId) {
+	public static DataGroupExtendedSpy createDomainPartDataGroupWithUpdated(String domainPartId,
+			String repeatId) {
 		DataGroupExtendedSpy domainPart = new DataGroupExtendedSpy("personDomainPart");
 		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
 		recordInfo.addChild(new DataAtomicSpy("id", domainPartId));
 		domainPart.addChild(recordInfo);
 		TestDataForPerson.createAndAddUpdated(recordInfo, repeatId);
+		domainPart.addChild(new DataAtomicSpy("identifier", "3456", "0"));
+
+		DataGroupExtendedSpy affiliation = new DataGroupExtendedSpy("affiliation");
+		DataGroupExtendedSpy organisationLink = new DataGroupExtendedSpy("organisationLink");
+		organisationLink.addChild(new DataAtomicSpy("linkedRecordType", "organisation"));
+		organisationLink.addChild(new DataAtomicSpy("linkedRecordId", "678"));
+		affiliation.addChild(organisationLink);
+		affiliation.setRepeatId("0");
+		domainPart.addChild(affiliation);
 
 		return domainPart;
 	}

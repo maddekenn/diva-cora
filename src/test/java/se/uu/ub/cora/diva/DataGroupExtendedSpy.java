@@ -40,6 +40,7 @@ public class DataGroupExtendedSpy implements DataGroup {
 	public List<String> requestedAtomicNameInDatas = new ArrayList<>();
 	public List<DataGroup> totalReturnedDataGroups = new ArrayList<>();
 	private String repeatId;
+	public List<String> nameInDatasRequestedFromContains = new ArrayList<>();
 
 	public DataGroupExtendedSpy(String nameInData) {
 		this.nameInData = nameInData;
@@ -69,6 +70,7 @@ public class DataGroupExtendedSpy implements DataGroup {
 
 	@Override
 	public boolean containsChildWithNameInData(String nameInData) {
+		nameInDatasRequestedFromContains.add(nameInData);
 		for (DataElement dataElement : children) {
 			if (nameInData.equals(dataElement.getNameInData())) {
 				return true;

@@ -19,9 +19,11 @@
 package se.uu.ub.cora.diva;
 
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_BEFORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
 
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.extended.PersonDomainPartFromPersonUpdater;
 import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
+import se.uu.ub.cora.diva.extended.PersonDomainPartPersonSynchronizer;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartCreate;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartDelete;
 import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
@@ -91,6 +94,10 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 				PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_RETURN, PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(DELETE_BEFORE, PERSON_DOMAIN_PART, 0));
+		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_METADATA_VALIDATION,
+				PERSON_DOMAIN_PART, 0));
+		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_METADATA_VALIDATION,
+				PERSON_DOMAIN_PART, 0));
 	}
 
 	private void createContext(String recordType) {
@@ -137,6 +144,9 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		} else if (UPDATE_AFTER_STORE == position) {
 			RecordStorage recordStorage = dependencyProvider.getRecordStorage();
 			addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
+		} else if (UPDATE_BEFORE_METADATA_VALIDATION == position
+				|| CREATE_BEFORE_METADATA_VALIDATION == position) {
+			functionalities.add(new PersonDomainPartValidator());
 		}
 	}
 
@@ -236,7 +246,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	private void addFunctionalityForCreateAfterMetadataValidation(
 			List<ExtendedFunctionality> functionalities) {
 		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
-		functionalities.add(new PersonDomainPartValidator(recordStorage));
+		functionalities.add(new PersonDomainPartPersonSynchronizer(recordStorage));
 	}
 
 	private void addFunctionalityForCreateBeforeReturn(
