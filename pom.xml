@@ -49,7 +49,7 @@
 		<gatekeeperclient.version>3.12.0</gatekeeperclient.version>
 		<divamixedstorage.version>4.11-SNAPSHOT</divamixedstorage.version>
 		<solrsearch.version>4.4.0</solrsearch.version>
-		<metacreator.version>4.5.0</metacreator.version>
+		<metacreator.version>4.6-SNAPSHOT</metacreator.version>
 		<httphandler.version>2.4.0</httphandler.version>
 		<apptokenstorage.version>2.4.0</apptokenstorage.version>
 		<sqldatabase.version>6.0.0</sqldatabase.version>
@@ -138,13 +138,11 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>basicstorage</artifactId>
 			<version>${basicstorage.version}</version>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>gatekeeper</artifactId>
 			<version>${gatekeeper.version}</version>
- 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
@@ -156,7 +154,6 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>divamixedstorage</artifactId>
 			<version>${divamixedstorage.version}</version>
-<!--  			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
