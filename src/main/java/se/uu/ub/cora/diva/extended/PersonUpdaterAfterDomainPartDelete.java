@@ -18,11 +18,18 @@
  */
 package se.uu.ub.cora.diva.extended;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 
+import se.uu.ub.cora.beefeater.authentication.User;
 import se.uu.ub.cora.bookkeeper.linkcollector.DataRecordLinkCollector;
 import se.uu.ub.cora.bookkeeper.termcollector.DataGroupTermCollector;
+import se.uu.ub.cora.data.DataAtomic;
+import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -49,7 +56,7 @@ public class PersonUpdaterAfterDomainPartDelete implements ExtendedFunctionality
 		String personIdPartOfId = recordId.substring(0, recordId.lastIndexOf(":"));
 
 		DataGroup person = recordStorage.read(PERSON, personIdPartOfId);
-		alterPersonDomainPartList(recordId, person);
+		addAndAlterDataInPerson(data, recordId, person);
 
 		String metadataId = getMetadataId();
 		DataGroup collectedTerms = termCollector.collectTerms(metadataId, person);
@@ -59,6 +66,14 @@ public class PersonUpdaterAfterDomainPartDelete implements ExtendedFunctionality
 		recordStorage.update(PERSON, personIdPartOfId, person, collectedTerms, collectedLinks,
 				dataDivider);
 
+	}
+
+	private void addAndAlterDataInPerson(ExtendedFunctionalityData data, String recordId,
+			DataGroup person) {
+		alterPersonDomainPartList(recordId, person);
+		DataGroup recordInfo = person.getFirstGroupWithNameInData(RECORD_INFO);
+		alterDomainListInPerson(recordId, recordInfo);
+		createAndAddUpdateInfoForThisUpdate(recordInfo, data.user);
 	}
 
 	private void alterPersonDomainPartList(String recordId, DataGroup person) {
@@ -88,6 +103,71 @@ public class PersonUpdaterAfterDomainPartDelete implements ExtendedFunctionality
 
 	private boolean notDomainPartToRemove(String recordId, String linkedDomainPart) {
 		return !recordId.equals(linkedDomainPart);
+	}
+
+	private void alterDomainListInPerson(String recordId, DataGroup recordInfo) {
+		String domainPartOfId = recordId.substring(recordId.lastIndexOf(":") + 1);
+		List<DataAtomic> domains = recordInfo.getAllDataAtomicsWithNameInData("domain");
+		recordInfo.removeAllChildrenWithNameInData("domain");
+		possiblyAddDomainsAgain(domainPartOfId, recordInfo, domains);
+	}
+
+	private void possiblyAddDomainsAgain(String domainPartOfId, DataGroup recordInfo,
+			List<DataAtomic> domains) {
+		for (DataAtomic dataAtomic : domains) {
+			if (notDomainToRemove(domainPartOfId, dataAtomic)) {
+				recordInfo.addChild(dataAtomic);
+			}
+		}
+	}
+
+	private boolean notDomainToRemove(String domainPartOfId, DataAtomic dataAtomic) {
+		return !domainPartOfId.equals(dataAtomic.getValue());
+	}
+
+	private void createAndAddUpdateInfoForThisUpdate(DataGroup recordInfo, User user) {
+		DataGroup updated = DataGroupProvider.getDataGroupUsingNameInData("updated");
+		setUpdatedBy(updated, user);
+		setTsUpdated(updated);
+		recordInfo.addChild(updated);
+		setNewRepeatIdsToEnsureUnique(recordInfo);
+	}
+
+	private void setUpdatedBy(DataGroup updated, User user) {
+		DataGroup updatedBy = createUpdatedByLink(user);
+		updated.addChild(updatedBy);
+	}
+
+	private DataGroup createUpdatedByLink(User user) {
+		DataGroup updatedBy = DataGroupProvider.getDataGroupUsingNameInData("updatedBy");
+		updatedBy.addChild(DataAtomicProvider
+				.getDataAtomicUsingNameInDataAndValue("linkedRecordType", "user"));
+		updatedBy.addChild(
+				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(LINKED_RECORD_ID, user.id));
+		return updatedBy;
+	}
+
+	private void setTsUpdated(DataGroup updated) {
+		String currentLocalDateTime = getCurrentTimestampAsString();
+		updated.addChild(DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("tsUpdated",
+				currentLocalDateTime));
+	}
+
+	private String getCurrentTimestampAsString() {
+		return formatInstantKeepingTrailingZeros(Instant.now());
+	}
+
+	protected String formatInstantKeepingTrailingZeros(Instant instant) {
+		DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendInstant(6).toFormatter();
+		return formatter.format(instant);
+	}
+
+	private void setNewRepeatIdsToEnsureUnique(DataGroup recordInfo) {
+		int i = 0;
+		for (DataGroup updatedGroup : recordInfo.getAllGroupsWithNameInData("updated")) {
+			updatedGroup.setRepeatId(String.valueOf(i));
+			i++;
+		}
 	}
 
 	private String getMetadataId() {

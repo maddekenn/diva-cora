@@ -91,7 +91,13 @@ public class DataGroupExtendedSpy implements DataGroup {
 
 	@Override
 	public List<DataElement> getAllChildrenWithNameInData(String nameInData) {
-		return null;
+		List<DataElement> currentListToReturn = new ArrayList<>();
+		for (DataElement dataElement : children) {
+			if (nameInData.equals(dataElement.getNameInData())) {
+				currentListToReturn.add(dataElement);
+			}
+		}
+		return currentListToReturn;
 	}
 
 	@Override
