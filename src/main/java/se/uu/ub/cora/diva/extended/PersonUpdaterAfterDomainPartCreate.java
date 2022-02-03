@@ -32,6 +32,7 @@ import se.uu.ub.cora.storage.RecordStorage;
 
 public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality {
 
+	private static final String DOMAIN = "domain";
 	private static final String RECORD_INFO = "recordInfo";
 	private static final String PERSON = "person";
 	private static final String PERSON_DOMAIN_PART = "personDomainPart";
@@ -107,13 +108,13 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 	}
 
 	private void possiblyAddDomainToPerson(String recordId, DataGroup personRecordInfo) {
-		String domainPartOfId = recordId.substring(recordId.lastIndexOf(":") + 1);
+		String domainPartOfId = recordId.substring(recordId.lastIndexOf(':') + 1);
 		boolean domainAlreadyExist = domainAlreadyExists(personRecordInfo, domainPartOfId);
 		if (!domainAlreadyExist) {
 			createAndAddDomainInPerson(personRecordInfo, domainPartOfId);
 			int counter = 0;
 			for (DataAtomic repeatedDataGroup : personRecordInfo
-					.getAllDataAtomicsWithNameInData("domain")) {
+					.getAllDataAtomicsWithNameInData(DOMAIN)) {
 				repeatedDataGroup.setRepeatId(String.valueOf(counter));
 				counter++;
 			}
@@ -122,7 +123,7 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 
 	private boolean domainAlreadyExists(DataGroup personRecordInfo, String domainPartOfId) {
 		List<DataAtomic> existingDomains = personRecordInfo
-				.getAllDataAtomicsWithNameInData("domain");
+				.getAllDataAtomicsWithNameInData(DOMAIN);
 		for (DataAtomic existingDomain : existingDomains) {
 			if (existingDomain.getValue().equals(domainPartOfId)) {
 				return true;
@@ -132,7 +133,7 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 	}
 
 	private void createAndAddDomainInPerson(DataGroup personRecordInfo, String domainPartOfId) {
-		DataAtomic domain = DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("domain",
+		DataAtomic domain = DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(DOMAIN,
 				domainPartOfId);
 		personRecordInfo.addChild(domain);
 	}

@@ -50,7 +50,7 @@ public class ClassicPersonSynchronizer implements ExtendedFunctionality {
 	private String extractRecordId(DataGroup dataGroup) {
 		String recordId = getIdFromRecordInfo(dataGroup);
 		if ("personDomainPart".equals(recordType)) {
-			return recordId.substring(0, recordId.lastIndexOf(":"));
+			return recordId.substring(0, recordId.lastIndexOf(':'));
 		}
 		return recordId;
 	}

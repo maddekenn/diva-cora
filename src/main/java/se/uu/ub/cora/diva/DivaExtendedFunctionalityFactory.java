@@ -118,7 +118,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			checkPositionForOrganisation(position, functionalities);
 		} else if (PERSON_DOMAIN_PART.equals(recordType)) {
 			checkPositionForDomainPart(position, functionalities);
-		} else if (PERSON.equals(recordType) && UPDATE_AFTER_STORE == position) {
+		} else if (UPDATE_AFTER_STORE == position && PERSON.equals(recordType)) {
 			addFunctionalityForPersonAfterStore(functionalities);
 		}
 		return functionalities;
