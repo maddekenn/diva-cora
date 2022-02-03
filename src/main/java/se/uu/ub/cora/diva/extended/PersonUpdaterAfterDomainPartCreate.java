@@ -51,7 +51,7 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
 		DataGroup dataGroup = data.dataGroup;
 		String recordId = extractRecordId(dataGroup);
-		String personIdPartOfId = recordId.substring(0, recordId.lastIndexOf(":"));
+		String personIdPartOfId = recordId.substring(0, recordId.lastIndexOf(':'));
 
 		DataGroup readPerson = recordStorage.read(PERSON, personIdPartOfId);
 		createAndAddPersonDomainPartToPerson(recordId, readPerson);
@@ -122,8 +122,7 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 	}
 
 	private boolean domainAlreadyExists(DataGroup personRecordInfo, String domainPartOfId) {
-		List<DataAtomic> existingDomains = personRecordInfo
-				.getAllDataAtomicsWithNameInData(DOMAIN);
+		List<DataAtomic> existingDomains = personRecordInfo.getAllDataAtomicsWithNameInData(DOMAIN);
 		for (DataAtomic existingDomain : existingDomains) {
 			if (existingDomain.getValue().equals(domainPartOfId)) {
 				return true;

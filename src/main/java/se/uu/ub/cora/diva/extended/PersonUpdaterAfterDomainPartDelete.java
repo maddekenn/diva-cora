@@ -53,7 +53,7 @@ public class PersonUpdaterAfterDomainPartDelete implements ExtendedFunctionality
 	@Override
 	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
 		String recordId = extractRecordId(data.dataGroup);
-		String personIdPartOfId = recordId.substring(0, recordId.lastIndexOf(":"));
+		String personIdPartOfId = recordId.substring(0, recordId.lastIndexOf(':'));
 
 		DataGroup person = recordStorage.read(PERSON, personIdPartOfId);
 		addAndAlterDataInPerson(data, recordId, person);
@@ -106,7 +106,7 @@ public class PersonUpdaterAfterDomainPartDelete implements ExtendedFunctionality
 	}
 
 	private void alterDomainListInPerson(String recordId, DataGroup recordInfo) {
-		String domainPartOfId = recordId.substring(recordId.lastIndexOf(":") + 1);
+		String domainPartOfId = recordId.substring(recordId.lastIndexOf(':') + 1);
 		List<DataAtomic> domains = recordInfo.getAllDataAtomicsWithNameInData("domain");
 		recordInfo.removeAllChildrenWithNameInData("domain");
 		possiblyAddDomainsAgain(domainPartOfId, recordInfo, domains);
