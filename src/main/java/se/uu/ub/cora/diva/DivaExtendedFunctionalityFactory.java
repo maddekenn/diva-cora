@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, 2021 Uppsala University Library
+ * Copyright 2020, 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -21,7 +21,7 @@ package se.uu.ub.cora.diva;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN;
-import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_BEFORE;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_AFTER;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
@@ -37,8 +37,8 @@ import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.extended.PersonDomainPartFromPersonUpdater;
-import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
 import se.uu.ub.cora.diva.extended.PersonDomainPartPersonSynchronizer;
+import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartCreate;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartDelete;
 import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
@@ -93,7 +93,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		contexts.add(new ExtendedFunctionalityContext(CREATE_AFTER_METADATA_VALIDATION,
 				PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_RETURN, PERSON_DOMAIN_PART, 0));
-		contexts.add(new ExtendedFunctionalityContext(DELETE_BEFORE, PERSON_DOMAIN_PART, 0));
+		contexts.add(new ExtendedFunctionalityContext(DELETE_AFTER, PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_METADATA_VALIDATION,
 				PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_METADATA_VALIDATION,
@@ -139,8 +139,8 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			addFunctionalityForCreateAfterMetadataValidation(functionalities);
 		} else if (CREATE_BEFORE_RETURN == position) {
 			addFunctionalityForCreateBeforeReturn(functionalities);
-		} else if (DELETE_BEFORE == position) {
-			addFunctionalityForDeleteBefore(functionalities);
+		} else if (DELETE_AFTER == position) {
+			addFunctionalityForDeleteAfter(functionalities);
 		} else if (UPDATE_AFTER_STORE == position) {
 			RecordStorage recordStorage = dependencyProvider.getRecordStorage();
 			addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
@@ -256,14 +256,16 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
 		functionalities.add(new PersonUpdaterAfterDomainPartCreate(recordStorage, termCollector,
 				linkCollector));
+		addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
 	}
 
-	private void addFunctionalityForDeleteBefore(List<ExtendedFunctionality> functionalities) {
+	private void addFunctionalityForDeleteAfter(List<ExtendedFunctionality> functionalities) {
 		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
 		DataGroupTermCollector termCollector = dependencyProvider.getDataGroupTermCollector();
 		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
 		functionalities.add(new PersonUpdaterAfterDomainPartDelete(recordStorage, termCollector,
 				linkCollector));
+		addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
 	}
 
 	public SqlDatabaseFactory onlyForTestGetSqlDatabaseFactory() {

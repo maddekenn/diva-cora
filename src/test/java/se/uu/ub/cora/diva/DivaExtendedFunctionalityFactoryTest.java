@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, 2021 Uppsala University Library
+ * Copyright 2020, 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -25,7 +25,7 @@ import static org.testng.Assert.assertTrue;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN;
-import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_BEFORE;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_AFTER;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION;
@@ -45,8 +45,8 @@ import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.extended.PersonDomainPartFromPersonUpdater;
-import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
 import se.uu.ub.cora.diva.extended.PersonDomainPartPersonSynchronizer;
+import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartCreate;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartDelete;
 import se.uu.ub.cora.diva.extended.SpiderDependencyProviderSpy;
@@ -119,7 +119,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 				7);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(CREATE_BEFORE_RETURN,
 				"personDomainPart", 8);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(DELETE_BEFORE, "personDomainPart", 9);
+		assertCorrectContextUsingPositionRecordTypeAndIndex(DELETE_AFTER, "personDomainPart", 9);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_METADATA_VALIDATION,
 				"personDomainPart", 10);
 		assertCorrectContextUsingPositionRecordTypeAndIndex(CREATE_BEFORE_METADATA_VALIDATION,
@@ -347,7 +347,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 		divaExtendedFunctionality.onlyForTestSetSqlDatabaseFactory(databaseFactorySpy);
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
 				.factor(CREATE_BEFORE_RETURN, "personDomainPart");
-		assertEquals(functionalities.size(), 1);
+		assertEquals(functionalities.size(), 2);
 
 		PersonUpdaterAfterDomainPartCreate personUpdater = (PersonUpdaterAfterDomainPartCreate) functionalities
 				.get(0);
@@ -356,6 +356,11 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 		assertSame(personUpdater.getTermCollector(), spiderDependencyProvider.termCollector);
 		assertSame(personUpdater.getLinkCollector(), spiderDependencyProvider.linkCollector);
+
+		ClassicPersonSynchronizer classicSynchronizer = (ClassicPersonSynchronizer) functionalities
+				.get(1);
+		assertCorrectlyCreatedClassicSynchronizer(classicSynchronizer, "personDomainPart");
+
 	}
 
 	@Test
@@ -367,19 +372,23 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void factorBeforeDeleteOtherType() {
-		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
-				.factor(DELETE_BEFORE, "otherType");
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality.factor(DELETE_AFTER,
+				"otherType");
 		assertEquals(functionalities.size(), 0);
 	}
 
 	@Test
 	public void factorPersonDomainPartUpdateAfterDomainPartDelete() {
-		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
-				.factor(DELETE_BEFORE, "personDomainPart");
-		assertEquals(functionalities.size(), 1);
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality.factor(DELETE_AFTER,
+				"personDomainPart");
+		assertEquals(functionalities.size(), 2);
 		PersonUpdaterAfterDomainPartDelete functionality = (PersonUpdaterAfterDomainPartDelete) functionalities
 				.get(0);
 		assertSame(functionality.getRecordStorage(), recordStorageProvider.recordStorage);
+		ClassicPersonSynchronizer classicSynchronizer = (ClassicPersonSynchronizer) functionalities
+				.get(1);
+		assertCorrectlyCreatedClassicSynchronizer(classicSynchronizer, "personDomainPart");
+
 	}
 
 	@Test
