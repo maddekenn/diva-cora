@@ -256,7 +256,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
 		functionalities.add(new PersonUpdaterAfterDomainPartCreate(recordStorage, termCollector,
 				linkCollector));
-		addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
+		// addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
 	}
 
 	private void addFunctionalityForDeleteAfter(List<ExtendedFunctionality> functionalities) {
@@ -265,7 +265,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
 		functionalities.add(new PersonUpdaterAfterDomainPartDelete(recordStorage, termCollector,
 				linkCollector));
-		addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
+		// addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
 	}
 
 	public SqlDatabaseFactory onlyForTestGetSqlDatabaseFactory() {
