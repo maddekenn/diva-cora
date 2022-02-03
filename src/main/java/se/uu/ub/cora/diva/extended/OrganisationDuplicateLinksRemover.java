@@ -26,13 +26,14 @@ import java.util.Map;
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 
 public class OrganisationDuplicateLinksRemover implements ExtendedFunctionality {
 
 	@Override
-	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
-		handleChildrenInDataGroupUsingNameInData(dataGroup, "parentOrganisation");
-		handleChildrenInDataGroupUsingNameInData(dataGroup, "earlierOrganisation");
+	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
+		handleChildrenInDataGroupUsingNameInData(data.dataGroup, "parentOrganisation");
+		handleChildrenInDataGroupUsingNameInData(data.dataGroup, "earlierOrganisation");
 	}
 
 	private void handleChildrenInDataGroupUsingNameInData(DataGroup dataGroup, String nameInData) {

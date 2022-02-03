@@ -27,12 +27,12 @@ import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.spider.dependency.SpiderInstanceProvider;
-import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 
 public class PersonDomainPartIndexerTest {
 
 	private String authToken = "someAuthToken";
-	private ExtendedFunctionality functionality;
+	private PersonDomainPartIndexer functionality;
 	private SpiderInstanceFactorySpy instanceFactory;
 	private DataAtomicFactorySpy dataAtomicFactory;
 	private DataGroupFactorySpy dataGroupFactory;
@@ -57,17 +57,24 @@ public class PersonDomainPartIndexerTest {
 		recordTypeLink.addChild(new DataAtomicSpy("linkedRecordId", "NOTperson"));
 		workOrder.addChild(recordTypeLink);
 
-		functionality.useExtendedFunctionality(authToken, workOrder);
+		functionality.useExtendedFunctionality(createDefaultData(workOrder));
 
 		assertEquals(instanceFactory.spiderRecordReaders.size(), 0);
 
+	}
+
+	private ExtendedFunctionalityData createDefaultData(DataGroup dataGroup) {
+		ExtendedFunctionalityData data = new ExtendedFunctionalityData();
+		data.authToken = "someAuthToken";
+		data.dataGroup = dataGroup;
+		return data;
 	}
 
 	@Test
 	public void testExtendedFunctionalityOneDomainPart() {
 		DataGroup workOrder = createWorkOrder("index");
 
-		functionality.useExtendedFunctionality(authToken, workOrder);
+		functionality.useExtendedFunctionality(createDefaultData(workOrder));
 
 		assertCorrectCalledRecordReader();
 		assertEquals(instanceFactory.spiderRecordCreators.size(), 2);
@@ -140,7 +147,7 @@ public class PersonDomainPartIndexerTest {
 	public void testExtendedFunctionalityOneDomainPartRemoveFromIndex() {
 		DataGroup workOrder = createWorkOrder("removeFromIndex");
 
-		functionality.useExtendedFunctionality(authToken, workOrder);
+		functionality.useExtendedFunctionality(createDefaultData(workOrder));
 
 		assertCorrectCalledRecordReader();
 		assertEquals(instanceFactory.spiderRecordCreators.size(), 2);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,44 +18,15 @@
  */
 package se.uu.ub.cora.diva.extended;
 
-import se.uu.ub.cora.data.DataAtomic;
+import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexer;
 
-public class DataAtomicSpy implements DataAtomic {
+public class ClassicIndexerSpy implements ClassicIndexer {
 
-	public String nameInData;
-	public String value;
-	private String repeatId;
-
-	public DataAtomicSpy(String nameInData, String value) {
-		this.nameInData = nameInData;
-		this.value = value;
-	}
-
-	public DataAtomicSpy(String nameInData, String value, String repeatId) {
-		this.nameInData = nameInData;
-		this.value = value;
-		this.repeatId = repeatId;
-	}
+	public String recordId;
 
 	@Override
-	public void setRepeatId(String repeatId) {
-		this.repeatId = repeatId;
-
-	}
-
-	@Override
-	public String getRepeatId() {
-		return repeatId;
-	}
-
-	@Override
-	public String getNameInData() {
-		return nameInData;
-	}
-
-	@Override
-	public String getValue() {
-		return value;
+	public void index(String recordId) {
+		this.recordId = recordId;
 	}
 
 }

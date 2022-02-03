@@ -31,6 +31,7 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.DatabaseFacadeSpy;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.spider.record.DataException;
 
 public class OrganisationDisallowedDependencyDetectorTest {
@@ -61,16 +62,23 @@ public class OrganisationDisallowedDependencyDetectorTest {
 
 	@Test
 	public void testWhenNoParentOrPredecessorInDataGroupNoCallForDependecyCheck() {
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 		dbFacadeSpy.MCR.assertMethodNotCalled("readUsingSqlAndValues");
 		dbFacadeSpy.MCR.assertMethodWasCalled("close");
+	}
+
+	private ExtendedFunctionalityData createDefaultData(DataGroup person) {
+		ExtendedFunctionalityData data = new ExtendedFunctionalityData();
+		data.authToken = "authToken";
+		data.dataGroup = person;
+		return data;
 	}
 
 	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
 			+ "Organisation not updated due to link to self")
 	public void testWhenSelfPresentAsParentInDataGroup() {
 		addSelfAsParent();
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 	}
 
 	private void addSelfAsParent() {
@@ -85,7 +93,7 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		addSelfAsParent();
 
 		try {
-			functionality.useExtendedFunctionality(authToken, dataGroup);
+			functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 			assertErrorWasThrownBeforeThisCall();
 		} catch (DataException e) {
 			dbFacadeSpy.MCR.assertMethodNotCalled("readUsingSqlAndValues");
@@ -102,7 +110,7 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		List<DataElement> parents = createListAndAddDefaultParent();
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 
 		dbFacadeSpy.MCR.assertMethodWasCalled("readUsingSqlAndValues");
 
@@ -144,7 +152,7 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		parents.add(parent2);
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 		String sql = getExpectedSql("?, ?");
 		dbFacadeSpy.MCR.assertParameter("readUsingSqlAndValues", 0, "sql", sql);
 
@@ -168,7 +176,7 @@ public class OrganisationDisallowedDependencyDetectorTest {
 				.createListAndAddPredecessorUsingRepeatIdAndId(dataGroup, "0", "78");
 		dataGroup.childrenToReturn.put("earlierOrganisation", predecessors);
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 
 		String sql = getExpectedSql("?, ?");
 		dbFacadeSpy.MCR.assertParameter("readUsingSqlAndValues", 0, "sql", sql);
@@ -192,7 +200,7 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		dataGroup.childrenToReturn.put("parentOrganisation", parents);
 		dbFacadeSpy.readReturnsSomeRows = true;
 		try {
-			functionality.useExtendedFunctionality(authToken, dataGroup);
+			functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 			assertErrorWasThrownBeforeThisCall();
 		} catch (Exception e) {
 			assertTrue(e instanceof DataException);
@@ -221,7 +229,7 @@ public class OrganisationDisallowedDependencyDetectorTest {
 		dataGroup.childrenToReturn.put("earlierOrganisation", predecessors);
 
 		try {
-			functionality.useExtendedFunctionality(authToken, dataGroup);
+			functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 			assertErrorWasThrownBeforeThisCall();
 		} catch (Exception e) {
 			assertTrue(e instanceof DataException);
@@ -242,7 +250,7 @@ public class OrganisationDisallowedDependencyDetectorTest {
 
 		dataGroup.childrenToReturn.put("earlierOrganisation", predecessors);
 		try {
-			functionality.useExtendedFunctionality(authToken, dataGroup);
+			functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 			assertErrorWasThrownBeforeThisCall();
 		} catch (DataException e) {
 			dbFacadeSpy.MCR.assertMethodNotCalled("readUsingSqlAndValues");

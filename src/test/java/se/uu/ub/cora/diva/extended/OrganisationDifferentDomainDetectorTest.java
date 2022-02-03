@@ -29,15 +29,16 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.DataGroupDomainSpy;
+import se.uu.ub.cora.diva.DataGroupExtendedSpy;
 import se.uu.ub.cora.diva.RecordStorageSpy;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.spider.record.DataException;
 
 public class OrganisationDifferentDomainDetectorTest {
 
 	private String authToken = "someAuthToken";
 	private OrganisationDifferentDomainDetector functionality;
-	private DataGroupDomainSpy dataGroup;
+	private DataGroupExtendedSpy dataGroup;
 	private RecordStorageSpy recordStorage;
 
 	@BeforeMethod
@@ -48,8 +49,8 @@ public class OrganisationDifferentDomainDetectorTest {
 	}
 
 	private void createDefaultDataGroup() {
-		dataGroup = new DataGroupDomainSpy("organisation");
-		DataGroupDomainSpy recordInfo = new DataGroupDomainSpy("recordInfo");
+		dataGroup = new DataGroupExtendedSpy("organisation");
+		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
 		recordInfo.addChild(new DataAtomicSpy("id", "4567"));
 		recordInfo.addChild(new DataAtomicSpy("domain", "someDomain"));
 		dataGroup.addChild(recordInfo);
@@ -62,12 +63,19 @@ public class OrganisationDifferentDomainDetectorTest {
 
 	@Test
 	public void testNoParentNoPredecessor() {
-		functionality.useExtendedFunctionality(authToken, dataGroup);
-		DataGroupDomainSpy recordInfo = (DataGroupDomainSpy) dataGroup.totalReturnedDataGroups
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
+		DataGroupExtendedSpy recordInfo = (DataGroupExtendedSpy) dataGroup.totalReturnedDataGroups
 				.get(0);
 		assertEquals(recordInfo.requestedAtomicNameInDatas.get(0), "domain");
 		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(0), "parentOrganisation");
 		assertEquals(dataGroup.getAllGroupsUsedNameInDatas.get(1), "earlierOrganisation");
+	}
+
+	private ExtendedFunctionalityData createDefaultData(DataGroup dataGroup) {
+		ExtendedFunctionalityData data = new ExtendedFunctionalityData();
+		data.authToken = "someAuthToken";
+		data.dataGroup = dataGroup;
+		return data;
 	}
 
 	@Test
@@ -77,10 +85,10 @@ public class OrganisationDifferentDomainDetectorTest {
 
 		addOrganisationToReturnFromStorage("organisation_parent0", "someDomain");
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
-		DataGroupDomainSpy returnedParent = (DataGroupDomainSpy) dataGroup.totalReturnedDataGroups
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
+		DataGroupExtendedSpy returnedParent = (DataGroupExtendedSpy) dataGroup.totalReturnedDataGroups
 				.get(1);
-		DataGroupDomainSpy organisationLink = (DataGroupDomainSpy) returnedParent.totalReturnedDataGroups
+		DataGroupExtendedSpy organisationLink = (DataGroupExtendedSpy) returnedParent.totalReturnedDataGroups
 				.get(0);
 		assertEquals(organisationLink.requestedAtomicNameInDatas.get(0), "linkedRecordId");
 		assertEquals(recordStorage.readRecordTypes.get(0), "organisation");
@@ -88,8 +96,8 @@ public class OrganisationDifferentDomainDetectorTest {
 	}
 
 	private void addOrganisationToReturnFromStorage(String key, String domain) {
-		DataGroupDomainSpy parentToReturnFromStorage = new DataGroupDomainSpy("organisation");
-		DataGroupDomainSpy recordInfo = new DataGroupDomainSpy("recordInfo");
+		DataGroupExtendedSpy parentToReturnFromStorage = new DataGroupExtendedSpy("organisation");
+		DataGroupExtendedSpy recordInfo = new DataGroupExtendedSpy("recordInfo");
 		recordInfo.addChild(new DataAtomicSpy("domain", domain));
 		parentToReturnFromStorage.addChild(recordInfo);
 		recordStorage.returnOnRead.put(key, parentToReturnFromStorage);
@@ -121,9 +129,9 @@ public class OrganisationDifferentDomainDetectorTest {
 
 	public DataGroup createOrganisationLinkUsingNameInDataRepeatIdAndOrgId(String nameInData,
 			String repeatId, String parentId) {
-		DataGroupDomainSpy parentGroup = new DataGroupDomainSpy(nameInData);
+		DataGroupExtendedSpy parentGroup = new DataGroupExtendedSpy(nameInData);
 		parentGroup.setRepeatId(repeatId);
-		DataGroupDomainSpy organisationLink = new DataGroupDomainSpy("organisationLink");
+		DataGroupExtendedSpy organisationLink = new DataGroupExtendedSpy("organisationLink");
 		DataAtomicSpy linkedRecordId = new DataAtomicSpy("linkedRecordId", parentId);
 		organisationLink.addChild(linkedRecordId);
 		DataAtomicSpy linkedRecordType = new DataAtomicSpy("linkedRecordType", "organisation");
@@ -148,7 +156,7 @@ public class OrganisationDifferentDomainDetectorTest {
 		dataGroup.addChildren(parents);
 		addOrganisationToReturnFromStorage("organisation_parent0", "someOtherDomain");
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 	}
 
 	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
@@ -159,7 +167,7 @@ public class OrganisationDifferentDomainDetectorTest {
 		addOrganisationToReturnFromStorage("organisation_parent1", "someOtherDomain");
 		dataGroup.addChildren(parents);
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 	}
 
 	@Test
@@ -169,10 +177,10 @@ public class OrganisationDifferentDomainDetectorTest {
 
 		addOrganisationToReturnFromStorage("organisation_predecessor0", "someDomain");
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
-		DataGroupDomainSpy returnedPredecessor = (DataGroupDomainSpy) dataGroup.totalReturnedDataGroups
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
+		DataGroupExtendedSpy returnedPredecessor = (DataGroupExtendedSpy) dataGroup.totalReturnedDataGroups
 				.get(1);
-		DataGroupDomainSpy organisationLink = (DataGroupDomainSpy) returnedPredecessor.totalReturnedDataGroups
+		DataGroupExtendedSpy organisationLink = (DataGroupExtendedSpy) returnedPredecessor.totalReturnedDataGroups
 				.get(0);
 		assertEquals(organisationLink.requestedAtomicNameInDatas.get(0), "linkedRecordId");
 		assertEquals(recordStorage.readRecordTypes.get(0), "organisation");
@@ -186,7 +194,7 @@ public class OrganisationDifferentDomainDetectorTest {
 		dataGroup.addChildren(predecessors);
 		addOrganisationToReturnFromStorage("organisation_predecessor0", "someOtherDomain");
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 	}
 
 	@Test
@@ -199,19 +207,19 @@ public class OrganisationDifferentDomainDetectorTest {
 		addOrganisationToReturnFromStorage("organisation_parent0", "someDomain");
 		addOrganisationToReturnFromStorage("organisation_predecessor0", "someDomain");
 
-		functionality.useExtendedFunctionality(authToken, dataGroup);
+		functionality.useExtendedFunctionality(createDefaultData(dataGroup));
 		assertEquals(dataGroup.totalReturnedDataGroups.size(), 3);
-		DataGroupDomainSpy returnedParent = (DataGroupDomainSpy) dataGroup.totalReturnedDataGroups
+		DataGroupExtendedSpy returnedParent = (DataGroupExtendedSpy) dataGroup.totalReturnedDataGroups
 				.get(1);
 		assertCorrectOrganisationLink(returnedParent, "parent0", 0);
-		DataGroupDomainSpy returnedPredecessor = (DataGroupDomainSpy) dataGroup.totalReturnedDataGroups
+		DataGroupExtendedSpy returnedPredecessor = (DataGroupExtendedSpy) dataGroup.totalReturnedDataGroups
 				.get(2);
 		assertCorrectOrganisationLink(returnedPredecessor, "predecessor0", 1);
 	}
 
-	private void assertCorrectOrganisationLink(DataGroupDomainSpy returnedParent, String recordId,
+	private void assertCorrectOrganisationLink(DataGroupExtendedSpy returnedParent, String recordId,
 			int indexInStorage) {
-		DataGroupDomainSpy organisationLink = (DataGroupDomainSpy) returnedParent.totalReturnedDataGroups
+		DataGroupExtendedSpy organisationLink = (DataGroupExtendedSpy) returnedParent.totalReturnedDataGroups
 				.get(0);
 		assertEquals(organisationLink.requestedAtomicNameInDatas.get(0), "linkedRecordId");
 		assertEquals(recordStorage.readRecordTypes.get(0), "organisation");

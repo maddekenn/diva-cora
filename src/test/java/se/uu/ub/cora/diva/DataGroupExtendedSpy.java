@@ -21,13 +21,14 @@ package se.uu.ub.cora.diva;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 
 import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataAttribute;
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
 
-public class DataGroupDomainSpy implements DataGroup {
+public class DataGroupExtendedSpy implements DataGroup {
 
 	public String nameInData;
 	public List<DataElement> children = new ArrayList<>();
@@ -38,21 +39,22 @@ public class DataGroupDomainSpy implements DataGroup {
 	public List<String> returnContainsTrueNameInDatas = new ArrayList<>();
 	public List<String> requestedAtomicNameInDatas = new ArrayList<>();
 	public List<DataGroup> totalReturnedDataGroups = new ArrayList<>();
+	private String repeatId;
+	public List<String> nameInDatasRequestedFromContains = new ArrayList<>();
 
-	public DataGroupDomainSpy(String nameInData) {
+	public DataGroupExtendedSpy(String nameInData) {
 		this.nameInData = nameInData;
 	}
 
 	@Override
 	public void setRepeatId(String repeatId) {
-		// TODO Auto-generated method stub
+		this.repeatId = repeatId;
 
 	}
 
 	@Override
 	public String getRepeatId() {
-		// TODO Auto-generated method stub
-		return null;
+		return repeatId;
 	}
 
 	@Override
@@ -68,6 +70,7 @@ public class DataGroupDomainSpy implements DataGroup {
 
 	@Override
 	public boolean containsChildWithNameInData(String nameInData) {
+		nameInDatasRequestedFromContains.add(nameInData);
 		for (DataElement dataElement : children) {
 			if (nameInData.equals(dataElement.getNameInData())) {
 				return true;
@@ -85,13 +88,18 @@ public class DataGroupDomainSpy implements DataGroup {
 
 	@Override
 	public List<DataElement> getChildren() {
-		// TODO Auto-generated method stub
-		return null;
+		return children;
 	}
 
 	@Override
 	public List<DataElement> getAllChildrenWithNameInData(String nameInData) {
-		return null;
+		List<DataElement> currentListToReturn = new ArrayList<>();
+		for (DataElement dataElement : children) {
+			if (nameInData.equals(dataElement.getNameInData())) {
+				currentListToReturn.add(dataElement);
+			}
+		}
+		return currentListToReturn;
 	}
 
 	@Override
@@ -103,7 +111,11 @@ public class DataGroupDomainSpy implements DataGroup {
 
 	@Override
 	public DataElement getFirstChildWithNameInData(String nameInData) {
-		// TODO Auto-generated method stub
+		for (DataElement dataElement : children) {
+			if (nameInData.equals(dataElement.getNameInData())) {
+				return dataElement;
+			}
+		}
 		return null;
 	}
 
@@ -122,8 +134,14 @@ public class DataGroupDomainSpy implements DataGroup {
 
 	@Override
 	public List<DataAtomic> getAllDataAtomicsWithNameInData(String childNameInData) {
-		// TODO Auto-generated method stub
-		return null;
+		List<DataAtomic> currentListToReturn = new ArrayList<>();
+		for (DataElement dataElement : children) {
+			if (childNameInData.equals(dataElement.getNameInData())
+					&& dataElement instanceof DataAtomic) {
+				currentListToReturn.add((DataAtomic) dataElement);
+			}
+		}
+		return currentListToReturn;
 	}
 
 	@Override
@@ -171,14 +189,28 @@ public class DataGroupDomainSpy implements DataGroup {
 
 	@Override
 	public boolean removeFirstChildWithNameInData(String childNameInData) {
-		// TODO Auto-generated method stub
+		for (DataElement dataElement : children) {
+			if (childNameInData.equals(dataElement.getNameInData())) {
+				children.remove(dataElement);
+				return true;
+			}
+		}
 		return false;
 	}
 
 	@Override
 	public boolean removeAllChildrenWithNameInData(String childNameInData) {
 		removeAllGroupsUsedNameInDatas.add(childNameInData);
-		return false;
+		return getChildren().removeIf(filterByNameInData(childNameInData));
+		// return false;
+	}
+
+	private Predicate<DataElement> filterByNameInData(String childNameInData) {
+		return dataElement -> dataElementsNameInDataIs(dataElement, childNameInData);
+	}
+
+	private boolean dataElementsNameInDataIs(DataElement dataElement, String childNameInData) {
+		return dataElement.getNameInData().equals(childNameInData);
 	}
 
 	@Override
@@ -190,7 +222,13 @@ public class DataGroupDomainSpy implements DataGroup {
 
 	@Override
 	public DataAtomic getFirstDataAtomicWithNameInData(String childNameInData) {
-		// TODO Auto-generated method stub
+		for (DataElement dataElement : children) {
+			if (childNameInData.equals(dataElement.getNameInData())) {
+				if (dataElement instanceof DataAtomic) {
+					return ((DataAtomic) dataElement);
+				}
+			}
+		}
 		return null;
 	}
 

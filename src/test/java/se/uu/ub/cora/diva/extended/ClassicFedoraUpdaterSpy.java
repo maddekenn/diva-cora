@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,44 +18,21 @@
  */
 package se.uu.ub.cora.diva.extended;
 
-import se.uu.ub.cora.data.DataAtomic;
+import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdater;
 
-public class DataAtomicSpy implements DataAtomic {
+public class ClassicFedoraUpdaterSpy implements ClassicFedoraUpdater {
 
-	public String nameInData;
-	public String value;
-	private String repeatId;
-
-	public DataAtomicSpy(String nameInData, String value) {
-		this.nameInData = nameInData;
-		this.value = value;
-	}
-
-	public DataAtomicSpy(String nameInData, String value, String repeatId) {
-		this.nameInData = nameInData;
-		this.value = value;
-		this.repeatId = repeatId;
-	}
+	public String recordType;
+	public String recordId;
+	public DataGroup dataGroup;
 
 	@Override
-	public void setRepeatId(String repeatId) {
-		this.repeatId = repeatId;
+	public void updateInFedora(String recordType, String recordId, DataGroup dataGroup) {
+		this.recordType = recordType;
+		this.recordId = recordId;
+		this.dataGroup = dataGroup;
 
-	}
-
-	@Override
-	public String getRepeatId() {
-		return repeatId;
-	}
-
-	@Override
-	public String getNameInData() {
-		return nameInData;
-	}
-
-	@Override
-	public String getValue() {
-		return value;
 	}
 
 }

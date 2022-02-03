@@ -24,6 +24,7 @@ import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.data.DataRecord;
 import se.uu.ub.cora.spider.dependency.SpiderInstanceProvider;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
+import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.spider.record.RecordCreator;
 import se.uu.ub.cora.spider.record.RecordReader;
 
@@ -32,9 +33,9 @@ public class PersonDomainPartIndexer implements ExtendedFunctionality {
 	private static final String RECORD_TYPE = "recordType";
 
 	@Override
-	public void useExtendedFunctionality(String authToken, DataGroup dataGroup) {
-		if (workOrderIsForPerson(dataGroup)) {
-			createWorkOrderForDomainPart(authToken, dataGroup);
+	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
+		if (workOrderIsForPerson(data.dataGroup)) {
+			createWorkOrderForDomainPart(data.authToken, data.dataGroup);
 		}
 	}
 

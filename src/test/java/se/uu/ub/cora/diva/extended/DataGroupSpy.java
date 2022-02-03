@@ -42,6 +42,7 @@ public class DataGroupSpy implements DataGroup {
 	public List<String> requestedAtomicNameInDatas = new ArrayList<>();
 	public String recordType;
 	public String recordId;
+	private String repeatId;
 
 	public DataGroupSpy(String nameInData) {
 		this.nameInData = nameInData;
@@ -55,14 +56,13 @@ public class DataGroupSpy implements DataGroup {
 
 	@Override
 	public void setRepeatId(String repeatId) {
-		// TODO Auto-generated method stub
+		this.repeatId = repeatId;
 
 	}
 
 	@Override
 	public String getRepeatId() {
-		// TODO Auto-generated method stub
-		return null;
+		return repeatId;
 	}
 
 	@Override
@@ -200,7 +200,13 @@ public class DataGroupSpy implements DataGroup {
 
 	@Override
 	public DataAtomic getFirstDataAtomicWithNameInData(String childNameInData) {
-		// TODO Auto-generated method stub
+		for (DataElement dataElement : children) {
+			if (childNameInData.equals(dataElement.getNameInData())) {
+				if (dataElement instanceof DataAtomic) {
+					return ((DataAtomic) dataElement);
+				}
+			}
+		}
 		return null;
 	}
 
