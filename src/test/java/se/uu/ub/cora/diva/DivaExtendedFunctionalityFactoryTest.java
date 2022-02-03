@@ -276,6 +276,7 @@ public class DivaExtendedFunctionalityFactoryTest {
 				.getClassicIndexer();
 		assertEquals(classicIndexer.getBaseUrl(), "classicAuthorityIndexUrl");
 		assertEquals(classicSynchronizer.getRecordType(), recordType);
+		assertSame(classicSynchronizer.getRecordStorage(), recordStorageProvider.recordStorage);
 	}
 
 	private void assertCorrectFedoraUpdaterFactory(
@@ -347,8 +348,8 @@ public class DivaExtendedFunctionalityFactoryTest {
 		divaExtendedFunctionality.onlyForTestSetSqlDatabaseFactory(databaseFactorySpy);
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
 				.factor(CREATE_BEFORE_RETURN, "personDomainPart");
-		// assertEquals(functionalities.size(), 2);
-		assertEquals(functionalities.size(), 1);
+		assertEquals(functionalities.size(), 2);
+		// assertEquals(functionalities.size(), 1);
 
 		PersonUpdaterAfterDomainPartCreate personUpdater = (PersonUpdaterAfterDomainPartCreate) functionalities
 				.get(0);
@@ -358,10 +359,9 @@ public class DivaExtendedFunctionalityFactoryTest {
 		assertSame(personUpdater.getTermCollector(), spiderDependencyProvider.termCollector);
 		assertSame(personUpdater.getLinkCollector(), spiderDependencyProvider.linkCollector);
 
-		// ClassicPersonSynchronizer classicSynchronizer = (ClassicPersonSynchronizer)
-		// functionalities
-		// .get(1);
-		// assertCorrectlyCreatedClassicSynchronizer(classicSynchronizer, "personDomainPart");
+		ClassicPersonSynchronizer classicSynchronizer = (ClassicPersonSynchronizer) functionalities
+				.get(1);
+		assertCorrectlyCreatedClassicSynchronizer(classicSynchronizer, "personDomainPart");
 
 	}
 
@@ -383,8 +383,8 @@ public class DivaExtendedFunctionalityFactoryTest {
 	public void factorPersonDomainPartUpdateAfterDomainPartDelete() {
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality.factor(DELETE_AFTER,
 				"personDomainPart");
-		// assertEquals(functionalities.size(), 2);
-		assertEquals(functionalities.size(), 1);
+		assertEquals(functionalities.size(), 2);
+		// assertEquals(functionalities.size(), 1);
 		PersonUpdaterAfterDomainPartDelete functionality = (PersonUpdaterAfterDomainPartDelete) functionalities
 				.get(0);
 		assertSame(functionality.getRecordStorage(), recordStorageProvider.recordStorage);

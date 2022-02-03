@@ -25,6 +25,7 @@ import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdater;
 import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
+import se.uu.ub.cora.storage.RecordStorage;
 
 public class ClassicPersonSynchronizer implements ExtendedFunctionality {
 
@@ -32,18 +33,25 @@ public class ClassicPersonSynchronizer implements ExtendedFunctionality {
 	private ClassicFedoraUpdaterFactory classicFedoraUpdaterFactory;
 	private ClassicIndexerFactory classicIndexerFactory;
 	private String recordType;
+	private RecordStorage recordStorage;
 
 	public ClassicPersonSynchronizer(ClassicFedoraUpdaterFactory classicFedoraUpdaterFactory,
-			ClassicIndexerFactory classicIndexer, String recordType) {
+			ClassicIndexerFactory classicIndexer, String recordType, RecordStorage recordStorage) {
 		this.classicFedoraUpdaterFactory = classicFedoraUpdaterFactory;
 		this.classicIndexerFactory = classicIndexer;
 		this.recordType = recordType;
+		this.recordStorage = recordStorage;
 	}
 
 	@Override
 	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
 		String recordId = extractRecordId(data.dataGroup);
-		updateInClassic(data.dataGroup, recordId);
+		DataGroup dataGroup = data.dataGroup;
+
+		if ("personDomainPart".equals(data.recordType)) {
+			dataGroup = recordStorage.read(PERSON, recordId);
+		}
+		updateInClassic(dataGroup, recordId);
 		indexInClassic(recordId);
 	}
 
@@ -80,6 +88,10 @@ public class ClassicPersonSynchronizer implements ExtendedFunctionality {
 
 	public String getRecordType() {
 		return recordType;
+	}
+
+	public RecordStorage getRecordStorage() {
+		return recordStorage;
 	}
 
 }

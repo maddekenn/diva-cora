@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.DataGroupExtendedSpy;
+import se.uu.ub.cora.diva.RecordStorageSpy;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 
 public class ClassicPersonSynchronizerTest {
@@ -33,14 +34,16 @@ public class ClassicPersonSynchronizerTest {
 	private ClassicFedoraUpdaterFactorySpy classicFedoraUpdaterFactory;
 	private ClassicIndexerFactorySpy classicIndexerFactory;
 	private ClassicPersonSynchronizer functionality;
+	private RecordStorageSpy recordStorage;
 
 	@BeforeMethod
 	public void setUp() {
+		recordStorage = new RecordStorageSpy();
 		classicFedoraUpdaterFactory = new ClassicFedoraUpdaterFactorySpy();
 		classicIndexerFactory = new ClassicIndexerFactorySpy();
 		String recordType = "person";
 		functionality = new ClassicPersonSynchronizer(classicFedoraUpdaterFactory,
-				classicIndexerFactory, recordType);
+				classicIndexerFactory, recordType, recordStorage);
 
 	}
 
@@ -48,6 +51,7 @@ public class ClassicPersonSynchronizerTest {
 	public void testInit() {
 		assertSame(functionality.getClassicFedoraUpdaterFactory(), classicFedoraUpdaterFactory);
 		assertSame(functionality.getClassicIndexer(), classicIndexerFactory);
+		assertSame(functionality.getRecordStorage(), recordStorage);
 	}
 
 	@Test
@@ -58,6 +62,7 @@ public class ClassicPersonSynchronizerTest {
 
 		assertCorrectCallToUpdater(person);
 		assertCorrectCallToIndexer();
+		assertEquals(recordStorage.readRecordTypes.size(), 0);
 	}
 
 	private ExtendedFunctionalityData createDefaultData(DataGroup person) {
@@ -67,7 +72,7 @@ public class ClassicPersonSynchronizerTest {
 		return data;
 	}
 
-	private void assertCorrectCallToUpdater(DataGroupExtendedSpy person) {
+	private void assertCorrectCallToUpdater(DataGroup person) {
 		assertEquals(classicFedoraUpdaterFactory.recordType, "person");
 		ClassicFedoraUpdaterSpy classicUpdater = classicFedoraUpdaterFactory.factoredUpdater;
 		assertEquals(classicUpdater.recordType, "person");
@@ -92,14 +97,17 @@ public class ClassicPersonSynchronizerTest {
 	@Test
 	public void testUseExtendedFunctionalityForPersonDomainPart() {
 		DataGroupExtendedSpy personDomainPart = createPersonDomainPart();
-
-		String recordType = "personDomainPart";
+		ExtendedFunctionalityData defaultData = createDefaultData(personDomainPart);
+		defaultData.recordType = "personDomainPart";
 		functionality = new ClassicPersonSynchronizer(classicFedoraUpdaterFactory,
-				classicIndexerFactory, recordType);
-		functionality.useExtendedFunctionality(createDefaultData(personDomainPart));
+				classicIndexerFactory, "personDomainPart", recordStorage);
+		functionality.useExtendedFunctionality(defaultData);
 
-		assertCorrectCallToUpdater(personDomainPart);
 		assertCorrectCallToIndexer();
+		assertEquals(recordStorage.readRecordTypes.size(), 1);
+		assertEquals(recordStorage.readRecordTypes.get(0), "person");
+		assertEquals(recordStorage.readRecordIds.get(0), "personId:235");
+		assertCorrectCallToUpdater(recordStorage.returnedDataGroups.get(0));
 	}
 
 	private DataGroupExtendedSpy createPersonDomainPart() {
