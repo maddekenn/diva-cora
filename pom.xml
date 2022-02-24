@@ -39,16 +39,16 @@
 		<coralog4j.version>2.7.0</coralog4j.version>
 		<json.version>3.1.0</json.version>
 		<spider.version>5.5.0</spider.version>
-		<therest.version>7.4.0</therest.version>
+		<therest.version>7.6.0</therest.version>
 		<beefeater.version>3.6.0</beefeater.version>
-		<bookkeeper.version>6.4.0</bookkeeper.version>
+		<bookkeeper.version>6.5.0</bookkeeper.version>
 		<basicdata.version>3.5.0</basicdata.version>
 		<storage.version>5.2.0</storage.version>
 		<basicstorage.version>5.3.0</basicstorage.version>
 		<gatekeeper.version>3.10.0</gatekeeper.version>
 		<gatekeeperclient.version>3.13.0</gatekeeperclient.version>
 		<divamixedstorage.version>4.11.0</divamixedstorage.version>
-		<solrsearch.version>4.4.0</solrsearch.version>
+		<solrsearch.version>4.5.0</solrsearch.version>
 		<metacreator.version>4.6.0</metacreator.version>
 		<httphandler.version>2.4.0</httphandler.version>
 		<apptokenstorage.version>2.4.0</apptokenstorage.version>
