@@ -18,7 +18,6 @@
  */
 package se.uu.ub.cora.diva.extended;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import se.uu.ub.cora.data.DataAtomic;
@@ -33,36 +32,28 @@ public class PersonOrcidValidator implements ExtendedFunctionality {
 
 	@Override
 	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
-		DataGroup previousRecord = data.previouslyStoredTopDataGroup;
-		List<String> previousOrcidValues = extractPreviousOrcids(previousRecord);
+		List<String> previousOrcidValues = extractOrcids(data.previouslyStoredTopDataGroup);
 
 		DataGroup updatedDataGroup = data.dataGroup;
-		List<String> currentOrcidValues = extractCurrentOrcids(updatedDataGroup);
+		List<String> currentOrcidValues = extractOrcids(updatedDataGroup);
 
+		ensureNoOrcidsHasBeenDeleted(updatedDataGroup, previousOrcidValues, currentOrcidValues);
+	}
+
+	private List<String> extractOrcids(DataGroup previousRecord) {
+		List<DataAtomic> previousOrcids = previousRecord.getAllDataAtomicsWithNameInData(ORCID_ID);
+		return ExtendedFunctionalityUtils.getDataAtomicValuesAsList(previousOrcids);
+	}
+
+	private void ensureNoOrcidsHasBeenDeleted(DataGroup updatedDataGroup,
+			List<String> previousOrcidValues, List<String> currentOrcidValues) {
 		for (String previousOrcid : previousOrcidValues) {
 			if (!currentOrcidValues.contains(previousOrcid)) {
 				updatedDataGroup.addChild(DataAtomicProvider
 						.getDataAtomicUsingNameInDataAndValue(ORCID_ID, previousOrcid));
 			}
 		}
-	}
-
-	private List<String> extractCurrentOrcids(DataGroup updatedDataGroup) {
-		List<DataAtomic> currentOrcids = updatedDataGroup.getAllDataAtomicsWithNameInData(ORCID_ID);
-		return getValuesAsList(currentOrcids);
-	}
-
-	private List<String> extractPreviousOrcids(DataGroup previousRecord) {
-		List<DataAtomic> previousOrcids = previousRecord.getAllDataAtomicsWithNameInData(ORCID_ID);
-		return getValuesAsList(previousOrcids);
-	}
-
-	private List<String> getValuesAsList(List<DataAtomic> orcids) {
-		List<String> orcidValues = new ArrayList<>();
-		for (DataAtomic dataAtomic : orcids) {
-			orcidValues.add(dataAtomic.getValue());
-		}
-		return orcidValues;
+		ExtendedFunctionalityUtils.setNewRepeatIdsToEnsureUnique(updatedDataGroup, ORCID_ID);
 	}
 
 }
