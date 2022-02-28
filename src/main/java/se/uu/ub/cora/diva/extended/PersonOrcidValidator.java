@@ -46,14 +46,18 @@ public class PersonOrcidValidator implements ExtendedFunctionality {
 	}
 
 	private void ensureNoOrcidsHasBeenDeleted(DataGroup updatedDataGroup,
-			List<String> previousOrcidValues, List<String> currentOrcidValues) {
-		for (String previousOrcid : previousOrcidValues) {
-			if (!currentOrcidValues.contains(previousOrcid)) {
+			List<String> previousValues, List<String> currentValues) {
+		for (String previousValue : previousValues) {
+			if (valueHasBeenRemoved(currentValues, previousValue)) {
 				updatedDataGroup.addChild(DataAtomicProvider
-						.getDataAtomicUsingNameInDataAndValue(ORCID_ID, previousOrcid));
+						.getDataAtomicUsingNameInDataAndValue(ORCID_ID, previousValue));
 			}
 		}
 		ExtendedFunctionalityUtils.setNewRepeatIdsToEnsureUnique(updatedDataGroup, ORCID_ID);
+	}
+
+	private boolean valueHasBeenRemoved(List<String> currentOrcidValues, String previousOrcid) {
+		return !currentOrcidValues.contains(previousOrcid);
 	}
 
 }

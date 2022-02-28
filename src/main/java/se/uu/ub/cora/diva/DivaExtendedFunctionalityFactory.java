@@ -39,6 +39,7 @@ import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.extended.PersonDomainPartFromPersonUpdater;
 import se.uu.ub.cora.diva.extended.PersonDomainPartPersonSynchronizer;
 import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
+import se.uu.ub.cora.diva.extended.PersonOrcidValidator;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartCreate;
 import se.uu.ub.cora.diva.extended.PersonUpdaterAfterDomainPartDelete;
 import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
@@ -89,6 +90,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		createContext(SUB_ORGANISATION);
 		createContext(TOP_ORGANISATION);
 		createContext(ROOT_ORGANISATION);
+		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_STORE, PERSON, 0));
 		contexts.add(new ExtendedFunctionalityContext(UPDATE_AFTER_STORE, PERSON, 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_AFTER_METADATA_VALIDATION,
 				PERSON_DOMAIN_PART, 0));
@@ -96,6 +98,7 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		contexts.add(new ExtendedFunctionalityContext(DELETE_AFTER, PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_METADATA_VALIDATION,
 				PERSON_DOMAIN_PART, 0));
+		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_STORE, PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_METADATA_VALIDATION,
 				PERSON_DOMAIN_PART, 0));
 	}
@@ -118,10 +121,15 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			checkPositionForOrganisation(position, functionalities);
 		} else if (PERSON_DOMAIN_PART.equals(recordType)) {
 			checkPositionForDomainPart(position, functionalities);
-		} else if (UPDATE_AFTER_STORE == position && PERSON.equals(recordType)) {
-			addFunctionalityForPersonAfterStore(functionalities);
+		} else if (PERSON.equals(recordType)) {
+			checkPositionForPerson(position, functionalities);
 		}
 		return functionalities;
+	}
+
+	private boolean isOrganisation(String recordType) {
+		return SUB_ORGANISATION.equals(recordType) || ROOT_ORGANISATION.equals(recordType)
+				|| TOP_ORGANISATION.equals(recordType);
 	}
 
 	private void checkPositionForOrganisation(ExtendedFunctionalityPosition position,
@@ -131,6 +139,37 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		} else if (UPDATE_AFTER_STORE == position) {
 			addFunctionalityForOrganisationsAfterStore(functionalities);
 		}
+	}
+
+	private void addFunctionalityForBeforeStore(List<ExtendedFunctionality> functionalities) {
+		addDuplicateLinksRemover(functionalities);
+		addDisallowedDependencyDetector(functionalities);
+		addDifferentDomainDetector(functionalities);
+	}
+
+	private void addDuplicateLinksRemover(List<ExtendedFunctionality> functionalities) {
+		functionalities.add(new OrganisationDuplicateLinksRemover());
+	}
+
+	private void addDifferentDomainDetector(List<ExtendedFunctionality> functionalities) {
+		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
+		functionalities.add(new OrganisationDifferentDomainDetector(recordStorage));
+	}
+
+	private void addDisallowedDependencyDetector(List<ExtendedFunctionality> functionalities) {
+		DatabaseFacade dbFacade = databaseFactory.factorDatabaseFacade();
+		functionalities.add(new OrganisationDisallowedDependencyDetector(dbFacade));
+	}
+
+	private void addFunctionalityForOrganisationsAfterStore(
+			List<ExtendedFunctionality> functionalities) {
+		ClassicOrganisationReloader classicOrganisationReloader = createClassicReloader();
+		functionalities.add(classicOrganisationReloader);
+	}
+
+	private ClassicOrganisationReloader createClassicReloader() {
+		HttpHandlerFactory factory = new HttpHandlerFactoryImp();
+		return ClassicOrganisationReloader.usingHttpHandlerFactoryAndUrl(factory, url);
 	}
 
 	private void checkPositionForDomainPart(ExtendedFunctionalityPosition position,
@@ -150,18 +189,20 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		}
 	}
 
-	private boolean isOrganisation(String recordType) {
-		return SUB_ORGANISATION.equals(recordType) || ROOT_ORGANISATION.equals(recordType)
-				|| TOP_ORGANISATION.equals(recordType);
+	private void addFunctionalityForCreateAfterMetadataValidation(
+			List<ExtendedFunctionality> functionalities) {
+		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
+		functionalities.add(new PersonDomainPartPersonSynchronizer(recordStorage));
 	}
 
-	private void addFunctionalityForPersonAfterStore(List<ExtendedFunctionality> functionalities) {
+	private void addFunctionalityForCreateBeforeReturn(
+			List<ExtendedFunctionality> functionalities) {
 		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
 		DataGroupTermCollector termCollector = dependencyProvider.getDataGroupTermCollector();
 		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
-		functionalities.add(
-				new PersonDomainPartFromPersonUpdater(recordStorage, termCollector, linkCollector));
-		addClassicSynchronizer(functionalities, recordStorage, PERSON);
+		functionalities.add(new PersonUpdaterAfterDomainPartCreate(recordStorage, termCollector,
+				linkCollector));
+		addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
 	}
 
 	private void addClassicSynchronizer(List<ExtendedFunctionality> functionalities,
@@ -203,6 +244,15 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		return new ClassicIndexerFactoryImp(classicAuthorityIndexUrl);
 	}
 
+	private void addFunctionalityForDeleteAfter(List<ExtendedFunctionality> functionalities) {
+		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
+		DataGroupTermCollector termCollector = dependencyProvider.getDataGroupTermCollector();
+		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
+		functionalities.add(new PersonUpdaterAfterDomainPartDelete(recordStorage, termCollector,
+				linkCollector));
+		addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
+	}
+
 	private String getAuthorityIndexUrlOrEmptyIfMissing() {
 		try {
 			return dependencyProvider.getInitInfoValueUsingKey("authorityIndexUrl");
@@ -212,60 +262,22 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		return "";
 	}
 
-	private void addFunctionalityForBeforeStore(List<ExtendedFunctionality> functionalities) {
-		addDuplicateLinksRemover(functionalities);
-		addDisallowedDependencyDetector(functionalities);
-		addDifferentDomainDetector(functionalities);
-	}
-
-	private void addDuplicateLinksRemover(List<ExtendedFunctionality> functionalities) {
-		functionalities.add(new OrganisationDuplicateLinksRemover());
-	}
-
-	private void addDifferentDomainDetector(List<ExtendedFunctionality> functionalities) {
-		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
-		functionalities.add(new OrganisationDifferentDomainDetector(recordStorage));
-	}
-
-	private void addDisallowedDependencyDetector(List<ExtendedFunctionality> functionalities) {
-		DatabaseFacade dbFacade = databaseFactory.factorDatabaseFacade();
-		functionalities.add(new OrganisationDisallowedDependencyDetector(dbFacade));
-	}
-
-	private void addFunctionalityForOrganisationsAfterStore(
+	private void checkPositionForPerson(ExtendedFunctionalityPosition position,
 			List<ExtendedFunctionality> functionalities) {
-		ClassicOrganisationReloader classicOrganisationReloader = createClassicReloader();
-		functionalities.add(classicOrganisationReloader);
+		if (UPDATE_AFTER_STORE == position) {
+			addFunctionalityForPersonAfterStore(functionalities);
+		} else if (UPDATE_BEFORE_STORE == position) {
+			functionalities.add(new PersonOrcidValidator());
+		}
 	}
 
-	private ClassicOrganisationReloader createClassicReloader() {
-		HttpHandlerFactory factory = new HttpHandlerFactoryImp();
-		return ClassicOrganisationReloader.usingHttpHandlerFactoryAndUrl(factory, url);
-	}
-
-	private void addFunctionalityForCreateAfterMetadataValidation(
-			List<ExtendedFunctionality> functionalities) {
-		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
-		functionalities.add(new PersonDomainPartPersonSynchronizer(recordStorage));
-	}
-
-	private void addFunctionalityForCreateBeforeReturn(
-			List<ExtendedFunctionality> functionalities) {
+	private void addFunctionalityForPersonAfterStore(List<ExtendedFunctionality> functionalities) {
 		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
 		DataGroupTermCollector termCollector = dependencyProvider.getDataGroupTermCollector();
 		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
-		functionalities.add(new PersonUpdaterAfterDomainPartCreate(recordStorage, termCollector,
-				linkCollector));
-		addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
-	}
-
-	private void addFunctionalityForDeleteAfter(List<ExtendedFunctionality> functionalities) {
-		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
-		DataGroupTermCollector termCollector = dependencyProvider.getDataGroupTermCollector();
-		DataRecordLinkCollector linkCollector = dependencyProvider.getDataRecordLinkCollector();
-		functionalities.add(new PersonUpdaterAfterDomainPartDelete(recordStorage, termCollector,
-				linkCollector));
-		addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
+		functionalities.add(
+				new PersonDomainPartFromPersonUpdater(recordStorage, termCollector, linkCollector));
+		addClassicSynchronizer(functionalities, recordStorage, PERSON);
 	}
 
 	public SqlDatabaseFactory onlyForTestGetSqlDatabaseFactory() {
