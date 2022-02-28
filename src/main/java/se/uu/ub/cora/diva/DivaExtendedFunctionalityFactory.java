@@ -37,6 +37,7 @@ import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.extended.PersonDomainPartFromPersonUpdater;
+import se.uu.ub.cora.diva.extended.PersonDomainPartLocalIdValidator;
 import se.uu.ub.cora.diva.extended.PersonDomainPartPersonSynchronizer;
 import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
 import se.uu.ub.cora.diva.extended.PersonOrcidValidator;
@@ -98,7 +99,6 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		contexts.add(new ExtendedFunctionalityContext(DELETE_AFTER, PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_METADATA_VALIDATION,
 				PERSON_DOMAIN_PART, 0));
-		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_STORE, PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_METADATA_VALIDATION,
 				PERSON_DOMAIN_PART, 0));
 	}
@@ -183,8 +183,10 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		} else if (UPDATE_AFTER_STORE == position) {
 			RecordStorage recordStorage = dependencyProvider.getRecordStorage();
 			addClassicSynchronizer(functionalities, recordStorage, PERSON_DOMAIN_PART);
-		} else if (UPDATE_BEFORE_METADATA_VALIDATION == position
-				|| CREATE_BEFORE_METADATA_VALIDATION == position) {
+		} else if (UPDATE_BEFORE_METADATA_VALIDATION == position) {
+			functionalities.add(new PersonDomainPartValidator());
+			functionalities.add(new PersonDomainPartLocalIdValidator());
+		} else if (CREATE_BEFORE_METADATA_VALIDATION == position) {
 			functionalities.add(new PersonDomainPartValidator());
 		}
 	}
