@@ -130,7 +130,7 @@ public class PersonUpdaterAfterDomainPartDelete implements ExtendedFunctionality
 		setUpdatedBy(updated, user);
 		setTsUpdated(updated);
 		recordInfo.addChild(updated);
-		setNewRepeatIdsToEnsureUnique(recordInfo);
+		ExtendedFunctionalityUtils.setNewRepeatIdsToEnsureUnique(recordInfo, "updated");
 	}
 
 	private void setUpdatedBy(DataGroup updated, User user) {
@@ -160,14 +160,6 @@ public class PersonUpdaterAfterDomainPartDelete implements ExtendedFunctionality
 	protected String formatInstantKeepingTrailingZeros(Instant instant) {
 		DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendInstant(6).toFormatter();
 		return formatter.format(instant);
-	}
-
-	private void setNewRepeatIdsToEnsureUnique(DataGroup recordInfo) {
-		int i = 0;
-		for (DataGroup updatedGroup : recordInfo.getAllGroupsWithNameInData("updated")) {
-			updatedGroup.setRepeatId(String.valueOf(i));
-			i++;
-		}
 	}
 
 	private String getMetadataId() {

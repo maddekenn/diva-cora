@@ -42,7 +42,6 @@ public class OrganisationDifferentDomainDetector implements ExtendedFunctionalit
 		String domain = recordInfo.getFirstAtomicValueWithNameInData("domain");
 		List<DataGroup> combinedList = getListOfParentsAndPredecessors(dataGroup);
 		checkLinksAndThrowErrorIfDifferentDomain(domain, combinedList);
-
 	}
 
 	private List<DataGroup> getListOfParentsAndPredecessors(DataGroup dataGroup) {

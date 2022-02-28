@@ -78,16 +78,7 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 				.getDataGroupAsLinkUsingNameInDataTypeAndId(PERSON_DOMAIN_PART, PERSON_DOMAIN_PART,
 						recordId);
 		readPerson.addChild(personDomainPartLink);
-		setNewRepeatIdForRepeatedDataElementsToEnsureUnique(
-				readPerson.getAllGroupsWithNameInData(PERSON_DOMAIN_PART));
-	}
-
-	private void setNewRepeatIdForRepeatedDataElementsToEnsureUnique(List<DataGroup> dataGroups) {
-		int counter = 0;
-		for (DataGroup repeatedDataGroup : dataGroups) {
-			repeatedDataGroup.setRepeatId(String.valueOf(counter));
-			counter++;
-		}
+		ExtendedFunctionalityUtils.setNewRepeatIdsToEnsureUnique(readPerson, PERSON_DOMAIN_PART);
 	}
 
 	private void addInfoFromDomainPartToPerson(DataGroup dataGroup, DataGroup readPerson,
@@ -96,8 +87,7 @@ public class PersonUpdaterAfterDomainPartCreate implements ExtendedFunctionality
 
 		DataGroup personRecordInfo = readPerson.getFirstGroupWithNameInData(RECORD_INFO);
 		personRecordInfo.addChild(domainPartUpdated);
-		setNewRepeatIdForRepeatedDataElementsToEnsureUnique(
-				personRecordInfo.getAllGroupsWithNameInData("updated"));
+		ExtendedFunctionalityUtils.setNewRepeatIdsToEnsureUnique(personRecordInfo, "updated");
 
 		possiblyAddDomainToPerson(recordId, personRecordInfo);
 	}
