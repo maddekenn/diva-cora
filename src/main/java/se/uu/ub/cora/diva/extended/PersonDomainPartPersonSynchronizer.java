@@ -75,7 +75,6 @@ public class PersonDomainPartPersonSynchronizer implements ExtendedFunctionality
 	private DataGroup tryToReadPersonThrowErrorIfNotExists(String personIdPartOfId) {
 		try {
 			return recordStorage.read("person", personIdPartOfId);
-
 		} catch (RecordNotFoundException exception) {
 			throw new DataException("No person exists with record id " + personIdPartOfId
 					+ ". PersonDomainPart was not created. " + exception.getMessage());
