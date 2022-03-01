@@ -41,7 +41,7 @@ public class ExtendedFunctionalityUtils {
 	}
 
 	public static List<String> getDataAtomicValuesAsList(List<DataAtomic> repeatableDataAtomics) {
-		List<String> dataAtomicValues = new ArrayList<>();
+		List<String> dataAtomicValues = new ArrayList<>(repeatableDataAtomics.size());
 		for (DataAtomic dataAtomic : repeatableDataAtomics) {
 			dataAtomicValues.add(dataAtomic.getValue());
 		}
