@@ -260,8 +260,8 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			return dependencyProvider.getInitInfoValueUsingKey("authorityIndexUrl");
 		} catch (SpiderInitializationException e) {
 			// do nothing
+			return "";
 		}
-		return "";
 	}
 
 	private void checkPositionForPerson(ExtendedFunctionalityPosition position,
