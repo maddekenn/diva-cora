@@ -26,6 +26,7 @@ import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPo
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_AFTER;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_BEFORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION;
@@ -45,6 +46,7 @@ import se.uu.ub.cora.diva.extended.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDisallowedDependencyDetector;
 import se.uu.ub.cora.diva.extended.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.extended.PersonDomainPartFromPersonUpdater;
+import se.uu.ub.cora.diva.extended.PersonDomainPartLocalIdDeletePreventer;
 import se.uu.ub.cora.diva.extended.PersonDomainPartLocalIdValidator;
 import se.uu.ub.cora.diva.extended.PersonDomainPartPersonSynchronizer;
 import se.uu.ub.cora.diva.extended.PersonDomainPartValidator;
@@ -102,31 +104,35 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void testInit() {
-		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 13);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_STORE, "subOrganisation",
+		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 14);
+
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_BEFORE_STORE,
+				"subOrganisation", 0);
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_AFTER_STORE,
+				"subOrganisation", 0);
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_BEFORE_STORE,
+				"topOrganisation", 0);
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_AFTER_STORE,
+				"topOrganisation", 0);
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_BEFORE_STORE,
+				"rootOrganisation", 0);
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_AFTER_STORE,
+				"rootOrganisation", 0);
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_BEFORE_STORE, "person", 0);
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_AFTER_STORE, "person", 0);
+
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(CREATE_AFTER_METADATA_VALIDATION,
+				"personDomainPart", 0);
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(CREATE_BEFORE_RETURN,
+				"personDomainPart", 0);
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_BEFORE_METADATA_VALIDATION,
+				"personDomainPart", 0);
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(CREATE_BEFORE_METADATA_VALIDATION,
+				"personDomainPart", 0);
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(DELETE_BEFORE, "personDomainPart",
 				0);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "subOrganisation",
-				1);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_STORE, "topOrganisation",
-				2);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "topOrganisation",
-				3);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_STORE, "rootOrganisation",
-				4);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "rootOrganisation",
-				5);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_STORE, "person", 6);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_AFTER_STORE, "person", 7);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(
-				ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION, "personDomainPart",
-				8);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(CREATE_BEFORE_RETURN,
-				"personDomainPart", 9);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(DELETE_AFTER, "personDomainPart", 10);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(UPDATE_BEFORE_METADATA_VALIDATION,
-				"personDomainPart", 11);
-		assertCorrectContextUsingPositionRecordTypeAndIndex(CREATE_BEFORE_METADATA_VALIDATION,
-				"personDomainPart", 12);
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(DELETE_AFTER, "personDomainPart",
+				0);
 
 		assertLookupNameAndSqlDatabaseFactory();
 	}
@@ -143,13 +149,23 @@ public class DivaExtendedFunctionalityFactoryTest {
 		assertSame(sqlDatabaseFactory1, sqlDatabaseFactory2);
 	}
 
-	private void assertCorrectContextUsingPositionRecordTypeAndIndex(
-			ExtendedFunctionalityPosition position, String recordType, int index) {
-		ExtendedFunctionalityContext updateBefore = divaExtendedFunctionality
-				.getExtendedFunctionalityContexts().get(index);
-		assertEquals(updateBefore.position, position);
-		assertEquals(updateBefore.recordType, recordType);
-		assertEquals(updateBefore.runAsNumber, 0);
+	private void assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(
+			ExtendedFunctionalityPosition position, String recordType, int runAsNumber) {
+		List<ExtendedFunctionalityContext> extendedFunctionalityContexts = divaExtendedFunctionality
+				.getExtendedFunctionalityContexts();
+		int foundTimes = 0;
+		for (ExtendedFunctionalityContext context : extendedFunctionalityContexts) {
+			if (extendedFunctionalityExists(position, recordType, runAsNumber, context)) {
+				foundTimes++;
+			}
+		}
+		assertEquals(foundTimes, 1);
+	}
+
+	private boolean extendedFunctionalityExists(ExtendedFunctionalityPosition position,
+			String recordType, int runAsNumber, ExtendedFunctionalityContext context) {
+		return context.position.equals(position) && context.recordType.equals(recordType)
+				&& context.runAsNumber == runAsNumber;
 	}
 
 	@Test(expectedExceptions = SpiderInitializationException.class, expectedExceptionsMessageRegExp = ""
@@ -385,7 +401,17 @@ public class DivaExtendedFunctionalityFactoryTest {
 	}
 
 	@Test
-	public void factorBeforeDeleteOtherType() {
+	public void factorPersonDomainPartUpdateBeforeDomainPartDelete() {
+		String recordType = "personDomainPart";
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(DELETE_BEFORE, recordType);
+		assertEquals(functionalities.size(), 1);
+		ExtendedFunctionality extendedFunctionality = functionalities.get(0);
+		assertTrue(extendedFunctionality instanceof PersonDomainPartLocalIdDeletePreventer);
+	}
+
+	@Test
+	public void factorDeleteAfterOtherType() {
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality.factor(DELETE_AFTER,
 				"otherType");
 		assertEquals(functionalities.size(), 0);
@@ -393,12 +419,30 @@ public class DivaExtendedFunctionalityFactoryTest {
 
 	@Test
 	public void factorPersonDomainPartUpdateAfterDomainPartDelete() {
+		String recordType = "personDomainPart";
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality.factor(DELETE_AFTER,
-				"personDomainPart");
+				recordType);
 		assertEquals(functionalities.size(), 2);
-		PersonUpdaterAfterDomainPartDelete functionality = (PersonUpdaterAfterDomainPartDelete) functionalities
+		assertPersonUpdaterAfterDomainPartDelete(functionalities);
+		assertClassicPersonSynchronizer(recordType, functionalities);
+	}
+
+	private void assertClassicPersonSynchronizer(String recordType,
+			List<ExtendedFunctionality> functionalities) {
+		ClassicPersonSynchronizer classicPersonSynchronizer = (ClassicPersonSynchronizer) functionalities
+				.get(1);
+		assertEquals(classicPersonSynchronizer.getRecordStorage(),
+				recordStorageProvider.recordStorage);
+		assertEquals(classicPersonSynchronizer.getRecordType(), recordType);
+	}
+
+	private void assertPersonUpdaterAfterDomainPartDelete(
+			List<ExtendedFunctionality> functionalities) {
+		PersonUpdaterAfterDomainPartDelete personudpaterAfterDomainPartDelete = (PersonUpdaterAfterDomainPartDelete) functionalities
 				.get(0);
-		assertSame(functionality.getRecordStorage(), recordStorageProvider.recordStorage);
+
+		assertSame(personudpaterAfterDomainPartDelete.getRecordStorage(),
+				recordStorageProvider.recordStorage);
 	}
 
 	@Test
