@@ -23,27 +23,25 @@ import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.spider.record.DataException;
 
-public class PersonDomainPartValidator implements ExtendedFunctionality {
+public class PersonDomainPartLocalIdDeletePreventer implements ExtendedFunctionality {
+
+	private DataGroup personDomainPart;
 
 	@Override
 	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
-		DataGroup personDomainPart = data.dataGroup;
-		throwErrorIfNoneOfNecessaryValueArePresent(personDomainPart);
+		personDomainPart = data.dataGroup;
+		throwErrorIfPersonDomianHasAnIdentifier();
 	}
 
-	private void throwErrorIfNoneOfNecessaryValueArePresent(DataGroup personDomainPart) {
-		if (identifierNotPresent(personDomainPart) && affiliationNotPresent(personDomainPart)) {
+	private void throwErrorIfPersonDomianHasAnIdentifier() {
+		if (identifierExists()) {
 			throw new DataException(
-					"Data is not valid. One of identifier or affiliation must be present.");
+					"PersonDomainPart contains at least one identifier and can therefor not be deleted.");
 		}
 	}
 
-	private boolean identifierNotPresent(DataGroup personDomainPart) {
-		return !personDomainPart.containsChildWithNameInData("identifier");
-	}
-
-	private boolean affiliationNotPresent(DataGroup personDomainPart) {
-		return !personDomainPart.containsChildWithNameInData("affiliation");
+	private boolean identifierExists() {
+		return personDomainPart.containsChildWithNameInData("identifier");
 	}
 
 }
