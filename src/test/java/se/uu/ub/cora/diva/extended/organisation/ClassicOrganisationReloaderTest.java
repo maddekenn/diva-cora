@@ -24,7 +24,6 @@ import static org.testng.Assert.assertNull;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.diva.extended.organisation.ClassicOrganisationReloader;
 import se.uu.ub.cora.diva.spies.HttpHandlerFactorySpy;
 import se.uu.ub.cora.diva.spies.HttpHandlerSpy;
 import se.uu.ub.cora.diva.spies.LoggerFactorySpy;

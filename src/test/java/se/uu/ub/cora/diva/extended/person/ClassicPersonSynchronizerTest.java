@@ -25,7 +25,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.extended.person.ClassicPersonSynchronizer;
 import se.uu.ub.cora.diva.spies.classic.ClassicFedoraUpdaterFactorySpy;
 import se.uu.ub.cora.diva.spies.classic.ClassicFedoraUpdaterSpy;
 import se.uu.ub.cora.diva.spies.classic.ClassicIndexerFactorySpy;

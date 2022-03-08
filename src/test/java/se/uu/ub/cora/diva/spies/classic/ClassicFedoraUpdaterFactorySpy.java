@@ -18,8 +18,8 @@
  */
 package se.uu.ub.cora.diva.spies.classic;
 
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdater;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
+import se.uu.ub.cora.diva.fedora.ClassicFedoraUpdater;
+import se.uu.ub.cora.diva.fedora.ClassicFedoraUpdaterFactory;
 
 public class ClassicFedoraUpdaterFactorySpy implements ClassicFedoraUpdaterFactory {
 

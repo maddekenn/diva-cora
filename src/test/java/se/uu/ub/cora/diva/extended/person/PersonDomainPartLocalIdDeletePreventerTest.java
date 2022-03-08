@@ -23,7 +23,6 @@ import static org.testng.Assert.assertTrue;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.diva.extended.person.PersonDomainPartLocalIdDeletePreventer;
 import se.uu.ub.cora.diva.spies.data.DataGroupExtendedSpy;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;

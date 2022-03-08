@@ -18,7 +18,7 @@
  */
 package se.uu.ub.cora.diva.spies.classic;
 
-import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexer;
+import se.uu.ub.cora.diva.classic.ClassicIndexer;
 
 public class ClassicIndexerSpy implements ClassicIndexer {
 

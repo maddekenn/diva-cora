@@ -29,7 +29,6 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.extended.organisation.OrganisationDuplicateLinksRemover;
 import se.uu.ub.cora.diva.spies.data.DataAtomicSpy;
 import se.uu.ub.cora.diva.spies.data.DataGroupSpy;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;

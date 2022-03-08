@@ -25,7 +25,6 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.beefeater.authentication.User;
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.extended.person.PersonDomainPartValidator;
 import se.uu.ub.cora.diva.spies.data.DataGroupExtendedSpy;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;

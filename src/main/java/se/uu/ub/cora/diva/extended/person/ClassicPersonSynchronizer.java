@@ -19,10 +19,10 @@
 package se.uu.ub.cora.diva.extended.person;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexer;
-import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdater;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
+import se.uu.ub.cora.diva.classic.ClassicIndexer;
+import se.uu.ub.cora.diva.classic.ClassicIndexerFactory;
+import se.uu.ub.cora.diva.fedora.ClassicFedoraUpdater;
+import se.uu.ub.cora.diva.fedora.ClassicFedoraUpdaterFactory;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.storage.RecordStorage;

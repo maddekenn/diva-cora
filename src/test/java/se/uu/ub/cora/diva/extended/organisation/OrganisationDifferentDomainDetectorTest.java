@@ -29,7 +29,6 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.extended.organisation.OrganisationDifferentDomainDetector;
 import se.uu.ub.cora.diva.spies.data.DataAtomicSpy;
 import se.uu.ub.cora.diva.spies.data.DataGroupExtendedSpy;
 import se.uu.ub.cora.diva.spies.storage.RecordStorageSpy;

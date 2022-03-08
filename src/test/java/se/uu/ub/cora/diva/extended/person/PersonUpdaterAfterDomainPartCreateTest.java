@@ -30,7 +30,6 @@ import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
-import se.uu.ub.cora.diva.extended.person.PersonUpdaterAfterDomainPartCreate;
 import se.uu.ub.cora.diva.spies.data.DataAtomicFactorySpy;
 import se.uu.ub.cora.diva.spies.data.DataAtomicSpy;
 import se.uu.ub.cora.diva.spies.data.DataGroupExtendedSpy;

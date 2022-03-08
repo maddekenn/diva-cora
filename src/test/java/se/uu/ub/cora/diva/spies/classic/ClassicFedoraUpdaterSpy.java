@@ -19,7 +19,7 @@
 package se.uu.ub.cora.diva.spies.classic;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdater;
+import se.uu.ub.cora.diva.fedora.ClassicFedoraUpdater;
 
 public class ClassicFedoraUpdaterSpy implements ClassicFedoraUpdater {
 
