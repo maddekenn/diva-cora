@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.extended;
+package se.uu.ub.cora.diva.extended.person;
 
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_METADATA_VALIDATION;
@@ -39,22 +39,8 @@ import se.uu.ub.cora.diva.classic.RelatedLinkCollectorFactory;
 import se.uu.ub.cora.diva.classic.RelatedLinkCollectorFactoryImp;
 import se.uu.ub.cora.diva.classic.RepeatableRelatedLinkCollector;
 import se.uu.ub.cora.diva.classic.RepeatableRelatedLinkCollectorImp;
-import se.uu.ub.cora.diva.extended.organisation.ClassicOrganisationReloader;
-import se.uu.ub.cora.diva.extended.organisation.OrganisationDifferentDomainDetector;
-import se.uu.ub.cora.diva.extended.organisation.OrganisationDisallowedDependencyDetector;
-import se.uu.ub.cora.diva.extended.organisation.OrganisationDuplicateLinksRemover;
-import se.uu.ub.cora.diva.extended.person.ClassicPersonSynchronizer;
-import se.uu.ub.cora.diva.extended.person.PersonDomainPartFromPersonUpdater;
-import se.uu.ub.cora.diva.extended.person.PersonDomainPartLocalIdDeletePreventer;
-import se.uu.ub.cora.diva.extended.person.PersonDomainPartLocalIdValidator;
-import se.uu.ub.cora.diva.extended.person.PersonDomainPartPersonSynchronizer;
-import se.uu.ub.cora.diva.extended.person.PersonDomainPartValidator;
-import se.uu.ub.cora.diva.extended.person.PersonOrcidValidator;
-import se.uu.ub.cora.diva.extended.person.PersonUpdaterAfterDomainPartCreate;
-import se.uu.ub.cora.diva.extended.person.PersonUpdaterAfterDomainPartDelete;
 import se.uu.ub.cora.diva.fedora.ClassicFedoraUpdaterFactoryImp;
 import se.uu.ub.cora.fedora.FedoraConnectionInfo;
-import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.spider.dependency.SpiderDependencyProvider;
 import se.uu.ub.cora.spider.dependency.SpiderInitializationException;
@@ -62,40 +48,24 @@ import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition;
-import se.uu.ub.cora.sqldatabase.DatabaseFacade;
-import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
-import se.uu.ub.cora.sqldatabase.SqlDatabaseFactoryImp;
 import se.uu.ub.cora.storage.RecordStorage;
 
-public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFactory {
+public class DivaExtendedPersonFunctionalityFactory implements ExtendedFunctionalityFactory {
 
 	private static final String PERSON = "person";
 	private static final String PERSON_DOMAIN_PART = "personDomainPart";
-	private static final String TOP_ORGANISATION = "topOrganisation";
-	private static final String ROOT_ORGANISATION = "rootOrganisation";
-	private static final String SUB_ORGANISATION = "subOrganisation";
 	private List<ExtendedFunctionalityContext> contexts = new ArrayList<>();
 	private SpiderDependencyProvider dependencyProvider;
-	private String url;
-	private SqlDatabaseFactory databaseFactory;
 
 	@Override
 	public void initializeUsingDependencyProvider(SpiderDependencyProvider dependencyProvider) {
 		this.dependencyProvider = dependencyProvider;
-		String databaseLookupNameValue = dependencyProvider
-				.getInitInfoValueUsingKey("databaseLookupName");
-
-		databaseFactory = SqlDatabaseFactoryImp.usingLookupNameFromContext(databaseLookupNameValue);
-		url = dependencyProvider.getInitInfoValueUsingKey("classicListUpdateURL");
 		createListOfContexts();
 	}
 
 	private void createListOfContexts() {
-		createContextForBeforeAndAfterUpdateUsingRecordType(SUB_ORGANISATION);
-		createContextForBeforeAndAfterUpdateUsingRecordType(TOP_ORGANISATION);
-		createContextForBeforeAndAfterUpdateUsingRecordType(ROOT_ORGANISATION);
-
-		createContextForBeforeAndAfterUpdateUsingRecordType(PERSON);
+		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_STORE, PERSON, 0));
+		contexts.add(new ExtendedFunctionalityContext(UPDATE_AFTER_STORE, PERSON, 0));
 
 		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_METADATA_VALIDATION,
 				PERSON_DOMAIN_PART, 0));
@@ -109,11 +79,6 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		contexts.add(new ExtendedFunctionalityContext(DELETE_AFTER, PERSON_DOMAIN_PART, 0));
 	}
 
-	private void createContextForBeforeAndAfterUpdateUsingRecordType(String recordType) {
-		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_STORE, recordType, 0));
-		contexts.add(new ExtendedFunctionalityContext(UPDATE_AFTER_STORE, recordType, 0));
-	}
-
 	@Override
 	public List<ExtendedFunctionalityContext> getExtendedFunctionalityContexts() {
 		return contexts;
@@ -122,9 +87,6 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 	@Override
 	public List<ExtendedFunctionality> factor(ExtendedFunctionalityPosition position,
 			String recordType) {
-		if (isOrganisation(recordType)) {
-			return createFunctionalitesForOrganisationAtPosition(position);
-		}
 		if (PERSON_DOMAIN_PART.equals(recordType)) {
 			return createFunctionalitiesForDomainPartAtPosition(position);
 		}
@@ -132,50 +94,6 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 			return createFunctionalitiesForPersonAtPosition(position);
 		}
 		return Collections.emptyList();
-	}
-
-	private boolean isOrganisation(String recordType) {
-		return SUB_ORGANISATION.equals(recordType) || ROOT_ORGANISATION.equals(recordType)
-				|| TOP_ORGANISATION.equals(recordType);
-	}
-
-	private List<ExtendedFunctionality> createFunctionalitesForOrganisationAtPosition(
-			ExtendedFunctionalityPosition position) {
-
-		if (UPDATE_BEFORE_STORE == position) {
-			return addFunctionalitiesForBeforeStoreForOrganisation();
-		}
-		if (UPDATE_AFTER_STORE == position) {
-			return addFunctionalityForAfterStoreForOrganisation();
-		}
-		return Collections.emptyList();
-	}
-
-	private List<ExtendedFunctionality> addFunctionalitiesForBeforeStoreForOrganisation() {
-		List<ExtendedFunctionality> functionalities = new ArrayList<>();
-		functionalities.add(new OrganisationDuplicateLinksRemover());
-		functionalities.add(addDisallowedDependencyDetector());
-		functionalities.add(addDifferentDomainDetector());
-		return functionalities;
-	}
-
-	private ExtendedFunctionality addDisallowedDependencyDetector() {
-		DatabaseFacade dbFacade = databaseFactory.factorDatabaseFacade();
-		return new OrganisationDisallowedDependencyDetector(dbFacade);
-	}
-
-	private ExtendedFunctionality addDifferentDomainDetector() {
-		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
-		return new OrganisationDifferentDomainDetector(recordStorage);
-	}
-
-	private List<ExtendedFunctionality> addFunctionalityForAfterStoreForOrganisation() {
-		return createListAndAddFunctionality(createClassicReloader());
-	}
-
-	private ClassicOrganisationReloader createClassicReloader() {
-		HttpHandlerFactory factory = new HttpHandlerFactoryImp();
-		return ClassicOrganisationReloader.usingHttpHandlerFactoryAndUrl(factory, url);
 	}
 
 	private List<ExtendedFunctionality> createFunctionalitiesForDomainPartAtPosition(
@@ -320,13 +238,4 @@ public class DivaExtendedFunctionalityFactory implements ExtendedFunctionalityFa
 		functionalities.add(createClassicPersonSynchronizer(recordStorage, PERSON));
 		return functionalities;
 	}
-
-	public SqlDatabaseFactory onlyForTestGetSqlDatabaseFactory() {
-		return databaseFactory;
-	}
-
-	public void onlyForTestSetSqlDatabaseFactory(SqlDatabaseFactory databaseFactory) {
-		this.databaseFactory = databaseFactory;
-	}
-
 }
