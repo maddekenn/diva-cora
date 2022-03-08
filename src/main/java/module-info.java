@@ -8,6 +8,6 @@ module se.uu.ub.cora.diva {
 	requires se.uu.ub.cora.diva.mixedstorage;
 
 	provides se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityFactory
-			with se.uu.ub.cora.diva.DivaExtendedFunctionalityFactory;
+			with se.uu.ub.cora.diva.extended.DivaExtendedFunctionalityFactory;
 
 }
