@@ -19,12 +19,11 @@
 package se.uu.ub.cora.diva.extended.person;
 
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION;
-import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_AFTER;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_BEFORE;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
-import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
 
 import java.util.ArrayList;
@@ -67,13 +66,11 @@ public class DivaExtendedPersonFunctionalityFactory implements ExtendedFunctiona
 		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_STORE, PERSON, 0));
 		contexts.add(new ExtendedFunctionalityContext(UPDATE_AFTER_STORE, PERSON, 0));
 
-		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_METADATA_VALIDATION,
-				PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_AFTER_METADATA_VALIDATION,
 				PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_RETURN, PERSON_DOMAIN_PART, 0));
 
-		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_METADATA_VALIDATION,
+		contexts.add(new ExtendedFunctionalityContext(UPDATE_AFTER_METADATA_VALIDATION,
 				PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(DELETE_BEFORE, PERSON_DOMAIN_PART, 0));
 		contexts.add(new ExtendedFunctionalityContext(DELETE_AFTER, PERSON_DOMAIN_PART, 0));
@@ -100,18 +97,14 @@ public class DivaExtendedPersonFunctionalityFactory implements ExtendedFunctiona
 			ExtendedFunctionalityPosition position) {
 		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
 
-		if (CREATE_BEFORE_METADATA_VALIDATION == position) {
-			return createListAndAddFunctionality(new PersonDomainPartValidator());
-		}
 		if (CREATE_AFTER_METADATA_VALIDATION == position) {
-			return createListAndAddFunctionality(
-					new PersonDomainPartPersonSynchronizer(recordStorage));
+			return addFunctionalitiesForCreateAfterMetadataValidation(recordStorage);
 		}
 		if (CREATE_BEFORE_RETURN == position) {
 			return addFunctionalityForCreateBeforeReturn(recordStorage);
 		}
-		if (UPDATE_BEFORE_METADATA_VALIDATION == position) {
-			return addFunctionalitiesForUpdateBeforeMetadataValidation();
+		if (UPDATE_AFTER_METADATA_VALIDATION == position) {
+			return addFunctionalitiesForUpdateAfterMetadataValidation(recordStorage);
 		}
 		if (UPDATE_AFTER_STORE == position) {
 			return createListAndAddFunctionality(
@@ -126,6 +119,16 @@ public class DivaExtendedPersonFunctionalityFactory implements ExtendedFunctiona
 		return Collections.emptyList();
 	}
 
+	private List<ExtendedFunctionality> addFunctionalitiesForCreateAfterMetadataValidation(
+			RecordStorage recordStorage) {
+		List<ExtendedFunctionality> functionalities = new ArrayList<>();
+		functionalities.add(new PersonDomainPartMustContainIdentifierOrAffiliation());
+		functionalities.add(
+				PersonDomainPartOrganisationSameDomainValidator.usingRecordStorage(recordStorage));
+		functionalities.add(new CopyDataFromPersonToPersonDomainPartOnCreate(recordStorage));
+		return functionalities;
+	}
+
 	private List<ExtendedFunctionality> createListAndAddFunctionality(
 			ExtendedFunctionality extendedFunctionality) {
 		List<ExtendedFunctionality> functionalities = new ArrayList<>();
@@ -133,10 +136,13 @@ public class DivaExtendedPersonFunctionalityFactory implements ExtendedFunctiona
 		return functionalities;
 	}
 
-	private List<ExtendedFunctionality> addFunctionalitiesForUpdateBeforeMetadataValidation() {
+	private List<ExtendedFunctionality> addFunctionalitiesForUpdateAfterMetadataValidation(
+			RecordStorage recordStorage) {
 		List<ExtendedFunctionality> functionalities = new ArrayList<>();
-		functionalities.add(new PersonDomainPartValidator());
-		functionalities.add(new PersonDomainPartLocalIdValidator());
+		functionalities.add(new PersonDomainPartMustContainIdentifierOrAffiliation());
+		functionalities.add(
+				PersonDomainPartOrganisationSameDomainValidator.usingRecordStorage(recordStorage));
+		functionalities.add(new PersonDomainPartPreventRemovalOfIdentifier());
 		return functionalities;
 	}
 

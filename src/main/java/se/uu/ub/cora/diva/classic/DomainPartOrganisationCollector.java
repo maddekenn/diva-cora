@@ -35,12 +35,14 @@ public class DomainPartOrganisationCollector implements RelatedLinkCollector {
 
 	@Override
 	public Map<String, Map<String, DataGroup>> collectLinks(DataGroup personDomainPartLink) {
-		DataGroup personDomainPart = readPersonDomainPart(personDomainPartLink);
-
-		Map<String, Map<String, DataGroup>> links = new HashMap<>();
 		String domainPartId = getDomainPartId(personDomainPartLink);
 		Map<String, DataGroup> domainParts = new HashMap<>();
+
+		DataGroup personDomainPart = readPersonDomainPart(personDomainPartLink);
+
 		domainParts.put(domainPartId, personDomainPart);
+
+		Map<String, Map<String, DataGroup>> links = new HashMap<>();
 		links.put("personDomainPart", domainParts);
 
 		Map<String, DataGroup> collectedOrganisationsFromLinks = collectOrganisations(

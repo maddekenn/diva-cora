@@ -23,7 +23,7 @@ import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.spider.record.DataException;
 
-public class PersonDomainPartValidator implements ExtendedFunctionality {
+public class PersonDomainPartMustContainIdentifierOrAffiliation implements ExtendedFunctionality {
 
 	@Override
 	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
@@ -32,10 +32,14 @@ public class PersonDomainPartValidator implements ExtendedFunctionality {
 	}
 
 	private void throwErrorIfNoneOfNecessaryValueArePresent(DataGroup personDomainPart) {
-		if (identifierNotPresent(personDomainPart) && affiliationNotPresent(personDomainPart)) {
+		if (noneOfIdentifierAndAffiliationIsPresent(personDomainPart)) {
 			throw new DataException(
 					"Data is not valid. One of identifier or affiliation must be present.");
 		}
+	}
+
+	private boolean noneOfIdentifierAndAffiliationIsPresent(DataGroup personDomainPart) {
+		return identifierNotPresent(personDomainPart) && affiliationNotPresent(personDomainPart);
 	}
 
 	private boolean identifierNotPresent(DataGroup personDomainPart) {
