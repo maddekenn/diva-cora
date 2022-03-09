@@ -18,15 +18,93 @@
  */
 package se.uu.ub.cora.diva.extended.person;
 
+import java.text.MessageFormat;
+import java.util.List;
+
+import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
+import se.uu.ub.cora.spider.record.DataException;
+import se.uu.ub.cora.storage.RecordStorage;
 
 public class PersonDomainPartOrganisationSameDomainValidator implements ExtendedFunctionality {
 
-	@Override
-	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
-		// TODO Auto-generated method stub
+	private RecordStorage recordStorage;
 
+	public static PersonDomainPartOrganisationSameDomainValidator usingRecordStorage(
+			RecordStorage recordStorage) {
+		return new PersonDomainPartOrganisationSameDomainValidator(recordStorage);
 	}
 
+	private PersonDomainPartOrganisationSameDomainValidator(RecordStorage recordStorage) {
+		this.recordStorage = recordStorage;
+	}
+
+	@Override
+	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
+		DataGroup personDomainPart = data.dataGroup;
+		List<DataGroup> affiliations = personDomainPart.getAllGroupsWithNameInData("affiliation");
+		if (personDomainPartHasAffiliations(affiliations)) {
+			checkDomainsFromAffiliationsAreTheSameAsInPersonDomainPart(personDomainPart,
+					affiliations);
+		}
+	}
+
+	private boolean personDomainPartHasAffiliations(List<DataGroup> affiliations) {
+		return !affiliations.isEmpty();
+	}
+
+	private void checkDomainsFromAffiliationsAreTheSameAsInPersonDomainPart(
+			DataGroup personDomainPart, List<DataGroup> affiliations) {
+		String personDomainPartsDomain = getDomainFromRecord(personDomainPart);
+		for (DataGroup affiliation : affiliations) {
+			checkDomainFromAffiliationIsTheSameAsPersonDomainPart(personDomainPartsDomain,
+					affiliation);
+		}
+	}
+
+	private void checkDomainFromAffiliationIsTheSameAsPersonDomainPart(
+			String personDomainPartsDomain, DataGroup affiliation) {
+		String organisationId = getOrganisationIdFromAffiliation(affiliation);
+		String organisationDomain = getDomainFromOrganisation(organisationId);
+
+		throwExceptionIfDomainsAreDifferent(personDomainPartsDomain, organisationId,
+				organisationDomain);
+	}
+
+	private boolean domainsAreDifferent(String personDomainPartsDomain, String organisationDomain) {
+		return !personDomainPartsDomain.equals(organisationDomain);
+	}
+
+	private String getDomainFromOrganisation(String organisationId) {
+		DataGroup organisation = recordStorage.read("organisation", organisationId);
+		return getDomainFromRecord(organisation);
+	}
+
+	private String getOrganisationIdFromAffiliation(DataGroup affiliation) {
+		DataGroup organisationLink = affiliation.getFirstGroupWithNameInData("organisationLink");
+		return organisationLink.getFirstAtomicValueWithNameInData("linkedRecordId");
+	}
+
+	private String getDomainFromRecord(DataGroup dataGroup) {
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
+		return recordInfo.getFirstAtomicValueWithNameInData("domain");
+	}
+
+	private void throwExceptionIfDomainsAreDifferent(String personDomainPartsDomain,
+			String organisationId, String organisationDomain) {
+		if (domainsAreDifferent(personDomainPartsDomain, organisationDomain)) {
+			String message = buildExceptionMessage(personDomainPartsDomain, organisationId,
+					organisationDomain);
+			throw new DataException(message);
+		}
+	}
+
+	private String buildExceptionMessage(String personDomainPartsDomain, String organisationId,
+			String organisationDomain) {
+		String message = "PersonDomainPart contains at least one linked organisation from a "
+				+ "different domain. Linked organisation {0} has domain {1}, but "
+				+ "PersonDomainPart has domain {2}";
+		return MessageFormat.format(message, organisationId, organisationDomain, personDomainPartsDomain);
+	}
 }
