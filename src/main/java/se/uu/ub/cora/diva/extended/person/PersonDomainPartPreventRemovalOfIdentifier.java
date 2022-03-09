@@ -27,7 +27,12 @@ import se.uu.ub.cora.diva.extended.ExtendedFunctionalityUtils;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 
-public class PersonDomainPartLocalIdValidator implements ExtendedFunctionality {
+/**
+ * PersonDomainPartPreventRemovalOfIdentifier ensures that an identifier can not be changed or
+ * removed from a personDomainPart. Any changed or removed identifiers will be readded from stored
+ * data.
+ */
+public class PersonDomainPartPreventRemovalOfIdentifier implements ExtendedFunctionality {
 
 	private static final String IDENTIFIER = "identifier";
 

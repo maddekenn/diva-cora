@@ -38,7 +38,7 @@ public class PersonDomainPartValidatorTest {
 	@BeforeMethod
 	public void setUp() {
 		domainPart = TestDataForPerson.createDomainPartDataGroupWithUpdated("personId:235:uu", "2");
-		validator = new PersonDomainPartValidator();
+		validator = new PersonDomainPartMustContainIdentifierOrAffiliation();
 
 	}
 

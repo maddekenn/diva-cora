@@ -27,6 +27,12 @@ import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.spider.record.DataException;
 import se.uu.ub.cora.storage.RecordStorage;
 
+/**
+ * PersonDomainPartOrganisationSameDomainValidator ensures that all linked organisations from
+ * affiliations belong to the same domain as the personDomainPart.
+ * <p>
+ * If any affiliation belongs to a different domain will a {@link DataException} be throw.
+ */
 public class PersonDomainPartOrganisationSameDomainValidator implements ExtendedFunctionality {
 
 	private RecordStorage recordStorage;
@@ -104,7 +110,12 @@ public class PersonDomainPartOrganisationSameDomainValidator implements Extended
 			String organisationDomain) {
 		String message = "PersonDomainPart contains at least one linked organisation from a "
 				+ "different domain. Linked organisation {0} has domain {1}, but "
-				+ "PersonDomainPart has domain {2}";
-		return MessageFormat.format(message, organisationId, organisationDomain, personDomainPartsDomain);
+				+ "PersonDomainPart has domain {2}.";
+		return MessageFormat.format(message, organisationId, organisationDomain,
+				personDomainPartsDomain);
+	}
+
+	RecordStorage getRecordStorageOnlyForTest() {
+		return recordStorage;
 	}
 }

@@ -27,12 +27,12 @@ import se.uu.ub.cora.spider.record.DataException;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 
-public class PersonDomainPartPersonSynchronizer implements ExtendedFunctionality {
+public class CopyDataFromPersonToPersonDomainPartOnCreate implements ExtendedFunctionality {
 
 	private static final String RECORD_INFO = "recordInfo";
 	private RecordStorage recordStorage;
 
-	public PersonDomainPartPersonSynchronizer(RecordStorage recordStorage) {
+	public CopyDataFromPersonToPersonDomainPartOnCreate(RecordStorage recordStorage) {
 		this.recordStorage = recordStorage;
 	}
 

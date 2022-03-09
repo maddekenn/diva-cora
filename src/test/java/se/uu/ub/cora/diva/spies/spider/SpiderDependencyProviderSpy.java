@@ -27,7 +27,7 @@ import se.uu.ub.cora.bookkeeper.termcollector.DataGroupTermCollector;
 import se.uu.ub.cora.bookkeeper.validator.DataValidator;
 import se.uu.ub.cora.diva.spies.data.DataGroupTermCollectorSpy;
 import se.uu.ub.cora.diva.spies.data.DataRecordLinkCollectorSpy;
-import se.uu.ub.cora.diva.spies.storage.RecordStorageProviderSpy;
+import se.uu.ub.cora.diva.spies.storage.RecordStorageSpy;
 import se.uu.ub.cora.search.RecordIndexer;
 import se.uu.ub.cora.search.RecordSearch;
 import se.uu.ub.cora.spider.authentication.Authenticator;
@@ -46,9 +46,9 @@ public class SpiderDependencyProviderSpy implements SpiderDependencyProvider {
 
 	public boolean getInitInfoValueUsingKeyWasCalled = false;
 	public Map<String, String> initInfo = new HashMap<>();
-	private RecordStorageProviderSpy recordStorageProvider;
 	public DataGroupTermCollector termCollector = new DataGroupTermCollectorSpy();
 	public DataRecordLinkCollector linkCollector = new DataRecordLinkCollectorSpy();
+	RecordStorage recordStorage = new RecordStorageSpy();
 
 	public SpiderDependencyProviderSpy(Map<String, String> initInfo) {
 		this.initInfo = initInfo;
@@ -83,7 +83,7 @@ public class SpiderDependencyProviderSpy implements SpiderDependencyProvider {
 
 	@Override
 	public RecordStorage getRecordStorage() {
-		return recordStorageProvider.getRecordStorage();
+		return recordStorage;
 	}
 
 	@Override
@@ -148,11 +148,6 @@ public class SpiderDependencyProviderSpy implements SpiderDependencyProvider {
 	public DataGroupToRecordEnhancer getDataGroupToRecordEnhancer() {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	public void setRecordStorageProvider(RecordStorageProviderSpy recordStorageProvider) {
-		this.recordStorageProvider = recordStorageProvider;
-
 	}
 
 }

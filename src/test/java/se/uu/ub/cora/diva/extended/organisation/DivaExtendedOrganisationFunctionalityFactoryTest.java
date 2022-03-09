@@ -39,7 +39,6 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.diva.spies.LoggerFactorySpy;
 import se.uu.ub.cora.diva.spies.db.SqlDatabaseFactorySpy;
 import se.uu.ub.cora.diva.spies.spider.SpiderDependencyProviderSpy;
-import se.uu.ub.cora.diva.spies.storage.RecordStorageProviderSpy;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.logger.LoggerProvider;
@@ -49,15 +48,16 @@ import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition;
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactoryImp;
+import se.uu.ub.cora.storage.RecordStorage;
 
 public class DivaExtendedOrganisationFunctionalityFactoryTest {
 
 	private DivaExtendedOrganisationFunctionalityFactory divaExtendedFunctionality;
 	private Map<String, String> initInfo;
 	private SpiderDependencyProviderSpy spiderDependencyProvider;
-	private RecordStorageProviderSpy recordStorageProvider;
 	private LoggerFactorySpy loggerFactorySpy;
 	private SqlDatabaseFactorySpy databaseFactorySpy;
+	private RecordStorage recordStorage;
 
 	@BeforeMethod
 	public void setUp() {
@@ -65,9 +65,8 @@ public class DivaExtendedOrganisationFunctionalityFactoryTest {
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 		divaExtendedFunctionality = new DivaExtendedOrganisationFunctionalityFactory();
 		setUpInitInfo();
-		recordStorageProvider = new RecordStorageProviderSpy();
 		spiderDependencyProvider = new SpiderDependencyProviderSpy(initInfo);
-		spiderDependencyProvider.setRecordStorageProvider(recordStorageProvider);
+		recordStorage = spiderDependencyProvider.getRecordStorage();
 		databaseFactorySpy = new SqlDatabaseFactorySpy();
 
 		divaExtendedFunctionality.initializeUsingDependencyProvider(spiderDependencyProvider);
@@ -164,7 +163,7 @@ public class DivaExtendedOrganisationFunctionalityFactoryTest {
 		OrganisationDifferentDomainDetector differentDomainDetector = (OrganisationDifferentDomainDetector) functionalities
 				.get(2);
 		assertNotNull(differentDomainDetector.getRecordStorage());
-		assertSame(differentDomainDetector.getRecordStorage(), recordStorageProvider.recordStorage);
+		assertSame(differentDomainDetector.getRecordStorage(), recordStorage);
 	}
 
 	@Test

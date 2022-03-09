@@ -37,7 +37,7 @@ import se.uu.ub.cora.spider.record.DataException;
 
 public class PersonDomainPartPersonSynchronizerTest {
 
-	private PersonDomainPartPersonSynchronizer synchronizer;
+	private CopyDataFromPersonToPersonDomainPartOnCreate synchronizer;
 	private String authToken = "someAuthToken";
 	private RecordStorageSpy recordStorage;
 	private DataAtomicFactorySpy dataAtomicFactorySpy;
@@ -47,7 +47,7 @@ public class PersonDomainPartPersonSynchronizerTest {
 		dataAtomicFactorySpy = new DataAtomicFactorySpy();
 		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactorySpy);
 		recordStorage = new RecordStorageSpy();
-		synchronizer = new PersonDomainPartPersonSynchronizer(recordStorage);
+		synchronizer = new CopyDataFromPersonToPersonDomainPartOnCreate(recordStorage);
 	}
 
 	@Test

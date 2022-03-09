@@ -64,7 +64,7 @@ public class PersonDomainPartLocalIdValidatorTest {
 
 	@Test
 	public void testOneLocalIdPreviousRecordRemovedFromUpdated() {
-		ExtendedFunctionality functionality = new PersonDomainPartLocalIdValidator();
+		ExtendedFunctionality functionality = new PersonDomainPartPreventRemovalOfIdentifier();
 		functionality.useExtendedFunctionality(data);
 
 		assertTrue(defaultPersonDomainPart.containsChildWithNameInData("identifier"));
@@ -76,7 +76,7 @@ public class PersonDomainPartLocalIdValidatorTest {
 	public void testTwoIdsPreviousRecordRemovedFromUpdatedOneLeftOneAdded() {
 		addMoreIdsToPreviousAndDefaultPerson();
 
-		ExtendedFunctionality functionality = new PersonDomainPartLocalIdValidator();
+		ExtendedFunctionality functionality = new PersonDomainPartPreventRemovalOfIdentifier();
 		functionality.useExtendedFunctionality(data);
 
 		List<DataAtomic> identifiers = defaultPersonDomainPart
@@ -103,7 +103,7 @@ public class PersonDomainPartLocalIdValidatorTest {
 	public void testnewAndUniqueRepeatIdsAreSet() {
 		addMoreIdsToPreviousAndDefaultPerson();
 
-		ExtendedFunctionality functionality = new PersonDomainPartLocalIdValidator();
+		ExtendedFunctionality functionality = new PersonDomainPartPreventRemovalOfIdentifier();
 		functionality.useExtendedFunctionality(data);
 
 		List<DataAtomic> identifiers = defaultPersonDomainPart

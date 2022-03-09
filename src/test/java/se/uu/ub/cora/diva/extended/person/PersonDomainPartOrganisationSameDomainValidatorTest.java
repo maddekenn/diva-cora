@@ -108,7 +108,7 @@ public class PersonDomainPartOrganisationSameDomainValidatorTest {
 
 	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
 			+ "PersonDomainPart contains at least one linked organisation from a different domain. "
-			+ "Linked organisation 1750 has domain kth, but PersonDomainPart has domain uu")
+			+ "Linked organisation 1750 has domain kth, but PersonDomainPart has domain uu.")
 	public void testWithOneAffiliationOtherDomain() throws Exception {
 		DataGroupSameOrganisationSpy sameOrgGroupSpy = new DataGroupSameOrganisationSpy("uu",
 				"1750");
@@ -121,7 +121,7 @@ public class PersonDomainPartOrganisationSameDomainValidatorTest {
 
 	@Test(expectedExceptions = DataException.class, expectedExceptionsMessageRegExp = ""
 			+ "PersonDomainPart contains at least one linked organisation from a different domain. "
-			+ "Linked organisation 3000 has domain kth, but PersonDomainPart has domain uu")
+			+ "Linked organisation 3000 has domain kth, but PersonDomainPart has domain uu.")
 	public void testWithThreeAffiliationOneFromOtherDomain() throws Exception {
 		DataGroupSameOrganisationSpy sameOrgGroupSpy = new DataGroupSameOrganisationSpy("uu",
 				"1000", "2000", "3000");

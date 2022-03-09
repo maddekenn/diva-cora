@@ -22,12 +22,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_AFTER_METADATA_VALIDATION;
-import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.CREATE_BEFORE_RETURN;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_AFTER;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.DELETE_BEFORE;
+import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_AFTER_STORE;
-import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_METADATA_VALIDATION;
 import static se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition.UPDATE_BEFORE_STORE;
 
 import java.util.HashMap;
@@ -43,21 +42,21 @@ import se.uu.ub.cora.diva.classic.RepeatableRelatedLinkCollectorImp;
 import se.uu.ub.cora.diva.fedora.ClassicFedoraUpdaterFactoryImp;
 import se.uu.ub.cora.diva.spies.LoggerFactorySpy;
 import se.uu.ub.cora.diva.spies.spider.SpiderDependencyProviderSpy;
-import se.uu.ub.cora.diva.spies.storage.RecordStorageProviderSpy;
 import se.uu.ub.cora.fedora.FedoraConnectionInfo;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityContext;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityPosition;
+import se.uu.ub.cora.storage.RecordStorage;
 
 public class DivaExtendedPersonFunctionalityFactoryTest {
 
 	private DivaExtendedPersonFunctionalityFactory divaExtendedFunctionality;
 	private Map<String, String> initInfo;
 	private SpiderDependencyProviderSpy spiderDependencyProvider;
-	private RecordStorageProviderSpy recordStorageProvider;
 	private LoggerFactorySpy loggerFactorySpy;
+	private RecordStorage recordStorage;
 
 	@BeforeMethod
 	public void setUp() {
@@ -65,9 +64,8 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 		divaExtendedFunctionality = new DivaExtendedPersonFunctionalityFactory();
 		setUpInitInfo();
-		recordStorageProvider = new RecordStorageProviderSpy();
 		spiderDependencyProvider = new SpiderDependencyProviderSpy(initInfo);
-		spiderDependencyProvider.setRecordStorageProvider(recordStorageProvider);
+		recordStorage = spiderDependencyProvider.getRecordStorage();
 
 		divaExtendedFunctionality.initializeUsingDependencyProvider(spiderDependencyProvider);
 	}
@@ -84,8 +82,6 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 
 	@Test
 	public void testInit() {
-		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 8);
-
 		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_BEFORE_STORE, "person", 0);
 		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_AFTER_STORE, "person", 0);
 
@@ -93,15 +89,14 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 				"personDomainPart", 0);
 		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(CREATE_BEFORE_RETURN,
 				"personDomainPart", 0);
-		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_BEFORE_METADATA_VALIDATION,
-				"personDomainPart", 0);
-		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(CREATE_BEFORE_METADATA_VALIDATION,
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_AFTER_METADATA_VALIDATION,
 				"personDomainPart", 0);
 		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(DELETE_BEFORE, "personDomainPart",
 				0);
 		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(DELETE_AFTER, "personDomainPart",
 				0);
 
+		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 7);
 	}
 
 	private void assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(
@@ -152,7 +147,9 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 		assertEquals(functionalities.size(), 2);
 		PersonDomainPartFromPersonUpdater functionality = (PersonDomainPartFromPersonUpdater) functionalities
 				.get(0);
-		assertSame(functionality.getRecordStorage(), recordStorageProvider.recordStorage);
+		// assertSame(functionality.getRecordStorage(),
+		// recordStorage);
+		assertSame(functionality.getRecordStorage(), recordStorage);
 
 		ClassicPersonSynchronizer classicSynchronizer = (ClassicPersonSynchronizer) functionalities
 				.get(1);
@@ -167,7 +164,7 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 				.getClassicIndexer();
 		assertEquals(classicIndexer.getBaseUrl(), "classicAuthorityIndexUrl");
 		assertEquals(classicSynchronizer.getRecordType(), recordType);
-		assertSame(classicSynchronizer.getRecordStorage(), recordStorageProvider.recordStorage);
+		assertSame(classicSynchronizer.getRecordStorage(), recordStorage);
 	}
 
 	private void assertCorrectFedoraUpdaterFactory(
@@ -195,8 +192,7 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 				.getRepeatableRelatedLinkCollector();
 		RelatedLinkCollectorFactoryImp relatedLinkCollectorFactory = (RelatedLinkCollectorFactoryImp) repeatableRelatedLinkCollector
 				.getRelatedLinkCollectorFactory();
-		assertSame(relatedLinkCollectorFactory.getRecordStorage(),
-				recordStorageProvider.recordStorage);
+		assertSame(relatedLinkCollectorFactory.getRecordStorage(), recordStorage);
 	}
 
 	@Test
@@ -218,16 +214,6 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 	}
 
 	@Test
-	public void factorPersonDomainPartUpdateAfterValidation() {
-		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
-				.factor(CREATE_AFTER_METADATA_VALIDATION, "personDomainPart");
-		assertEquals(functionalities.size(), 1);
-		PersonDomainPartPersonSynchronizer validatorFunctionality = (PersonDomainPartPersonSynchronizer) functionalities
-				.get(0);
-		assertSame(validatorFunctionality.getRecordStorage(), recordStorageProvider.recordStorage);
-	}
-
-	@Test
 	public void factorCreateAfterValidationOtherType() {
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
 				.factor(CREATE_AFTER_METADATA_VALIDATION, "otherType");
@@ -243,7 +229,7 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 		PersonUpdaterAfterDomainPartCreate personUpdater = (PersonUpdaterAfterDomainPartCreate) functionalities
 				.get(0);
 
-		assertSame(personUpdater.getRecordStorage(), recordStorageProvider.recordStorage);
+		assertSame(personUpdater.getRecordStorage(), recordStorage);
 
 		assertSame(personUpdater.getTermCollector(), spiderDependencyProvider.termCollector);
 		assertSame(personUpdater.getLinkCollector(), spiderDependencyProvider.linkCollector);
@@ -292,8 +278,7 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 			List<ExtendedFunctionality> functionalities) {
 		ClassicPersonSynchronizer classicPersonSynchronizer = (ClassicPersonSynchronizer) functionalities
 				.get(1);
-		assertEquals(classicPersonSynchronizer.getRecordStorage(),
-				recordStorageProvider.recordStorage);
+		assertEquals(classicPersonSynchronizer.getRecordStorage(), recordStorage);
 		assertEquals(classicPersonSynchronizer.getRecordType(), recordType);
 	}
 
@@ -302,8 +287,7 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 		PersonUpdaterAfterDomainPartDelete personudpaterAfterDomainPartDelete = (PersonUpdaterAfterDomainPartDelete) functionalities
 				.get(0);
 
-		assertSame(personudpaterAfterDomainPartDelete.getRecordStorage(),
-				recordStorageProvider.recordStorage);
+		assertSame(personudpaterAfterDomainPartDelete.getRecordStorage(), recordStorage);
 	}
 
 	@Test
@@ -316,25 +300,42 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 	@Test
 	public void factorPersonNotImplementedPosition() {
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
-				.factor(CREATE_BEFORE_METADATA_VALIDATION, "person");
+				.factor(CREATE_AFTER_METADATA_VALIDATION, "person");
 		assertEquals(functionalities.size(), 0);
 	}
 
 	@Test
-	public void factorPersonDomainPartUpdateBeforeValidation() {
+	public void factorPersonDomainPartCreateAfterValidation() {
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
-				.factor(UPDATE_BEFORE_METADATA_VALIDATION, "personDomainPart");
-		assertEquals(functionalities.size(), 2);
-		assertTrue(functionalities.get(0) instanceof PersonDomainPartValidator);
-		assertTrue(functionalities.get(1) instanceof PersonDomainPartLocalIdValidator);
+				.factor(CREATE_AFTER_METADATA_VALIDATION, "personDomainPart");
+		assertTrue(functionalities
+				.get(0) instanceof PersonDomainPartMustContainIdentifierOrAffiliation);
+
+		PersonDomainPartOrganisationSameDomainValidator sameDomain = (PersonDomainPartOrganisationSameDomainValidator) functionalities
+				.get(1);
+		assertSame(sameDomain.getRecordStorageOnlyForTest(), recordStorage);
+
+		CopyDataFromPersonToPersonDomainPartOnCreate copyFunctionality = (CopyDataFromPersonToPersonDomainPartOnCreate) functionalities
+				.get(2);
+		assertSame(copyFunctionality.getRecordStorage(), recordStorage);
+
+		assertEquals(functionalities.size(), 3);
 	}
 
 	@Test
-	public void factorPersonDomainPartCreateBeforeValidation() {
+	public void factorPersonDomainPartUpdateAfterValidation() {
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
-				.factor(CREATE_BEFORE_METADATA_VALIDATION, "personDomainPart");
-		assertEquals(functionalities.size(), 1);
-		assertTrue(functionalities.get(0) instanceof PersonDomainPartValidator);
+				.factor(UPDATE_AFTER_METADATA_VALIDATION, "personDomainPart");
+		assertTrue(functionalities
+				.get(0) instanceof PersonDomainPartMustContainIdentifierOrAffiliation);
+
+		PersonDomainPartOrganisationSameDomainValidator sameDomain = (PersonDomainPartOrganisationSameDomainValidator) functionalities
+				.get(1);
+		assertSame(sameDomain.getRecordStorageOnlyForTest(), recordStorage);
+
+		assertTrue(functionalities.get(2) instanceof PersonDomainPartPreventRemovalOfIdentifier);
+
+		assertEquals(functionalities.size(), 3);
 	}
 
 }
