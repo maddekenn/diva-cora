@@ -42,4 +42,6 @@ public interface ClassicFedoraUpdater {
 	 */
 	void updateInFedora(String recordType, String recordId, DataGroup dataGroup);
 
+	void createInFedora(String recordType, String recordId, DataGroup dataGroup);
+
 }

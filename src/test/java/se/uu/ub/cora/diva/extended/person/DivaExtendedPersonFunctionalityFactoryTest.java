@@ -84,6 +84,8 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 	public void testInit() {
 		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_BEFORE_STORE, "person", 0);
 		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(UPDATE_AFTER_STORE, "person", 0);
+		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(CREATE_BEFORE_RETURN, "person",
+				0);
 
 		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(CREATE_AFTER_METADATA_VALIDATION,
 				"personDomainPart", 0);
@@ -96,7 +98,7 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 		assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(DELETE_AFTER, "personDomainPart",
 				0);
 
-		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 7);
+		assertEquals(divaExtendedFunctionality.getExtendedFunctionalityContexts().size(), 8);
 	}
 
 	private void assertCorrectContextUsingPositionRecordTypeAndRunAsNumber(
@@ -133,7 +135,7 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 		initInfo.remove("authorityIndexUrl");
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
 				.factor(UPDATE_AFTER_STORE, "person");
-		ClassicPersonSynchronizer classicSynchronizer = (ClassicPersonSynchronizer) functionalities
+		ClassicPersonUpdateSynchronizer classicSynchronizer = (ClassicPersonUpdateSynchronizer) functionalities
 				.get(1);
 		ClassicIndexerFactoryImp classicIndexer = (ClassicIndexerFactoryImp) classicSynchronizer
 				.getClassicIndexer();
@@ -151,15 +153,17 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 		// recordStorage);
 		assertSame(functionality.getRecordStorage(), recordStorage);
 
-		ClassicPersonSynchronizer classicSynchronizer = (ClassicPersonSynchronizer) functionalities
+		ClassicPersonUpdateSynchronizer classicSynchronizer = (ClassicPersonUpdateSynchronizer) functionalities
 				.get(1);
 		assertCorrectlyCreatedClassicSynchronizer(classicSynchronizer, "person");
 	}
 
 	private void assertCorrectlyCreatedClassicSynchronizer(
-			ClassicPersonSynchronizer classicSynchronizer, String recordType) {
+			ClassicPersonUpdateSynchronizer classicSynchronizer, String recordType) {
 
-		assertCorrectFedoraUpdaterFactory(classicSynchronizer);
+		ClassicFedoraUpdaterFactoryImp classicFedoraUpdaterFactory = (ClassicFedoraUpdaterFactoryImp) classicSynchronizer
+				.getClassicFedoraUpdaterFactory();
+		assertCorrectFedoraUpdaterFactory(classicFedoraUpdaterFactory);
 		ClassicIndexerFactoryImp classicIndexer = (ClassicIndexerFactoryImp) classicSynchronizer
 				.getClassicIndexer();
 		assertEquals(classicIndexer.getBaseUrl(), "classicAuthorityIndexUrl");
@@ -168,9 +172,7 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 	}
 
 	private void assertCorrectFedoraUpdaterFactory(
-			ClassicPersonSynchronizer extendedFunctionality) {
-		ClassicFedoraUpdaterFactoryImp classicFedoraUpdaterFactory = (ClassicFedoraUpdaterFactoryImp) extendedFunctionality
-				.getClassicFedoraUpdaterFactory();
+			ClassicFedoraUpdaterFactoryImp classicFedoraUpdaterFactory) {
 		assertTrue(classicFedoraUpdaterFactory
 				.getHttpHandlerFactory() instanceof HttpHandlerFactoryImp);
 		assertCorrectFedoraConnectionInfo(classicFedoraUpdaterFactory);
@@ -203,12 +205,30 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 	}
 
 	@Test
+	public void factorPersonClassicSynchronizerAfterPersonCreate() {
+		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
+				.factor(CREATE_BEFORE_RETURN, "person");
+		assertEquals(functionalities.size(), 1);
+
+		ClassicPersonSynchronizer classicSynchronizer = (ClassicPersonSynchronizer) functionalities
+				.get(0);
+		assertCorrectFedoraUpdaterFactory((ClassicFedoraUpdaterFactoryImp) classicSynchronizer
+				.getClassicFedoraUpdaterFactory());
+		ClassicIndexerFactoryImp classicIndexer = (ClassicIndexerFactoryImp) classicSynchronizer
+				.getClassicIndexer();
+		assertEquals(classicIndexer.getBaseUrl(), "classicAuthorityIndexUrl");
+		assertEquals(classicSynchronizer.getRecordType(), "person");
+		assertSame(classicSynchronizer.getRecordStorage(), recordStorage);
+
+	}
+
+	@Test
 	public void factorForPersonDomainPartUpdateAfterStore() {
 		List<ExtendedFunctionality> functionalities = divaExtendedFunctionality
 				.factor(UPDATE_AFTER_STORE, "personDomainPart");
 		assertEquals(functionalities.size(), 1);
 
-		ClassicPersonSynchronizer classicSynchronizer = (ClassicPersonSynchronizer) functionalities
+		ClassicPersonUpdateSynchronizer classicSynchronizer = (ClassicPersonUpdateSynchronizer) functionalities
 				.get(0);
 		assertCorrectlyCreatedClassicSynchronizer(classicSynchronizer, "personDomainPart");
 	}
@@ -234,7 +254,7 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 		assertSame(personUpdater.getTermCollector(), spiderDependencyProvider.termCollector);
 		assertSame(personUpdater.getLinkCollector(), spiderDependencyProvider.linkCollector);
 
-		ClassicPersonSynchronizer classicSynchronizer = (ClassicPersonSynchronizer) functionalities
+		ClassicPersonUpdateSynchronizer classicSynchronizer = (ClassicPersonUpdateSynchronizer) functionalities
 				.get(1);
 		assertCorrectlyCreatedClassicSynchronizer(classicSynchronizer, "personDomainPart");
 
@@ -276,7 +296,7 @@ public class DivaExtendedPersonFunctionalityFactoryTest {
 
 	private void assertClassicPersonSynchronizer(String recordType,
 			List<ExtendedFunctionality> functionalities) {
-		ClassicPersonSynchronizer classicPersonSynchronizer = (ClassicPersonSynchronizer) functionalities
+		ClassicPersonUpdateSynchronizer classicPersonSynchronizer = (ClassicPersonUpdateSynchronizer) functionalities
 				.get(1);
 		assertEquals(classicPersonSynchronizer.getRecordStorage(), recordStorage);
 		assertEquals(classicPersonSynchronizer.getRecordType(), recordType);

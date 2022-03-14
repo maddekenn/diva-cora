@@ -65,6 +65,7 @@ public class DivaExtendedPersonFunctionalityFactory implements ExtendedFunctiona
 	private void createListOfContexts() {
 		contexts.add(new ExtendedFunctionalityContext(UPDATE_BEFORE_STORE, PERSON, 0));
 		contexts.add(new ExtendedFunctionalityContext(UPDATE_AFTER_STORE, PERSON, 0));
+		contexts.add(new ExtendedFunctionalityContext(CREATE_BEFORE_RETURN, PERSON, 0));
 
 		contexts.add(new ExtendedFunctionalityContext(CREATE_AFTER_METADATA_VALIDATION,
 				PERSON_DOMAIN_PART, 0));
@@ -166,7 +167,7 @@ public class DivaExtendedPersonFunctionalityFactory implements ExtendedFunctiona
 		ClassicFedoraUpdaterFactoryImp fedoraUpdaterFactory = createClassicFedoraUpdaterFactory(
 				recordStorage);
 		ClassicIndexerFactory classicIndexerFactory = createClassicIndexerFactory();
-		return new ClassicPersonSynchronizer(fedoraUpdaterFactory, classicIndexerFactory,
+		return new ClassicPersonUpdateSynchronizer(fedoraUpdaterFactory, classicIndexerFactory,
 				recordType, recordStorage);
 	}
 
@@ -231,6 +232,9 @@ public class DivaExtendedPersonFunctionalityFactory implements ExtendedFunctiona
 		if (UPDATE_BEFORE_STORE == position) {
 			return createListAndAddFunctionality(new PersonOrcidValidator());
 		}
+		if (CREATE_BEFORE_RETURN == position) {
+			return addFunctionalityForPersonCreateBeforeReturn();
+		}
 		return Collections.emptyList();
 	}
 
@@ -243,5 +247,23 @@ public class DivaExtendedPersonFunctionalityFactory implements ExtendedFunctiona
 				new PersonDomainPartFromPersonUpdater(recordStorage, termCollector, linkCollector));
 		functionalities.add(createClassicPersonSynchronizer(recordStorage, PERSON));
 		return functionalities;
+	}
+
+	private List<ExtendedFunctionality> addFunctionalityForPersonCreateBeforeReturn() {
+		RecordStorage recordStorage = dependencyProvider.getRecordStorage();
+		List<ExtendedFunctionality> functionalities = new ArrayList<>();
+		ExtendedFunctionality classicPersonCreateSynchronizer = createClassicPersonCreateSynchronizer(
+				recordStorage, PERSON);
+		functionalities.add(classicPersonCreateSynchronizer);
+		return functionalities;
+	}
+
+	private ExtendedFunctionality createClassicPersonCreateSynchronizer(RecordStorage recordStorage,
+			String recordType) {
+		ClassicFedoraUpdaterFactoryImp fedoraUpdaterFactory = createClassicFedoraUpdaterFactory(
+				recordStorage);
+		ClassicIndexerFactory classicIndexerFactory = createClassicIndexerFactory();
+		return new ClassicPersonCreateSynchronizer(fedoraUpdaterFactory, classicIndexerFactory,
+				recordType, recordStorage);
 	}
 }

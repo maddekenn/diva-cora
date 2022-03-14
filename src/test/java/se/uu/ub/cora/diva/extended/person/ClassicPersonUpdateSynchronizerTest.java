@@ -34,11 +34,11 @@ import se.uu.ub.cora.diva.spies.data.DataGroupExtendedSpy;
 import se.uu.ub.cora.diva.spies.storage.RecordStorageSpy;
 import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 
-public class ClassicPersonSynchronizerTest {
+public class ClassicPersonUpdateSynchronizerTest {
 
 	private ClassicFedoraUpdaterFactorySpy classicFedoraUpdaterFactory;
 	private ClassicIndexerFactorySpy classicIndexerFactory;
-	private ClassicPersonSynchronizer functionality;
+	private ClassicPersonUpdateSynchronizer functionality;
 	private RecordStorageSpy recordStorage;
 
 	@BeforeMethod
@@ -47,7 +47,7 @@ public class ClassicPersonSynchronizerTest {
 		classicFedoraUpdaterFactory = new ClassicFedoraUpdaterFactorySpy();
 		classicIndexerFactory = new ClassicIndexerFactorySpy();
 		String recordType = "person";
-		functionality = new ClassicPersonSynchronizer(classicFedoraUpdaterFactory,
+		functionality = new ClassicPersonUpdateSynchronizer(classicFedoraUpdaterFactory,
 				classicIndexerFactory, recordType, recordStorage);
 
 	}
@@ -104,7 +104,7 @@ public class ClassicPersonSynchronizerTest {
 		DataGroupExtendedSpy personDomainPart = createPersonDomainPart();
 		ExtendedFunctionalityData defaultData = createDefaultData(personDomainPart);
 		defaultData.recordType = "personDomainPart";
-		functionality = new ClassicPersonSynchronizer(classicFedoraUpdaterFactory,
+		functionality = new ClassicPersonUpdateSynchronizer(classicFedoraUpdaterFactory,
 				classicIndexerFactory, "personDomainPart", recordStorage);
 		functionality.useExtendedFunctionality(defaultData);
 

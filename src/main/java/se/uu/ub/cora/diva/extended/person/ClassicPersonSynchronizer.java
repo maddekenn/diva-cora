@@ -21,61 +21,25 @@ package se.uu.ub.cora.diva.extended.person;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.classic.ClassicIndexer;
 import se.uu.ub.cora.diva.classic.ClassicIndexerFactory;
-import se.uu.ub.cora.diva.fedora.ClassicFedoraUpdater;
 import se.uu.ub.cora.diva.fedora.ClassicFedoraUpdaterFactory;
-import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionality;
-import se.uu.ub.cora.spider.extendedfunctionality.ExtendedFunctionalityData;
 import se.uu.ub.cora.storage.RecordStorage;
 
-public class ClassicPersonSynchronizer implements ExtendedFunctionality {
+public class ClassicPersonSynchronizer {
 
-	private static final String PERSON = "person";
-	private ClassicFedoraUpdaterFactory classicFedoraUpdaterFactory;
-	private ClassicIndexerFactory classicIndexerFactory;
-	private String recordType;
-	private RecordStorage recordStorage;
+	protected static final String PERSON = "person";
+	protected ClassicFedoraUpdaterFactory classicFedoraUpdaterFactory;
+	protected ClassicIndexerFactory classicIndexerFactory;
+	protected String recordType;
+	protected RecordStorage recordStorage;
 
-	public ClassicPersonSynchronizer(ClassicFedoraUpdaterFactory classicFedoraUpdaterFactory,
-			ClassicIndexerFactory classicIndexer, String recordType, RecordStorage recordStorage) {
-		this.classicFedoraUpdaterFactory = classicFedoraUpdaterFactory;
-		this.classicIndexerFactory = classicIndexer;
-		this.recordType = recordType;
-		this.recordStorage = recordStorage;
-	}
-
-	@Override
-	public void useExtendedFunctionality(ExtendedFunctionalityData data) {
-		String recordId = extractRecordId(data.dataGroup);
-		DataGroup dataGroup = data.dataGroup;
-
-		if ("personDomainPart".equals(data.recordType)) {
-			dataGroup = recordStorage.read(PERSON, recordId);
-		}
-		updateInClassic(dataGroup, recordId);
-		indexInClassic(recordId);
-	}
-
-	private String extractRecordId(DataGroup dataGroup) {
-		String recordId = getIdFromRecordInfo(dataGroup);
-		if ("personDomainPart".equals(recordType)) {
-			return recordId.substring(0, recordId.lastIndexOf(':'));
-		}
-		return recordId;
-	}
-
-	private String getIdFromRecordInfo(DataGroup dataGroup) {
-		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
-		return recordInfo.getFirstAtomicValueWithNameInData("id");
-	}
-
-	private void updateInClassic(DataGroup dataGroup, String recordId) {
-		ClassicFedoraUpdater fedoraUpdater = classicFedoraUpdaterFactory.factor(PERSON);
-		fedoraUpdater.updateInFedora(PERSON, recordId, dataGroup);
-	}
-
-	private void indexInClassic(String recordId) {
+	protected void indexInClassic(String recordId) {
 		ClassicIndexer classicIndexer = classicIndexerFactory.factor(PERSON);
 		classicIndexer.index(recordId);
+	}
+
+	protected String getIdFromRecordInfo(DataGroup dataGroup) {
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
+		return recordInfo.getFirstAtomicValueWithNameInData("id");
 	}
 
 	public ClassicFedoraUpdaterFactory getClassicFedoraUpdaterFactory() {
@@ -93,5 +57,4 @@ public class ClassicPersonSynchronizer implements ExtendedFunctionality {
 	public RecordStorage getRecordStorage() {
 		return recordStorage;
 	}
-
 }
