@@ -121,11 +121,29 @@ public class ClassicFedoraUpdaterImp implements ClassicFedoraUpdater {
 	}
 
 	private HttpHandler setUpHttpHandlerForCreate(String recordId) {
-		String url = fedoraConnectionInfo.fedoraUrl + "objects/" + recordId
-				+ "?format=info:fedora/fedora-system:FOXML-1.1" + "&logMessage=coraWritten";
+		String url = fedoraConnectionInfo.fedoraUrl + "objects/new";
+		// String url = fedoraConnectionInfo.fedoraUrl + "objects/" + recordId
+		// + "?logMessage=coraWritten";
+		// String url = fedoraConnectionInfo.fedoraUrl + "objects/" + recordId
+		// + "?format=info:fedora/fedora-system:FOXML-1.1" + "&logMessage=coraWritten";
+		//
 		HttpHandler httpHandler = setUpHttpHandlerWithAuthorization(url);
 		httpHandler.setRequestMethod("POST");
 		return httpHandler;
+	}
+
+	public String createInFedoraUsingService(String recordType, String recordId,
+			DataGroup dataGroup, String json) {
+		// String url =
+		// "http://test.diva-portal.org:8082/authority/rest/authority/person/authority-person:82";
+		String url = "http://test.diva-portal.org:8082/authority/rest/authority/person/";
+		HttpHandler httpHandler = httpHandlerFactory.factor(url);
+		httpHandler.setRequestMethod("POST");
+		httpHandler.setRequestProperty("Content-type", "application/json");
+		httpHandler.setOutput(json);
+		String responseText = httpHandler.getResponseText();
+		return responseText;
+
 	}
 
 }

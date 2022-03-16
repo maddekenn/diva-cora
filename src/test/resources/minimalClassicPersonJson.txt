@@ -1,0 +1,14 @@
+{
+  "affiliations": [],
+  "defaultName": {
+    "lastname": "Fusksson3",
+    "number": "",
+    "firstname": "Fusk3"
+  },
+  "identifiers": [],
+  "pid": "",
+  "type": "PERSON",
+  "publicRecord": true,
+  "biographies": {},
+  "alternativeNames": []
+}
