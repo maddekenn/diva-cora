@@ -105,45 +105,52 @@ public class ClassicFedoraUpdaterImp implements ClassicFedoraUpdater {
 
 	@Override
 	public void createInFedora(String recordType, String recordId, DataGroup dataGroup) {
-		HttpHandler httpHandler = setUpHttpHandlerForCreate(recordId);
+		String url = fedoraConnectionInfo.fedoraUrl + "objects/" + recordId;
+		createObjectInFedora(recordId, url);
+
 		String fedoraXML = convertRecordToFedoraXML(recordType, dataGroup);
-		httpHandler.setRequestProperty("Content-Type", "text/xml");
-		httpHandler.setOutput(fedoraXML);
+		createDatastreamInFedora(recordId, url, fedoraXML);
+	}
+
+	private void createObjectInFedora(String recordId, String url) {
+		HttpHandler httpHandler = setUpHttpHandlerForCreate(url);
 		int responseCode = httpHandler.getResponseCode();
 		throwErrorIfNotCreatedFromFedora(recordId, responseCode);
 	}
 
-	private void throwErrorIfNotCreatedFromFedora(String recordId, int responseCode) {
-		if (responseCode != CREATED) {
-			throw FedoraException.withMessage("create to fedora failed for record: " + recordId
-					+ ", with response code: " + responseCode);
-		}
-	}
-
-	private HttpHandler setUpHttpHandlerForCreate(String recordId) {
-		String url = fedoraConnectionInfo.fedoraUrl + "objects/new";
-		// String url = fedoraConnectionInfo.fedoraUrl + "objects/" + recordId
-		// + "?logMessage=coraWritten";
-		// String url = fedoraConnectionInfo.fedoraUrl + "objects/" + recordId
-		// + "?format=info:fedora/fedora-system:FOXML-1.1" + "&logMessage=coraWritten";
-		//
-		HttpHandler httpHandler = setUpHttpHandlerWithAuthorization(url);
+	private HttpHandler setUpHttpHandlerForCreate(String datastreamUrl) {
+		HttpHandler httpHandler = setUpHttpHandlerWithAuthorization(datastreamUrl);
 		httpHandler.setRequestMethod("POST");
+		httpHandler.setRequestProperty("Content-Type", "text/xml");
 		return httpHandler;
 	}
 
-	public String createInFedoraUsingService(String recordType, String recordId,
-			DataGroup dataGroup, String json) {
-		// String url =
-		// "http://test.diva-portal.org:8082/authority/rest/authority/person/authority-person:82";
-		String url = "http://test.diva-portal.org:8082/authority/rest/authority/person/";
-		HttpHandler httpHandler = httpHandlerFactory.factor(url);
-		httpHandler.setRequestMethod("POST");
-		httpHandler.setRequestProperty("Content-type", "application/json");
-		httpHandler.setOutput(json);
-		String responseText = httpHandler.getResponseText();
-		return responseText;
+	private void throwErrorIfNotCreatedFromFedora(String recordId, int responseCode) {
+		throwErrorIfNotCreated(recordId, responseCode, "Create to fedora failed for record: ");
+	}
 
+	private void throwErrorIfNotCreated(String recordId, int responseCode, String startOfMessage) {
+		if (responseCode != CREATED) {
+			throw FedoraException.withMessage(
+					startOfMessage + recordId + ", with response code: " + responseCode);
+		}
+	}
+
+	private void createDatastreamInFedora(String recordId, String url, String fedoraXML) {
+		HttpHandler httpHandler = setUpHttpHandlerForCreateDatastream(url);
+		httpHandler.setOutput(fedoraXML);
+		int responseCode = httpHandler.getResponseCode();
+		throwErrorIfDatastreamNotCreatedFromFedora(recordId, responseCode);
+	}
+
+	private HttpHandler setUpHttpHandlerForCreateDatastream(String url) {
+		String datastreamUrl = url + "/datastreams/METADATA?dsLabel=coraWritten";
+		return setUpHttpHandlerForCreate(datastreamUrl);
+	}
+
+	private void throwErrorIfDatastreamNotCreatedFromFedora(String recordId, int responseCode) {
+		throwErrorIfNotCreated(recordId, responseCode,
+				"Adding datastream in fedora failed for record: ");
 	}
 
 }
